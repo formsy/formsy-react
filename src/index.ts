@@ -41,6 +41,7 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
   onValid: () => void;
   onValidSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
   preventExternalInvalidation?: boolean;
+  preventDefaultSubmit?: boolean;
   resetValue: any;
   setValidations: any;
   setValue: any;
@@ -88,6 +89,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     onValid: () => {},
     onValidSubmit: () => {},
     preventExternalInvalidation: false,
+    preventDefaultSubmit: true,
     resetValue: () => {},
     setValidations: () => {},
     setValue: () => {},
@@ -117,6 +119,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     onValid: PropTypes.func,
     onValidSubmit: PropTypes.func,
     preventExternalInvalidation: PropTypes.bool,
+    preventDefaultSubmit: PropTypes.bool,
     resetValue: PropTypes.func,
     setValidations: PropTypes.func,
     setValue: PropTypes.func,
@@ -377,10 +380,10 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   // Update model, submit to url prop and send the model
   public submit = event => {
-    const { onSubmit, onValidSubmit, onInvalidSubmit } = this.props;
+    const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit } = this.props;
     const { isValid } = this.state;
 
-    if (event && event.preventDefault) {
+    if (preventDefaultSubmit && event && event.preventDefault) {
       event.preventDefault();
     }
 
@@ -517,6 +520,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onValid,
       onValidSubmit,
       preventExternalInvalidation,
+      preventDefaultSubmit,
       resetValue,
       setValidations,
       setValue,
