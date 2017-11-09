@@ -18,13 +18,13 @@
     "url": "https://github.com/formsy/formsy-react.git"
   },
   "author": "Christian Alfoni",
-  "files": [
-    "lib"
-  ],
+  "files": ["lib"],
   "main": "lib/index.js",
   "scripts": {
-    "build": "NODE_ENV=production webpack -p --config webpack.config.js && yarn run prepublish",
-    "examples": "webpack-dev-server --config examples/webpack.config.js --content-base examples",
+    "build":
+      "NODE_ENV=production webpack -p --config webpack.config.js && yarn run prepublish",
+    "examples":
+      "webpack-dev-server --config examples/webpack.config.js --content-base examples",
     "lint": "eslint src/**/*.js",
     "prepublish": "rm -Rf ./lib && babel ./src/ -d ./lib/",
     "test": "babel-node testrunner"
@@ -46,16 +46,16 @@
     "eslint-plugin-react": "^7.1.0",
     "jsdom": "^11.1.0",
     "nodeunit": "^0.11.1",
-    "react": "^15.6.1",
+    "react": "^15.6.1 || ^16.0.0",
     "react-addons-pure-render-mixin": "^15.6.0",
     "react-addons-test-utils": "^15.6.0",
-    "react-dom": "^15.6.1",
+    "react-dom": "^15.6.1 || ^16.0.0",
     "sinon": "^3.2.0",
     "webpack": "^3.5.4",
     "webpack-dev-server": "^2.7.1"
   },
   "peerDependencies": {
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "react": "^15.6.1 || ^16.0.0",
+    "react-dom": "^15.6.1 || ^16.0.0"
   }
 }
