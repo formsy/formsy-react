@@ -431,7 +431,7 @@ Formsy.propTypes = {
   isRequired: PropTypes.func,
   isValid: PropTypes.func,
   isValidValue: PropTypes.func,
-  mapping: PropTypes.object, // eslint-disable-line
+  mapping: PropTypes.func,
   preventExternalInvalidation: PropTypes.bool,
   onChange: PropTypes.func,
   onInvalid: PropTypes.func,
