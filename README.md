@@ -1,4 +1,4 @@
-# formsy-react [![GitHub release](https://img.shields.io/github/release/christianalfoni/formsy-react.svg)](https://github.com/christianalfoni/formsy-react/releases) [![Build Status](https://travis-ci.org/christianalfoni/formsy-react.svg?branch=master)](https://travis-ci.org/christianalfoni/formsy-react)
+# formsy-react [![GitHub release](https://img.shields.io/github/release/formsy-react/formsy-react.svg)](https://github.com/formsy-react/formsy-react/releases) [![Build Status](https://travis-ci.org/formsy-react/formsy-react.svg?branch=master)](https://travis-ci.org/formsy-react/formsy-react)
 
 A form input builder and validator for React.
 
@@ -125,7 +125,7 @@ This code results in a form with a submit button that will run the `submit` meth
 
 ## Changelog
 
-[Check out releases](https://github.com/christianalfoni/formsy-react/releases)
+[Check out releases](https://github.com/formsy-react/formsy-react/releases)
 
 ## License
 
