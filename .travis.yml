@@ -2,3 +2,6 @@ language: node_js
 sudo: false
 node_js:
   - '8.2.1'
+script:
+  - yarn lint
+  - yarn test
