@@ -127,6 +127,30 @@ export default (Component) => {
       return this.state.value;
     }
 
+    setValidations(validations, required) {
+      // Add validations to the store itself as the props object can not be modified
+      this.validations = convertValidationsToObject(validations) || {};
+      this.requiredValidations = required === true ? { isDefaultRequiredValue: true } :
+        convertValidationsToObject(required);
+    }
+
+    // By default, we validate after the value has been set.
+    // A user can override this and pass a second parameter of `false` to skip validation.
+    setValue(value, validate = true) {
+      if (!validate) {
+        this.setState({
+          value,
+        });
+      } else {
+        this.setState({
+          value,
+          isPristine: false,
+        }, () => {
+          this.context.formsy.validate(this);
+        });
+      }
+    }
+
     hasValue() {
       return this.state.value !== '';
     }
@@ -163,30 +187,6 @@ export default (Component) => {
       }, () => {
         this.context.formsy.validate(this);
       });
-    }
-
-    setValidations(validations, required) {
-      // Add validations to the store itself as the props object can not be modified
-      this.validations = convertValidationsToObject(validations) || {};
-      this.requiredValidations = required === true ? { isDefaultRequiredValue: true } :
-        convertValidationsToObject(required);
-    }
-
-    // By default, we validate after the value has been set.
-    // A user can override this and pass a second parameter of `false` to skip validation.
-    setValue(value, validate = true) {
-      if (!validate) {
-        this.setState({
-          value,
-        });
-      } else {
-        this.setState({
-          value,
-          isPristine: false,
-        }, () => {
-          this.context.formsy.validate(this);
-        });
-      }
     }
 
     showError() {
