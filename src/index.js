@@ -63,28 +63,6 @@ class Formsy extends React.Component {
     }
   }
 
-  // Method put on each input component to register
-  // itself to the form
-  attachToForm(component) {
-    if (this.inputs.indexOf(component) === -1) {
-      this.inputs.push(component);
-    }
-
-    this.validate(component);
-  }
-
-  // Method put on each input component to unregister
-  // itself from the form
-  detachFromForm(component) {
-    const componentPos = this.inputs.indexOf(component);
-
-    if (componentPos !== -1) {
-      this.inputs = this.inputs.slice(0, componentPos).concat(this.inputs.slice(componentPos + 1));
-    }
-
-    this.validateForm();
-  }
-
   getCurrentValues() {
     return this.inputs.reduce((data, component) => {
       const name = component.props.name;
@@ -108,9 +86,30 @@ class Formsy extends React.Component {
     }, {});
   }
 
-  // Checks if the values have changed from their initial value
-  isChanged() {
-    return !utils.isSame(this.getPristineValues(), this.getCurrentValues());
+  setFormPristine(isPristine) {
+    this.setState({
+      formSubmitted: !isPristine,
+    });
+
+    // Iterate through each component and set it as pristine
+    // or "dirty".
+    this.inputs.forEach((component) => {
+      component.setState({
+        formSubmitted: !isPristine,
+        isPristine,
+      });
+    });
+  }
+
+  setInputValidationErrors(errors) {
+    this.inputs.forEach((component) => {
+      const name = component.props.name;
+      const args = [{
+        isValid: !(name in errors),
+        validationError: typeof errors[name] === 'string' ? [errors[name]] : errors[name],
+      }];
+      component.setState(...args);
+    });
   }
 
   isFormDisabled() {
@@ -210,30 +209,31 @@ class Formsy extends React.Component {
     };
   }
 
-  setInputValidationErrors(errors) {
-    this.inputs.forEach((component) => {
-      const name = component.props.name;
-      const args = [{
-        isValid: !(name in errors),
-        validationError: typeof errors[name] === 'string' ? [errors[name]] : errors[name],
-      }];
-      component.setState(...args);
-    });
+  // Method put on each input component to register
+  // itself to the form
+  attachToForm(component) {
+    if (this.inputs.indexOf(component) === -1) {
+      this.inputs.push(component);
+    }
+
+    this.validate(component);
   }
 
-  setFormPristine(isPristine) {
-    this.setState({
-      formSubmitted: !isPristine,
-    });
+  // Method put on each input component to unregister
+  // itself from the form
+  detachFromForm(component) {
+    const componentPos = this.inputs.indexOf(component);
 
-    // Iterate through each component and set it as pristine
-    // or "dirty".
-    this.inputs.forEach((component) => {
-      component.setState({
-        formSubmitted: !isPristine,
-        isPristine,
-      });
-    });
+    if (componentPos !== -1) {
+      this.inputs = this.inputs.slice(0, componentPos).concat(this.inputs.slice(componentPos + 1));
+    }
+
+    this.validateForm();
+  }
+
+  // Checks if the values have changed from their initial value
+  isChanged() {
+    return !utils.isSame(this.getPristineValues(), this.getCurrentValues());
   }
 
   // Update model, submit to url prop and send the model
