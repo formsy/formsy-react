@@ -1,6 +1,18 @@
 <a name="1.0.0"></a>
 # [1.0.0](https://github.com/formsy/formsy-react/compare/0.19.5...1.0.0) (2017-11-11)
 
+### Bug Fixes
+* #14 Change PropType for `value` to allow array (@twisty)
+* #8 Fix incorrect mapping prop type (@rkuykendall)
+* #5 Updated readme and package.json for new organization @rkuykendall
+
+### Features
+* Replaced React.PropTypes with prop-types
+* Removed React.createClass to allow support for React 16
+
+### BREAKING CHANGES
+* Mixins are deprecated and replaced with `withFormsy` HOC you can use to wrap your components. See examples in the [README](https://github.com/formsy/formsy-react/blob/master/README.md)
+* Formsy.Form is also replaced but Formsy. You can still use the same API to manage validations and submit
 
 
 <a name="0.19.5"></a>
