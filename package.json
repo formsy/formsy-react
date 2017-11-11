@@ -18,16 +18,23 @@
     "url": "https://github.com/formsy/formsy-react.git"
   },
   "author": "Christian Alfoni",
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "main": "lib/index.js",
   "scripts": {
-    "build":
-      "NODE_ENV=production webpack -p --config webpack.config.js && yarn run prepublish",
-    "examples":
-      "webpack-dev-server --config examples/webpack.config.js --content-base examples",
+    "build": "NODE_ENV=production webpack -p --config webpack.config.js && yarn run prepublish",
+    "examples": "webpack-dev-server --config examples/webpack.config.js --content-base examples",
     "lint": "eslint src/**/*.js",
+    "changelog": "standard-changelog",
     "prepublish": "rm -Rf ./lib && babel ./src/ -d ./lib/",
+    "release": "standard-version",
     "test": "babel-node testrunner"
+  },
+  "standard-version": {
+    "skip": {
+      "tag": true
+    }
   },
   "dependencies": {
     "form-data-to-object": "^0.2.0",
@@ -51,6 +58,7 @@
     "react-addons-test-utils": "^15.6.0",
     "react-dom": "^15.6.1 || ^16.0.0",
     "sinon": "^3.2.0",
+    "standard-version": "^4.2.0",
     "webpack": "^3.5.4",
     "webpack-dev-server": "^2.7.1"
   },
