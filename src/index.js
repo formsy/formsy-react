@@ -458,7 +458,7 @@ const addValidationRule = (name, func) => {
 
 const withFormsy = Wrapper;
 
-const deprecatedWrapper = Component => {
+const deprecatedWrapper = (Component) => {
   console.warn('Wrapper has been renamed to withFormsy. Importing Wrapper from formsy-react is depreacted and will be removed in the future. Please rename your Wrapper imports to withFormsy.');
 
   return withFormsy(Component);
