@@ -461,6 +461,7 @@ const withFormsy = Wrapper;
 export {
   addValidationRule,
   propTypes,
+  validationRules,
   withFormsy,
 };
 
