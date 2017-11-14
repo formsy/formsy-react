@@ -467,6 +467,7 @@ const deprecatedWrapper = (Component) => {
 export {
   addValidationRule,
   propTypes,
+  validationRules,
   withFormsy,
   deprecatedWrapper as Wrapper,
 };
