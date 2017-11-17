@@ -608,6 +608,43 @@ export default {
 
     test.done();
 
+  },
+
+  'binds all necessary methods': function (test) {
+    const onInputRef = input => {
+      [
+        'getErrorMessage',
+        'getErrorMessages',
+        'getValue',
+        'hasValue',
+        'isFormDisabled',
+        'isValid',
+        'isPristine',
+        'isFormSubmitted',
+        'isRequired',
+        'isValidValue',
+        'resetValue',
+        'setValidations',
+        'setValue',
+        'showRequired',
+        'showError',
+      ].forEach(fnName => {
+        const fn = input[fnName];
+        try {
+          fn();
+        } catch(e) {
+          throw new Error(`Method '${fnName}' isn't bound.`);
+        }
+      });
+
+      test.done();
+    }
+
+    TestUtils.renderIntoDocument(
+      <Formsy>
+        <TestInput ref={onInputRef} name="name" value="foo" />
+      </Formsy>
+    );
   }
 
 };

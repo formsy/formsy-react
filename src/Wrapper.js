@@ -59,16 +59,22 @@ export default (Component) => {
         externalError: null,
         formSubmitted: false,
       };
+
       this.getErrorMessage = this.getErrorMessage.bind(this);
       this.getErrorMessages = this.getErrorMessages.bind(this);
       this.getValue = this.getValue.bind(this);
+      this.hasValue = this.hasValue.bind(this);
       this.isFormDisabled = this.isFormDisabled.bind(this);
       this.isPristine = this.isPristine.bind(this);
+      this.isFormSubmitted = this.isFormSubmitted.bind(this);
       this.isRequired = this.isRequired.bind(this);
+      this.isValidValue = this.isValidValue.bind(this);
       this.isValid = this.isValid.bind(this);
       this.resetValue = this.resetValue.bind(this);
+      this.setValidations = this.setValidations.bind(this);
       this.setValue = this.setValue.bind(this);
       this.showRequired = this.showRequired.bind(this);
+      this.showError = this.showError.bind(this);
     }
 
     componentWillMount() {
