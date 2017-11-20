@@ -109,11 +109,7 @@ export default (Component) => {
       if (!this.isValid() || this.showRequired()) {
         return this.state.externalError || this.state.validationError || [];
       }
-
       return [];
-
-      // !this.isValid() || this.showRequired() ?
-      // (this.state.externalError || this.state.validationError || []) : [];
     }
 
     getValue = () => this.state.value;
@@ -156,7 +152,6 @@ export default (Component) => {
 
     isValidValue = value =>
       this.context.formsy.isValidValue.call(null, this, value);
-      // return this.props.isValidValue.call(null, this, value);
 
     resetValue = () => {
       this.setState({
