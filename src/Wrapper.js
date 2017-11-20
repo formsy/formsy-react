@@ -106,13 +106,17 @@ export default (Component) => {
     }
 
     getErrorMessages = () => {
-      return !this.isValid() || this.showRequired() ?
-        (this.state.externalError || this.state.validationError || []) : [];
+      if (!this.isValid() || this.showRequired()) {
+        return this.state.externalError || this.state.validationError || [];
+      }
+
+      return [];
+
+      // !this.isValid() || this.showRequired() ?
+      // (this.state.externalError || this.state.validationError || []) : [];
     }
 
-    getValue = () => {
-      return this.state.value;
-    }
+    getValue = () => this.state.value;
 
     setValidations = (validations, required) => {
       // Add validations to the store itself as the props object can not be modified
@@ -138,34 +142,21 @@ export default (Component) => {
       }
     }
 
-    hasValue = () => {
-      return this.state.value !== '';
-    }
+    hasValue = () => this.state.value !== '';
 
-    isFormDisabled = () => {
-      return this.context.formsy.isFormDisabled();
-    }
+    isFormDisabled = () => this.context.formsy.isFormDisabled();
 
-    isFormSubmitted = () => {
-      return this.state.formSubmitted;
-    }
+    isFormSubmitted = () => this.state.formSubmitted;
 
-    isPristine = () => {
-      return this.state.isPristine;
-    }
+    isPristine = () => this.state.isPristine;
 
-    isRequired = () => {
-      return !!this.props.required;
-    }
+    isRequired = () => !!this.props.required;
 
-    isValid = () => {
-      return this.state.isValid;
-    }
+    isValid = () => this.state.isValid;
 
-    isValidValue = (value) => {
-      return this.context.formsy.isValidValue.call(null, this, value);
+    isValidValue = value =>
+      this.context.formsy.isValidValue.call(null, this, value);
       // return this.props.isValidValue.call(null, this, value);
-    }
 
     resetValue = () => {
       this.setState({
@@ -176,13 +167,9 @@ export default (Component) => {
       });
     }
 
-    showError = () => {
-      return !this.showRequired() && !this.isValid();
-    }
+    showError = () => !this.showRequired() && !this.isValid();
 
-    showRequired = () => {
-      return this.state.isRequired;
-    }
+    showRequired = () => this.state.isRequired;
 
     render() {
       const { innerRef } = this.props;
