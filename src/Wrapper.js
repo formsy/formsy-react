@@ -59,22 +59,6 @@ export default (Component) => {
         externalError: null,
         formSubmitted: false,
       };
-
-      this.getErrorMessage = this.getErrorMessage.bind(this);
-      this.getErrorMessages = this.getErrorMessages.bind(this);
-      this.getValue = this.getValue.bind(this);
-      this.hasValue = this.hasValue.bind(this);
-      this.isFormDisabled = this.isFormDisabled.bind(this);
-      this.isPristine = this.isPristine.bind(this);
-      this.isFormSubmitted = this.isFormSubmitted.bind(this);
-      this.isRequired = this.isRequired.bind(this);
-      this.isValidValue = this.isValidValue.bind(this);
-      this.isValid = this.isValid.bind(this);
-      this.resetValue = this.resetValue.bind(this);
-      this.setValidations = this.setValidations.bind(this);
-      this.setValue = this.setValue.bind(this);
-      this.showRequired = this.showRequired.bind(this);
-      this.showError = this.showError.bind(this);
     }
 
     componentWillMount() {
@@ -116,21 +100,21 @@ export default (Component) => {
       this.context.formsy.detachFromForm(this);
     }
 
-    getErrorMessage() {
+    getErrorMessage = () => {
       const messages = this.getErrorMessages();
       return messages.length ? messages[0] : null;
     }
 
-    getErrorMessages() {
-      return !this.isValid() || this.showRequired() ?
-        (this.state.externalError || this.state.validationError || []) : [];
+    getErrorMessages = () => {
+      if (!this.isValid() || this.showRequired()) {
+        return this.state.externalError || this.state.validationError || [];
+      }
+      return [];
     }
 
-    getValue() {
-      return this.state.value;
-    }
+    getValue = () => this.state.value;
 
-    setValidations(validations, required) {
+    setValidations = (validations, required) => {
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations = required === true ? { isDefaultRequiredValue: true } :
@@ -139,7 +123,7 @@ export default (Component) => {
 
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
-    setValue(value, validate = true) {
+    setValue = (value, validate = true) => {
       if (!validate) {
         this.setState({
           value,
@@ -154,36 +138,22 @@ export default (Component) => {
       }
     }
 
-    hasValue() {
-      return this.state.value !== '';
-    }
+    hasValue = () => this.state.value !== '';
 
-    isFormDisabled() {
-      return this.context.formsy.isFormDisabled();
-    }
+    isFormDisabled = () => this.context.formsy.isFormDisabled();
 
-    isFormSubmitted() {
-      return this.state.formSubmitted;
-    }
+    isFormSubmitted = () => this.state.formSubmitted;
 
-    isPristine() {
-      return this.state.isPristine;
-    }
+    isPristine = () => this.state.isPristine;
 
-    isRequired() {
-      return !!this.props.required;
-    }
+    isRequired = () => !!this.props.required;
 
-    isValid() {
-      return this.state.isValid;
-    }
+    isValid = () => this.state.isValid;
 
-    isValidValue(value) {
-      return this.context.formsy.isValidValue.call(null, this, value);
-      // return this.props.isValidValue.call(null, this, value);
-    }
+    isValidValue = value =>
+      this.context.formsy.isValidValue.call(null, this, value);
 
-    resetValue() {
+    resetValue = () => {
       this.setState({
         value: this.state.pristineValue,
         isPristine: true,
@@ -192,13 +162,9 @@ export default (Component) => {
       });
     }
 
-    showError() {
-      return !this.showRequired() && !this.isValid();
-    }
+    showError = () => !this.showRequired() && !this.isValid();
 
-    showRequired() {
-      return this.state.isRequired;
-    }
+    showRequired = () => this.state.isRequired;
 
     render() {
       const { innerRef } = this.props;
