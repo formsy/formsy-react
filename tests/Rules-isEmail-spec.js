@@ -49,6 +49,15 @@ export default {
 
   },
 
+  'should pass with new long domains': function (test) {
+
+    const form = TestUtils.renderIntoDocument(<TestForm inputValue="tickets@now.diamonds"/>);
+    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
+    test.equal(inputComponent.isValid(), true);
+    test.done();
+
+  },
+
   'should pass with an undefined': function (test) {
 
     const form = TestUtils.renderIntoDocument(<TestForm inputValue={undefined}/>);
