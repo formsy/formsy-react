@@ -79,8 +79,11 @@ export default {
           return;
         } else if (typeof validations[validationMethod] !== 'function') {
           const validation = validationRules[validationMethod](
-            currentValues, value, validations[validationMethod],
+            currentValues,
+            value,
+            validations[validationMethod],
           );
+
           if (typeof validation === 'string') {
             results.errors.push(validation);
             results.failed.push(validationMethod);
