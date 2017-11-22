@@ -10,6 +10,11 @@
     "react-component",
     "validation"
   ],
+  "standard-version": {
+    "skip": {
+      "tag": true
+    }
+  },
   "license": "MIT",
   "homepage": "https://github.com/formsy/formsy-react",
   "bugs": "https://github.com/formsy/formsy-react/issues",
@@ -27,6 +32,7 @@
     "examples": "webpack-dev-server --config examples/webpack.config.js --content-base examples",
     "lint": "eslint src/**/*.js",
     "prepublish": "rm -Rf ./lib && babel ./src/ -d ./lib/",
+    "changelog": "standard-changelog",
     "test": "babel-node testrunner"
   },
   "dependencies": {
@@ -52,6 +58,8 @@
     "react-addons-test-utils": "^15.6.0",
     "react-dom": "^15.6.1 || ^16.0.0",
     "sinon": "^3.2.0",
+    "standard-changelog": "^1.0.5",
+    "standard-version": "^4.2.0",
     "webpack": "^3.5.4",
     "webpack-dev-server": "^2.7.1"
   },
