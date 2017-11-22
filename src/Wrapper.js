@@ -2,6 +2,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import utils from './utils';
 
+/* eslint-disable react/default-props-match-prop-types */
+
 const convertValidationsToObject = (validations) => {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {

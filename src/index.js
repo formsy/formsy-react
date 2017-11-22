@@ -6,6 +6,8 @@ import utils from './utils';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
 
+/* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
+
 class Formsy extends React.Component {
   constructor(props) {
     super(props);
@@ -65,7 +67,7 @@ class Formsy extends React.Component {
 
   getCurrentValues() {
     return this.inputs.reduce((data, component) => {
-      const name = component.props.name;
+      const { name } = component.props;
       const dataCopy = Object.assign({}, data); // avoid param reassignment
       dataCopy[name] = component.state.value;
       return dataCopy;
@@ -79,7 +81,7 @@ class Formsy extends React.Component {
 
   getPristineValues() {
     return this.inputs.reduce((data, component) => {
-      const name = component.props.name;
+      const { name } = component.props;
       const dataCopy = Object.assign({}, data); // avoid param reassignment
       dataCopy[name] = component.props.value;
       return dataCopy;
@@ -103,7 +105,7 @@ class Formsy extends React.Component {
 
   setInputValidationErrors(errors) {
     this.inputs.forEach((component) => {
-      const name = component.props.name;
+      const { name } = component.props;
       const args = [{
         isValid: !(name in errors),
         validationError: typeof errors[name] === 'string' ? [errors[name]] : errors[name],
@@ -149,7 +151,7 @@ class Formsy extends React.Component {
   // Reset each key in the model to the original / initial / specified value
   resetModel(data) {
     this.inputs.forEach((component) => {
-      const name = component.props.name;
+      const { name } = component.props;
       if (data && Object.prototype.hasOwnProperty.call(data, name)) {
         component.setValue(data[name]);
       } else {
@@ -162,14 +164,23 @@ class Formsy extends React.Component {
   // Checks validation on current value or a passed value
   runValidation(component, value = component.state.value) {
     const currentValues = this.getCurrentValues();
-    const validationErrors = component.props.validationErrors;
-    const validationError = component.props.validationError;
+    const {
+      validationError,
+      validationErrors,
+    } = component.props;
 
     const validationResults = utils.runRules(
-      value, currentValues, component.validations, validationRules,
+      value,
+      currentValues,
+      component.validations,
+      validationRules,
     );
+
     const requiredResults = utils.runRules(
-      value, currentValues, component.requiredValidations, validationRules,
+      value,
+      currentValues,
+      component.requiredValidations,
+      validationRules,
     );
 
     const isRequired = Object.keys(component.requiredValidations).length ?
