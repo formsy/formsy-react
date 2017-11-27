@@ -7,9 +7,11 @@ A form input builder and validator for React.
 
 ## Background
 
-I wrote an article on forms and validation with React, [Nailing that validation with React JS](http://christianalfoni.github.io/javascript/2014/10/22/nailing-that-validation-with-reactjs.html), the result of that was this component.
+[christianalfoni](https://github.com/christianalfoni/) wrote an article on forms and validation with React, [Nailing that validation with React JS](http://christianalfoni.github.io/javascript/2014/10/22/nailing-that-validation-with-reactjs.html), the result of that was this component.
 
 The main concept is that forms, inputs, and validation are done very differently across developers and projects. This React component aims to be that “sweet spot” between flexibility and reusability.
+
+This project was originally located at https://github.com/christianalfoni/formsy-react if you're looking for v0.x or old issues.
 
 ## What You Can Do
 
