@@ -61,7 +61,7 @@
     "standard-changelog": "^1.0.5",
     "standard-version": "^4.2.0",
     "webpack": "^3.5.4",
-    "webpack-dev-server": "^2.7.1"
+    "webpack-dev-server": "^2.9.5"
   },
   "peerDependencies": {
     "react": "^15.6.1 || ^16.0.0",
