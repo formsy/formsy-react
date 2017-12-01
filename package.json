@@ -60,7 +60,7 @@
     "sinon": "^4.1.2",
     "standard-changelog": "^1.0.5",
     "standard-version": "^4.2.0",
-    "webpack": "^3.5.4",
+    "webpack": "^3.9.1",
     "webpack-dev-server": "^2.9.5"
   },
   "peerDependencies": {
