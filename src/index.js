@@ -469,9 +469,14 @@ const addValidationRule = (name, func) => {
 
 const withFormsy = Wrapper;
 
+let didWarnAboutWrapperDeprecation = false;
+
 const deprecatedWrapper = (Component) => {
-  // eslint-disable-next-line no-console
-  console.warn('Wrapper has been renamed to withFormsy. Importing Wrapper from formsy-react is depreacted and will be removed in the future. Please rename your Wrapper imports to withFormsy.');
+  if (!didWarnAboutWrapperDeprecation) {
+    // eslint-disable-next-line no-console
+    console.warn('Wrapper has been renamed to withFormsy. Importing Wrapper from formsy-react is depreacted and will be removed in the future. Please rename your Wrapper imports to withFormsy.');
+    didWarnAboutWrapperDeprecation = true;
+  }
 
   return withFormsy(Component);
 };
