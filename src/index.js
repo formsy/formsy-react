@@ -9,7 +9,7 @@ import Wrapper, { propTypes } from './Wrapper';
 /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
 
 class Formsy extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {
       isValid: true,
@@ -19,8 +19,8 @@ class Formsy extends React.Component {
     this.inputs = [];
   }
 
-  getChildContext = () => {
-    return {
+  getChildContext = () => (
+    {
       formsy: {
         attachToForm: this.attachToForm,
         detachFromForm: this.detachFromForm,
@@ -28,8 +28,8 @@ class Formsy extends React.Component {
         isFormDisabled: this.isFormDisabled,
         isValidValue: (component, value) => this.runValidation(component, value).isValid,
       },
-    };
-  }
+    }
+  )
 
   componentDidMount = () => {
     this.validateForm();
@@ -52,28 +52,28 @@ class Formsy extends React.Component {
     }
   }
 
-  getCurrentValues = () => {
-    return this.inputs.reduce((data, component) => {
+  getCurrentValues = () => (
+    this.inputs.reduce((data, component) => {
       const { name } = component.props;
       const dataCopy = Object.assign({}, data); // avoid param reassignment
       dataCopy[name] = component.state.value;
       return dataCopy;
-    }, {});
-  }
+    }, {})
+  )
 
   getModel = () => {
     const currentValues = this.getCurrentValues();
     return this.mapModel(currentValues);
   }
 
-  getPristineValues = () => {
-    return this.inputs.reduce((data, component) => {
+  getPristineValues = () => (
+    this.inputs.reduce((data, component) => {
       const { name } = component.props;
       const dataCopy = Object.assign({}, data); // avoid param reassignment
       dataCopy[name] = component.props.value;
       return dataCopy;
-    }, {});
-  }
+    }, {})
+  )
 
   setFormPristine = (isPristine) => {
     this.setState({
@@ -101,9 +101,7 @@ class Formsy extends React.Component {
     });
   }
 
-  isFormDisabled = () => {
-    return this.props.disabled;
-  }
+  isFormDisabled = () => this.props.disabled;
 
   mapModel = (model) => {
     if (this.props.mapping) {
@@ -230,9 +228,7 @@ class Formsy extends React.Component {
   }
 
   // Checks if the values have changed from their initial value
-  isChanged = () => {
-    return !utils.isSame(this.getPristineValues(), this.getCurrentValues());
-  }
+  isChanged = () => !utils.isSame(this.getPristineValues(), this.getCurrentValues());
 
   // Update model, submit to url prop and send the model
   submit = (event) => {
