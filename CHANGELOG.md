@@ -1,3 +1,11 @@
+<a name="1.1.2"></a>
+## [1.1.2](https://github.com/formsy/formsy-react/compare/v1.1.1...v1.1.2) (2017-12-13)
+
+### Bug Fixes
+
+* **deprecation:** Make Wrapper deprecation warning only show once ([#30](https://github.com/formsy/formsy-react/issues/30)) ([a1c0bbe](https://github.com/formsy/formsy-react/commit/a1c0bbe))
+* **binding:** Fix resetForm throwing error due to bad binding ([#41](https://github.com/formsy/formsy-react/issues/41)) ([b58cfd](https://github.com/formsy/formsy-react/commit/b58cfd))
+
 <a name="1.1.1"></a>
 # [1.1.1](https://github.com/formsy/formsy-react/compare/v1.1.0...v1.1.1) (2017-11-22)
 
