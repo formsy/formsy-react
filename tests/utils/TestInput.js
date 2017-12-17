@@ -9,7 +9,7 @@ class TestInput extends React.Component {
     }
 
     render() {
-        return <input type={this.props.type} value={this.props.getValue()} onChange={this.updateValue}/>;
+        return <input type={this.props.type} value={this.props.value} onChange={this.updateValue}/>;
     }
 }
 
