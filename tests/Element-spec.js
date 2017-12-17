@@ -9,7 +9,7 @@ import immediate from './utils/immediate';
 
 export default {
 
-  'should return passed and setValue() value when using getValue()': function (test) {
+  'should pass down correct value prop after using setValue()': function (test) {
 
     const form = TestUtils.renderIntoDocument(
       <Formsy>
@@ -33,7 +33,7 @@ export default {
             this.props.setValue(event.target.value, false);
         }
         render() {
-            return <input type="text" value={this.props.getValue()} onChange={this.updateValue}/>;
+            return <input type="text" value={this.props.value} onChange={this.updateValue}/>;
         }
     })
     const form = TestUtils.renderIntoDocument(
@@ -60,7 +60,7 @@ export default {
             this.props.setValue(event.target.value, false);
         }
         render() {
-            return <input type="text" value={this.props.getValue()} onChange={this.updateValue}/>;
+            return <input type="text" value={this.props.value} onChange={this.updateValue}/>;
         }
     })
     const form = TestUtils.renderIntoDocument(
@@ -105,10 +105,10 @@ export default {
 
   'should return error message passed when calling getErrorMessage()': function (test) {
 
-    let getErrorMessage = null;
+    let errorMessage = null;
     const Input = InputFactory({
       componentDidMount: function() {
-        getErrorMessage = this.props.getErrorMessage;
+        errorMessage = this.props.errorMessage;
       }
     });
     TestUtils.renderIntoDocument(
@@ -117,7 +117,7 @@ export default {
       </Formsy>
     );
 
-    test.equal(getErrorMessage(), 'Has to be email');
+    test.equal(errorMessage, 'Has to be email');
 
     test.done();
 
@@ -127,8 +127,8 @@ export default {
 
     let isValid = null;
     const Input = InputFactory({
-      componentDidMount: function() {
-        isValid = this.props.isValid;
+      componentWillReceiveProps: function(nextProps) {
+        isValid = nextProps.isValid;
       }
     });
     const form = TestUtils.renderIntoDocument(
@@ -137,10 +137,10 @@ export default {
       </Formsy>
     );
 
-    test.equal(isValid(), false);
+    test.equal(isValid, false);
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
     TestUtils.Simulate.change(input, {target: {value: 'foo@foo.com'}});
-    test.equal(isValid(), true);
+    test.equal(isValid, true);
 
     test.done();
 
@@ -162,9 +162,9 @@ export default {
       </Formsy>
     );
 
-    test.equal(isRequireds[0](), false);
-    test.equal(isRequireds[1](), true);
-    test.equal(isRequireds[2](), true);
+    test.equal(isRequireds[0], false);
+    test.equal(isRequireds[1], true);
+    test.equal(isRequireds[2], true);
 
     test.done();
 
@@ -186,9 +186,9 @@ export default {
       </Formsy>
     );
 
-    test.equal(showRequireds[0](), false);
-    test.equal(showRequireds[1](), true);
-    test.equal(showRequireds[2](), false);
+    test.equal(showRequireds[0], false);
+    test.equal(showRequireds[1], true);
+    test.equal(showRequireds[2], false);
 
     test.done();
 
@@ -198,8 +198,8 @@ export default {
 
     let isPristine = null;
     const Input = InputFactory({
-      componentDidMount: function() {
-        isPristine = this.props.isPristine;
+      componentWillReceiveProps: function(nextProps) {
+        isPristine = nextProps.isPristine;
       }
     });
     const form = TestUtils.renderIntoDocument(
@@ -208,10 +208,10 @@ export default {
       </Formsy>
     );
 
-    test.equal(isPristine(), true);
+    test.equal(isPristine, true);
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
     TestUtils.Simulate.change(input, {target: {value: 'foo'}});
-    test.equal(isPristine(), false);
+    test.equal(isPristine, false);
 
     test.done();
 
@@ -594,7 +594,7 @@ export default {
       shouldComponentUpdate: function() { return false },
       render: function() {
         renderSpy();
-        return <input type={this.props.type} value={this.props.getValue()} onChange={this.updateValue}/>;
+        return <input type={this.props.type} value={this.props.value} onChange={this.updateValue}/>;
       }
     });
 
@@ -613,21 +613,10 @@ export default {
   'binds all necessary methods': function (test) {
     const onInputRef = input => {
       [
-        'getErrorMessage',
-        'getErrorMessages',
-        'getValue',
-        'hasValue',
-        'isFormDisabled',
-        'isValid',
-        'isPristine',
-        'isFormSubmitted',
-        'isRequired',
         'isValidValue',
         'resetValue',
         'setValidations',
         'setValue',
-        'showRequired',
-        'showError',
       ].forEach(fnName => {
         const fn = input[fnName];
         try {
