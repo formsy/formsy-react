@@ -1435,9 +1435,9 @@ conventional-changelog-angular@^1.5.2:
     compare-func "^1.3.1"
     q "^1.4.1"
 
-conventional-changelog-angular@^1.5.3:
-  version "1.5.3"
-  resolved "https://registry.yarnpkg.com/conventional-changelog-angular/-/conventional-changelog-angular-1.5.3.tgz#ff0dd01d740e35bfdbc3f02dfea13cf0d96f0b82"
+conventional-changelog-angular@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/conventional-changelog-angular/-/conventional-changelog-angular-1.6.0.tgz#0a26a071f2c9fcfcf2b86ba0cfbf6e6301b75bfa"
   dependencies:
     compare-func "^1.3.1"
     q "^1.4.1"
@@ -1472,9 +1472,9 @@ conventional-changelog-core@^1.9.3:
     read-pkg-up "^1.0.1"
     through2 "^2.0.0"
 
-conventional-changelog-core@^1.9.4:
-  version "1.9.4"
-  resolved "https://registry.yarnpkg.com/conventional-changelog-core/-/conventional-changelog-core-1.9.4.tgz#a541e5354f91072f8583b19e34abb9f6e461c367"
+conventional-changelog-core@^1.9.5:
+  version "1.9.5"
+  resolved "https://registry.yarnpkg.com/conventional-changelog-core/-/conventional-changelog-core-1.9.5.tgz#5db7566dad7c0cb75daf47fbb2976f7bf9928c1d"
   dependencies:
     conventional-changelog-writer "^2.0.3"
     conventional-commits-parser "^2.1.0"
@@ -4998,14 +4998,14 @@ stack-utils@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/stack-utils/-/stack-utils-1.0.1.tgz#d4f33ab54e8e38778b0ca5cfd3b3afb12db68620"
 
-standard-changelog@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/standard-changelog/-/standard-changelog-1.0.6.tgz#d3d495f2f1b97a246256e17b64d21e3fd4fbc908"
+standard-changelog@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/standard-changelog/-/standard-changelog-1.0.7.tgz#5865ea467dc3cc7f53d49d16b4b4b456167b6ed2"
   dependencies:
     add-stream "^1.0.0"
     chalk "^1.1.3"
-    conventional-changelog-angular "^1.5.3"
-    conventional-changelog-core "^1.9.4"
+    conventional-changelog-angular "^1.6.0"
+    conventional-changelog-core "^1.9.5"
     figures "^1.5.0"
     fs-access "^1.0.0"
     lodash "^4.1.0"
