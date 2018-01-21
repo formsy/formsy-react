@@ -64,7 +64,7 @@
     "webpack-dev-server": "^2.9.7"
   },
   "peerDependencies": {
-    "react": "^15.6.1 || ^16.0.0",
-    "react-dom": "^15.6.1 || ^16.0.0"
+    "react": "^15.6.1 || ^16.2.0",
+    "react-dom": "^15.6.1 || ^16.2.0"
   }
 }
