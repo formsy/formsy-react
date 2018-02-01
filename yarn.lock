@@ -1435,9 +1435,9 @@ conventional-changelog-angular@^1.5.2:
     compare-func "^1.3.1"
     q "^1.4.1"
 
-conventional-changelog-angular@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/conventional-changelog-angular/-/conventional-changelog-angular-1.6.0.tgz#0a26a071f2c9fcfcf2b86ba0cfbf6e6301b75bfa"
+conventional-changelog-angular@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/conventional-changelog-angular/-/conventional-changelog-angular-1.6.1.tgz#e1434d017c854032b272f690424a8c0ca16dc318"
   dependencies:
     compare-func "^1.3.1"
     q "^1.4.1"
@@ -1472,17 +1472,17 @@ conventional-changelog-core@^1.9.3:
     read-pkg-up "^1.0.1"
     through2 "^2.0.0"
 
-conventional-changelog-core@^1.9.5:
-  version "1.9.5"
-  resolved "https://registry.yarnpkg.com/conventional-changelog-core/-/conventional-changelog-core-1.9.5.tgz#5db7566dad7c0cb75daf47fbb2976f7bf9928c1d"
+conventional-changelog-core@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/conventional-changelog-core/-/conventional-changelog-core-2.0.0.tgz#1bdf7d21f3d066427ff9e07db0a2c5dd60015b9f"
   dependencies:
-    conventional-changelog-writer "^2.0.3"
+    conventional-changelog-writer "^3.0.0"
     conventional-commits-parser "^2.1.0"
     dateformat "^1.0.12"
     get-pkg-repo "^1.0.0"
     git-raw-commits "^1.3.0"
     git-remote-origin-url "^2.0.0"
-    git-semver-tags "^1.2.3"
+    git-semver-tags "^1.3.0"
     lodash "^4.0.0"
     normalize-package-data "^2.3.5"
     q "^1.4.1"
@@ -1542,9 +1542,9 @@ conventional-changelog-writer@^2.0.2:
     split "^1.0.0"
     through2 "^2.0.0"
 
-conventional-changelog-writer@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/conventional-changelog-writer/-/conventional-changelog-writer-2.0.3.tgz#073b0c39f1cc8fc0fd9b1566e93833f51489c81c"
+conventional-changelog-writer@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/conventional-changelog-writer/-/conventional-changelog-writer-3.0.0.tgz#e106154ed94341e387d717b61be2181ff53254cc"
   dependencies:
     compare-func "^1.3.1"
     conventional-commits-filter "^1.1.1"
@@ -2690,6 +2690,13 @@ git-remote-origin-url@^2.0.0:
 git-semver-tags@^1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/git-semver-tags/-/git-semver-tags-1.2.3.tgz#188b453882bf9d7a23afd31baba537dab7388d5d"
+  dependencies:
+    meow "^3.3.0"
+    semver "^5.0.1"
+
+git-semver-tags@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/git-semver-tags/-/git-semver-tags-1.3.0.tgz#b154833a6ab5c360c0ad3b1aa9b8f12ea06de919"
   dependencies:
     meow "^3.3.0"
     semver "^5.0.1"
@@ -4994,14 +5001,14 @@ stack-utils@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/stack-utils/-/stack-utils-1.0.1.tgz#d4f33ab54e8e38778b0ca5cfd3b3afb12db68620"
 
-standard-changelog@^1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/standard-changelog/-/standard-changelog-1.0.7.tgz#5865ea467dc3cc7f53d49d16b4b4b456167b6ed2"
+standard-changelog@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/standard-changelog/-/standard-changelog-1.0.8.tgz#f2556dacf46307fe98d29c4bb806610830ca3635"
   dependencies:
     add-stream "^1.0.0"
     chalk "^1.1.3"
-    conventional-changelog-angular "^1.6.0"
-    conventional-changelog-core "^1.9.5"
+    conventional-changelog-angular "^1.6.1"
+    conventional-changelog-core "^2.0.0"
     figures "^1.5.0"
     fs-access "^1.0.0"
     lodash "^4.1.0"
