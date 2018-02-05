@@ -35,7 +35,10 @@ const convertValidationsToObject = (validations) => {
 const propTypes = {
   innerRef: PropTypes.func,
   name: PropTypes.string.isRequired,
-  required: PropTypes.bool,
+  required: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
   validations: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.string,
