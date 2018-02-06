@@ -37,6 +37,7 @@ const propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.oneOfType([
     PropTypes.bool,
+    PropTypes.object,
     PropTypes.string,
   ]),
   validations: PropTypes.oneOfType([
