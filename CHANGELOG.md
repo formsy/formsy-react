@@ -1,3 +1,11 @@
+<a name="1.1.3"></a>
+## [1.1.3](https://github.com/formsy/formsy-react/compare/v1.1.2...v1.1.3) (2018-02-07)
+
+### Bug Fixes
+
+* **PropTypes:** Add object to allowed types for required prop ([#75](https://github.com/formsy/formsy-react/pull/75)) ([fe60d06](https://github.com/formsy/formsy-react/commit/fe60d06))
+
+
 <a name="1.1.2"></a>
 ## [1.1.2](https://github.com/formsy/formsy-react/compare/v1.1.1...v1.1.2) (2017-12-13)
 
