@@ -14,7 +14,7 @@ class MyTest extends React.Component {
     }
 
     render() {
-      return <input type={this.props.type} value={this.props.getValue()} onChange={this.handleChange}/>;
+      return <input type={this.props.type} value={this.props.value} onChange={this.handleChange}/>;
     }
 }
 const FormsyTest = withFormsy(MyTest);
@@ -108,7 +108,7 @@ export default {
     let isValid = false;
     const CustomInput = InputFactory({
       componentDidMount: function() {
-        isValid = this.props.isValid();
+        isValid = this.props.isValid;
       }
     });
     const form = TestUtils.renderIntoDocument(
