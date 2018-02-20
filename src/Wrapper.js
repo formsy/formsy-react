@@ -40,6 +40,8 @@ const propTypes = {
     PropTypes.object,
     PropTypes.string,
   ]),
+  validationError: PropTypes.string,
+  validationErrors: PropTypes.object, // eslint-disable-line react/forbid-prop-types
   validations: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.string,
@@ -173,7 +175,13 @@ export default (Component) => {
     showRequired = () => this.state.isRequired;
 
     render() {
-      const { innerRef } = this.props;
+      const {
+        innerRef,
+        validations,
+        validationError,
+        validationErrors,
+        ...nativeProps
+      } = this.props;
       const propsForElement = {
         getErrorMessage: this.getErrorMessage,
         getErrorMessages: this.getErrorMessages,
@@ -190,6 +198,7 @@ export default (Component) => {
         setValue: this.setValue,
         showRequired: this.showRequired,
         showError: this.showError,
+        nativeProps,
         ...this.props,
       };
 
