@@ -415,6 +415,40 @@ export default {
 
   },
 
+  'onChange should honor dot notation transformations': function (test) {
+
+    const hasChanged = sinon.spy();
+    class TestForm extends React.Component {
+      state = {
+        showInput: false
+      }
+      addInput() {
+        this.setState({
+          showInput: true
+        })
+      }
+      render() {
+        return (
+          <Formsy onChange={hasChanged}>
+            {
+              this.state.showInput ?
+                <TestInput name="parent.child" value="test"/>
+              :
+                null
+            }
+          </Formsy>);
+      }
+    }
+
+    const form = TestUtils.renderIntoDocument(<TestForm/>);
+    form.addInput();
+    immediate(() => {
+      test.deepEqual(hasChanged.args[0][0], {parent: {child: 'test'}});
+      test.done();
+    });
+
+  },
+
   'Update a form': {
 
     'should allow elements to check if the form is disabled': function (test) {

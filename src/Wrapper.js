@@ -175,22 +175,22 @@ export default (Component) => {
     render() {
       const { innerRef } = this.props;
       const propsForElement = {
-        getErrorMessage: this.getErrorMessage,
-        getErrorMessages: this.getErrorMessages,
-        getValue: this.getValue,
-        hasValue: this.hasValue,
-        isFormDisabled: this.isFormDisabled,
-        isValid: this.isValid,
-        isPristine: this.isPristine,
-        isFormSubmitted: this.isFormSubmitted,
-        isRequired: this.isRequired,
+        ...this.props,
+        errorMessage: this.getErrorMessage(),
+        errorMessages: this.getErrorMessages(),
+        hasValue: this.hasValue(),
+        isFormDisabled: this.isFormDisabled(),
+        isFormSubmitted: this.isFormSubmitted(),
+        isPristine: this.isPristine(),
+        isRequired: this.isRequired(),
+        isValid: this.isValid(),
         isValidValue: this.isValidValue,
         resetValue: this.resetValue,
         setValidations: this.setValidations,
         setValue: this.setValue,
-        showRequired: this.showRequired,
-        showError: this.showError,
-        ...this.props,
+        showError: this.showError(),
+        showRequired: this.showRequired(),
+        value: this.getValue(),
       };
 
       if (innerRef) {
