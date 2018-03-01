@@ -3,7 +3,7 @@ const isEmpty = value => value === '';
 
 const validations = {
   isDefaultRequiredValue(values, value) {
-    return value === undefined || value === '';
+    return value === undefined || value === null || value === '';
   },
   isExisty(values, value) {
     return isExisty(value);
