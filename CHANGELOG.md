@@ -1,3 +1,12 @@
+<a name="1.1.4"></a>
+## [1.1.4](https://github.com/formsy/formsy-react/compare/v1.1.3...v1.1.4) (2018-03-05)
+
+### Bug Fixes
+
+* **IE Scrolling:** Scroll in IE does not work if form is disabled ([#81](https://github.com/formsy/formsy-react/pull/81)) ([b00bcab](https://github.com/formsy/formsy-react/commit/b00bcab))
+* **isDefaultRequiredValue:** Fix `isDefaultRequiredValue` to also consider `null` as an empty value. ([#82](https://github.com/formsy/formsy-react/pull/82)) ([8fbc7ef](https://github.com/formsy/formsy-react/commit/8fbc7ef))
+
+
 <a name="1.1.3"></a>
 ## [1.1.3](https://github.com/formsy/formsy-react/compare/v1.1.2...v1.1.3) (2018-02-07)
 
