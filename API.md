@@ -41,7 +41,7 @@
 
 ### <a id="formsy">Formsy</a>
 
-`import Formsy from 'react-formsy';`
+`import Formsy from 'formsy-react';`
 
 #### <a id="mapping">mapping</a>
 
