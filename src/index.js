@@ -99,6 +99,9 @@ class Formsy extends React.Component {
       }];
       component.setState(...args);
     });
+    if (!this.props.preventExternalInvalidation && this.state.isValid) {
+      this.setFormValidState(false);
+    }
   }
 
   setFormValidState = (allIsValid) => {
