@@ -1,4 +1,10 @@
-# formsy-react [![GitHub release](https://img.shields.io/github/release/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/releases) [![Build Status](https://travis-ci.org/formsy/formsy-react.svg?branch=master)](https://travis-ci.org/formsy/formsy-react) [![Gitter chat](https://badges.gitter.im/formsy.png)](https://gitter.im/formsy/Lobby)
+# formsy-react 
+
+[![GitHub release](https://img.shields.io/github/release/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/releases)
+[![Build status](https://travis-ci.org/formsy/formsy-react.svg?branch=master)](https://travis-ci.org/formsy/formsy-react)
+[![Gzipped size](http://img.badgesize.io/https://unpkg.com/formsy-react?compression=gzip)](https://unpkg.com/formsy-react)
+[![Gitter chat](https://badges.gitter.im/formsy.png)](https://gitter.im/formsy/Lobby)
+
 
 A form input builder and validator for React.
 
@@ -118,12 +124,19 @@ export default class App extends React.Component {
 
 This code results in a form with a submit button that will run the `submit` method when the form is submitted with a valid email. The submit button is disabled as long as the input is empty ([required](/API.md#required)) and the value is not an email ([isEmail](/API.md#validators)). On validation error it will show the message: "This is not a valid email".
 
-## Contribute
+## Formsy component packages
 
 -   Fork repo
 -   `yarn`
 -   `yarn examples` runs the development server on `localhost:8080`
 -   `yarn test` runs the tests
+
+## Contribute
+
+-   https://github.com/twisty/formsy-react-components, Bootstrap 3 compatible form fields
+-   https://github.com/zabute/formsy-semantic-ui-react, Semantic UI form fields
+-   https://github.com/gogoair/react-formsy-combo-select, wrapper for https://github.com/gogoair/react-combo-select
+-   https://github.com/rojobuffalo/formsy-material-ui, Material-UI form fields (out of date, for formsy-react 0.x)
 
 ## Changelog
 
