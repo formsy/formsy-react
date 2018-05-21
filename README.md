@@ -126,17 +126,18 @@ This code results in a form with a submit button that will run the `submit` meth
 
 ## Formsy component packages
 
+-   https://github.com/twisty/formsy-react-components, Bootstrap 3 compatible form fields
+-   https://github.com/zabute/formsy-semantic-ui-react, Semantic UI form fields
+-   https://github.com/gogoair/react-formsy-combo-select, wrapper for https://github.com/gogoair/react-combo-select
+-   https://github.com/rojobuffalo/formsy-material-ui, Material-UI form fields (out of date, for formsy-react 0.x)
+
+## Contribute
+
 -   Fork repo
 -   `yarn`
 -   `yarn examples` runs the development server on `localhost:8080`
 -   `yarn test` runs the tests
 
-## Contribute
-
--   https://github.com/twisty/formsy-react-components, Bootstrap 3 compatible form fields
--   https://github.com/zabute/formsy-semantic-ui-react, Semantic UI form fields
--   https://github.com/gogoair/react-formsy-combo-select, wrapper for https://github.com/gogoair/react-combo-select
--   https://github.com/rojobuffalo/formsy-material-ui, Material-UI form fields (out of date, for formsy-react 0.x)
 
 ## Changelog
 
