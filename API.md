@@ -228,7 +228,7 @@ class MyForm extends React.Component {
 }
 ```
 
-With the `preventExternalInvalidation` the input will not be invalidated though it has an error.
+With the `preventExternalInvalidation` the input will not be invalidated though it has an error when `updateInputsWithError()` or an `invalidate` callback is called.
 
 ### <a id="withFormsy">`withFormsy`</a>
 
