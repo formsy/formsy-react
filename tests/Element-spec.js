@@ -3,7 +3,7 @@ import TestUtils from 'react-dom/test-utils';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import sinon from 'sinon';
 
-import Formsy, { withFormsy, Wrapper } from './..';
+import Formsy, { withFormsy } from './..';
 import TestInput, { InputFactory } from './utils/TestInput';
 import immediate from './utils/immediate';
 
@@ -29,33 +29,6 @@ export default {
   'withFormsy: should only set the value and not validate when calling setValue(val, false)': function (test) {
 
     const Input = withFormsy(class TestInput extends React.Component {
-        updateValue = (event) => {
-            this.props.setValue(event.target.value, false);
-        }
-        render() {
-            return <input type="text" value={this.props.value} onChange={this.updateValue}/>;
-        }
-    })
-    const form = TestUtils.renderIntoDocument(
-        <Formsy>
-            <Input name="foo" value="foo" innerRef="comp" />
-        </Formsy>
-    );
-    const inputComponent = TestUtils.findRenderedComponentWithType(form, Input);
-    const setStateSpy = sinon.spy(inputComponent, 'setState');
-    const inputElement = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
-
-    test.equal(setStateSpy.called, false);
-    TestUtils.Simulate.change(inputElement, {target: {value: 'foobar'}});
-    test.equal(setStateSpy.calledOnce, true);
-    test.equal(setStateSpy.calledWithExactly({ value: 'foobar' }), true);
-    test.done();
-
-  },
-
-  'Wrapper: should only set the value and not validate when calling setValue(val, false)': function (test) {
-
-    const Input = Wrapper(class TestInput extends React.Component {
         updateValue = (event) => {
             this.props.setValue(event.target.value, false);
         }
