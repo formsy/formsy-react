@@ -272,7 +272,7 @@ class Formsy extends React.Component {
   validate = (component) => {
     // Trigger onChange
     if (this.state.canChange) {
-      this.props.onChange(this.getCurrentValues(), this.isChanged());
+      this.props.onChange(this.getModel(), this.isChanged());
     }
 
     const validation = this.runValidation(component);
