@@ -768,6 +768,130 @@ export default {
 
     }
 
+  },
+
+  'form valid state': {
+
+    'should allow to be changed with updateInputsWithError': function (test) {
+
+      class TestForm extends React.Component {
+        state = { isValid: true };
+        onValidSubmit = (model, reset, updateInputsWithError) => {
+          updateInputsWithError({foo: 'bar'}, true)
+        }
+        onValid = () => {
+          this.setState({isValid: true})
+        }
+        onInvalid = () => {
+          this.setState({isValid: false})
+        }
+        render() {
+          return (
+            <Formsy
+              onInvalid={this.onInvalid}
+              onValid={this.onValid}
+              onValidSubmit={this.onValidSubmit}
+            >
+              <TestInput name="foo"/>
+            </Formsy>);
+        }
+      }
+      const form = TestUtils.renderIntoDocument(<TestForm/>);
+
+      // Wait for update
+      immediate(() => {
+        test.equal(form.state.isValid, true);
+        TestUtils.Simulate.submit(ReactDOM.findDOMNode(form));
+
+        // Wait for update
+        immediate(() => {
+          test.equal(form.state.isValid, false);
+          test.done();
+        });
+      });
+
+    },
+
+    'should be false when validationErrors is not empty': function (test) {
+
+      class TestForm extends React.Component {
+        state = { validationErrors: {}, isValid: true };
+        setValidationErrors = (empty) => {
+          this.setState(!empty ? { validationErrors: {foo: 'bar'} } : { validationErrors: {} });
+        }
+        onValid = () => {
+          this.setState({isValid: true})
+        }
+        onInvalid = () => {
+          this.setState({isValid: false})
+        }
+        render() {
+          return (
+            <Formsy
+              onInvalid={this.onInvalid}
+              onValid={this.onValid}
+              validationErrors={this.state.validationErrors}
+            >
+              <TestInput name="foo"/>
+            </Formsy>);
+        }
+      }
+      const form = TestUtils.renderIntoDocument(<TestForm/>);
+
+      // Wait for update
+      immediate(() => {
+        test.equal(form.state.isValid, true);
+        form.setValidationErrors();
+
+        // Wait for update
+        immediate(() => {
+          test.equal(form.state.isValid, false);
+          test.done();
+        });
+      });
+
+    },
+  },
+
+  'should be true when validationErrors is not empty and preventExternalInvalidation is true': function (test) {
+
+    class TestForm extends React.Component {
+      state = { validationErrors: {}, isValid: true };
+      setValidationErrors = (empty) => {
+        this.setState(!empty ? { validationErrors: {foo: 'bar'} } : { validationErrors: {} });
+      }
+      onValid = () => {
+        this.setState({isValid: true})
+      }
+      onInvalid = () => {
+        this.setState({isValid: false})
+      }
+      render() {
+        return (
+          <Formsy
+            onInvalid={this.onInvalid}
+            onValid={this.onValid}
+            preventExternalInvalidation
+            validationErrors={this.state.validationErrors}
+          >
+            <TestInput name="foo"/>
+          </Formsy>);
+      }
+    }
+    const form = TestUtils.renderIntoDocument(<TestForm/>);
+
+    // Wait for update
+    immediate(() => {
+      test.equal(form.state.isValid, true);
+      form.setValidationErrors();
+
+      // Wait for update
+      immediate(() => {
+        test.equal(form.state.isValid, true);
+        test.done();
+      });
+    });
+
   }
 
 };
