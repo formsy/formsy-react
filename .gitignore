@@ -1,3 +1,6 @@
 node_modules
 .DS_Store
 .idea
+yarn-error.log*
+yarn-debug.log*
+npm-error.log*

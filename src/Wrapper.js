@@ -216,7 +216,7 @@ export default (Component) => {
   };
 
   WrappedComponent.defaultProps = {
-    innerRef: () => {},
+    innerRef: undefined,
     required: false,
     validationError: '',
     validationErrors: {},
