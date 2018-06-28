@@ -458,7 +458,7 @@ You can pre-verify a value against the passed validators to the form element.
 ```jsx
 class MyInput extends React.Component {
   changeValue = (event) => {
-    if (this.isValidValue(event.target.value)) {
+    if (this.props.isValidValue(event.target.value)) {
       this.props.setValue(event.target.value);
     }
   }
