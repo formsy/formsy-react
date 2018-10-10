@@ -169,7 +169,7 @@ export default (Component) => {
     }
 
     registerRef = (refName, ref) => {
-      this[refName] = ref
+      this[refName] = ref;
     }
 
     showError = () => !this.showRequired() && !this.isValid();
@@ -221,6 +221,7 @@ export default (Component) => {
   };
 
   WrappedComponent.defaultProps = {
+    innerRef: null,
     required: false,
     validationError: '',
     validationErrors: {},
