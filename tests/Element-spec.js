@@ -610,6 +610,41 @@ export default {
 
   },
 
+  'input should recieve the registerRef prop allowing the Form to access children input nodes without manually keeping track': function (test) {
+
+    var renderSpy = sinon.spy();
+
+    const Input = InputFactory({
+      shouldComponentUpdate: function() { return false },
+      componentDidMount: function () {this.props.registerRef(this.props.name, this.input)},
+      render: function() {
+        renderSpy();
+        return (
+          <input
+            type={this.props.type}
+            value={this.props.getValue()}
+            onChange={this.updateValue}
+            ref={el => this.input = el}
+          />
+        )
+      }
+    });
+
+    const form = TestUtils.renderIntoDocument(
+      <Formsy>
+        <Input name="foo" value="foo"/>
+      </Formsy>
+    );
+
+    test.equal(form.inputs.length, 1)
+    test.notEqual(form.inputs[0].foo, undefined)
+    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
+    test.deepEqual(input, form.inputs[0].foo)
+
+    test.done();
+
+  },
+
   'binds all necessary methods': function (test) {
     const onInputRef = input => {
       [
@@ -624,6 +659,7 @@ export default {
         'isRequired',
         'isValidValue',
         'resetValue',
+        'registerRef',
         'setValidations',
         'setValue',
         'showRequired',

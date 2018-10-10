@@ -168,6 +168,10 @@ export default (Component) => {
       });
     }
 
+    registerRef = (refName, ref) => {
+      this[refName] = ref
+    }
+
     showError = () => !this.showRequired() && !this.isValid();
 
     showRequired = () => this.state.isRequired;
@@ -186,6 +190,7 @@ export default (Component) => {
         isRequired: this.isRequired,
         isValidValue: this.isValidValue,
         resetValue: this.resetValue,
+        registerRef: this.registerRef,
         setValidations: this.setValidations,
         setValue: this.setValue,
         showRequired: this.showRequired,
