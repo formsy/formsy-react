@@ -190,13 +190,8 @@ class Formsy extends React.Component {
         }
 
         if (isRequired) {
-          const error = validationErrors[requiredResults.success[0]];
-          if (error) {
-            return [error];
-          } else if (validationError) {
-            return [validationError];
-          }
-          return null;
+          const error = validationErrors[requiredResults.success[0]] || validationError;
+          return error ? [error] : null;
         }
 
         if (validationResults.failed.length) {
