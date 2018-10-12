@@ -472,6 +472,30 @@ export default {
 
   },
 
+  'should return the validationError if the field is invalid and required rule is true': function (test) {
+
+    class TestForm extends React.Component {
+      render() {
+        return (
+          <Formsy>
+            <TestInput name="A"
+              validationError='Field is required'
+              required
+            />
+          </Formsy>
+        );
+      }
+    }
+    const form = TestUtils.renderIntoDocument(<TestForm/>);
+
+    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
+    test.equal(inputComponent.isValid(), false);
+    test.equal(inputComponent.getErrorMessage(), 'Field is required');
+
+    test.done();
+
+  },
+
   'should handle objects and arrays as values': function (test) {
 
     class TestForm extends React.Component {
@@ -610,6 +634,41 @@ export default {
 
   },
 
+  'input should recieve the registerRef prop allowing the Form to access children input nodes without manually keeping track': function (test) {
+
+    var renderSpy = sinon.spy();
+
+    const Input = InputFactory({
+      shouldComponentUpdate: function() { return false },
+      componentDidMount: function () {this.props.registerRef(this.props.name, this.input)},
+      render: function() {
+        renderSpy();
+        return (
+          <input
+            type={this.props.type}
+            value={this.props.getValue()}
+            onChange={this.updateValue}
+            ref={el => this.input = el}
+          />
+        )
+      }
+    });
+
+    const form = TestUtils.renderIntoDocument(
+      <Formsy>
+        <Input name="foo" value="foo"/>
+      </Formsy>
+    );
+
+    test.equal(form.inputs.length, 1)
+    test.notEqual(form.inputs[0].foo, undefined)
+    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
+    test.deepEqual(input, form.inputs[0].foo)
+
+    test.done();
+
+  },
+
   'binds all necessary methods': function (test) {
     const onInputRef = input => {
       [
@@ -624,6 +683,7 @@ export default {
         'isRequired',
         'isValidValue',
         'resetValue',
+        'registerRef',
         'setValidations',
         'setValue',
         'showRequired',
