@@ -472,6 +472,30 @@ export default {
 
   },
 
+  'should return the validationError if the field is invalid and required rule is true': function (test) {
+
+    class TestForm extends React.Component {
+      render() {
+        return (
+          <Formsy>
+            <TestInput name="A"
+              validationError='Field is required'
+              required
+            />
+          </Formsy>
+        );
+      }
+    }
+    const form = TestUtils.renderIntoDocument(<TestForm/>);
+
+    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
+    test.equal(inputComponent.isValid(), false);
+    test.equal(inputComponent.getErrorMessage(), 'Field is required');
+
+    test.done();
+
+  },
+
   'should handle objects and arrays as values': function (test) {
 
     class TestForm extends React.Component {
