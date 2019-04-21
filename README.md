@@ -5,6 +5,11 @@
 [![Gzipped size](http://img.badgesize.io/https://unpkg.com/formsy-react?compression=gzip)](https://unpkg.com/formsy-react)
 [![Gitter chat](https://badges.gitter.im/formsy.png)](https://gitter.im/formsy/Lobby)
 
+## This fork
+
+It has those PRs:
+* https://github.com/formsy/formsy-react/pull/126
+
 
 A form input builder and validator for React.
 
