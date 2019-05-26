@@ -29,14 +29,17 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "NODE_ENV=production webpack -p --config webpack.config.js && yarn run prepublish",
+    "changelog": "standard-changelog",
+    "deploy": "np --any-branch",
     "examples": "webpack-dev-server --config examples/webpack.config.js --content-base examples",
     "lint": "eslint src/**/*.js",
     "prepublish": "rm -Rf ./lib && babel ./src/ -d ./lib/",
-    "changelog": "standard-changelog",
-    "test": "babel-node testrunner"
+    "test": "babel-node testrunner",
+    "version": "npm run build && git add lib && git add release && npm run changelog && git add CHANGELOG.md"
   },
   "dependencies": {
     "form-data-to-object": "^0.2.0",
+    "np": "^5.0.2",
     "prop-types": "^15.5.10"
   },
   "devDependencies": {
