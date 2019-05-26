@@ -1,3 +1,13 @@
+<a name="2.0.0-beta.1"></a>
+# [2.0.0-beta.1](https://github.com/formsy/formsy-react/compare/v1.1.4...v2.0.0-beta.1) (2019-05-26)
+
+
+### Bug Fixes
+
+* removed useless default for innerRef prop from the HOC to prevent warnings when the wrapped component is a SFC ([3284327](https://github.com/formsy/formsy-react/commit/3284327))
+
+
+
 <a name="1.1.4"></a>
 ## [1.1.4](https://github.com/formsy/formsy-react/compare/v1.1.3...v1.1.4) (2018-03-05)
 
