@@ -272,7 +272,7 @@ class Formsy extends React.Component {
   validate = (component) => {
     // Trigger onChange
     if (this.state.canChange) {
-      this.props.onChange(this.getCurrentValues(), this.isChanged());
+      this.props.onChange(this.getModel(), this.isChanged());
     }
 
     const validation = this.runValidation(component);
@@ -451,26 +451,11 @@ const addValidationRule = (name, func) => {
   validationRules[name] = func;
 };
 
-const withFormsy = Wrapper;
-
-let didWarnAboutWrapperDeprecation = false;
-
-const deprecatedWrapper = (Component) => {
-  if (!didWarnAboutWrapperDeprecation) {
-    // eslint-disable-next-line no-console
-    console.warn('Wrapper has been renamed to withFormsy. Importing Wrapper from formsy-react is depreacted and will be removed in the future. Please rename your Wrapper imports to withFormsy.');
-    didWarnAboutWrapperDeprecation = true;
-  }
-
-  return withFormsy(Component);
-};
-
 export {
   addValidationRule,
   propTypes,
   validationRules,
-  withFormsy,
-  deprecatedWrapper as Wrapper,
+  Wrapper as withFormsy,
 };
 
 export default Formsy;
