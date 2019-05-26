@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "form-data-to-object": "^0.2.0",
-    "np": "^5.0.2",
     "prop-types": "^15.5.10"
   },
   "devDependencies": {
@@ -56,6 +55,7 @@
     "eslint-plugin-react": "^7.5.1",
     "jsdom": "^11.5.1",
     "nodeunit": "^0.11.1",
+    "np": "^5.0.2",
     "react": "^16.2.0 || ^16.0.0",
     "react-addons-pure-render-mixin": "^15.6.0",
     "react-addons-test-utils": "^15.6.0",
