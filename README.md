@@ -136,6 +136,7 @@ This code results in a form with a submit button that will run the `submit` meth
 -   Fork repo
 -   `yarn`
 -   `yarn test` runs the tests
+-   `npm run deploy` build and release formsy
 
 ## PR titles / commits
 
