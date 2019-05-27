@@ -135,9 +135,24 @@ This code results in a form with a submit button that will run the `submit` meth
 
 -   Fork repo
 -   `yarn`
--   `yarn examples` runs the development server on `localhost:8080`
 -   `yarn test` runs the tests
 
+## PR titles / commits
+
+We use `standard-changelog` to build out changelogs on release, which works off the 
+[Angular Commit Message Conventions](https://gist.github.com/stephenparish/9941e89d80e2bc58a153#format-of-the-commit-message).
+Please format your commit titles as:
+
+`<type>: <subject>`
+
+**With allowed `<type>`:**
+- feat (feature)
+- fix (bug fix)
+- docs (documentation)
+- style (formatting, missing semi colons, …)
+- refactor
+- test (when adding missing tests)
+- chore (maintain)
 
 ## Changelog
 
