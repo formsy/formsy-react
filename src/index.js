@@ -99,6 +99,21 @@ class Formsy extends React.Component {
       }];
       component.setState(...args);
     });
+    if (!this.props.preventExternalInvalidation && this.state.isValid) {
+      this.setFormValidState(false);
+    }
+  }
+
+  setFormValidState = (allIsValid) => {
+    this.setState({
+      isValid: allIsValid,
+    });
+
+    if (allIsValid) {
+      this.props.onValid();
+    } else {
+      this.props.onInvalid();
+    }
   }
 
   isFormDisabled = () => this.props.disabled;
@@ -252,7 +267,7 @@ class Formsy extends React.Component {
   // Go through errors from server and grab the components
   // stored in the inputs map. Change their state to invalid
   // and set the serverError message
-  updateInputsWithError = (errors) => {
+  updateInputsWithError = (errors, invalidate) => {
     Object.keys(errors).forEach((name) => {
       const component = utils.find(this.inputs, input => input.props.name === name);
       if (!component) {
@@ -264,6 +279,9 @@ class Formsy extends React.Component {
       }];
       component.setState(...args);
     });
+    if (invalidate && this.state.isValid) {
+      this.setFormValidState(false);
+    }
   }
 
   // Use the binded values and the actual input value to
@@ -294,15 +312,7 @@ class Formsy extends React.Component {
     const onValidationComplete = () => {
       const allIsValid = this.inputs.every(component => component.state.isValid);
 
-      this.setState({
-        isValid: allIsValid,
-      });
-
-      if (allIsValid) {
-        this.props.onValid();
-      } else {
-        this.props.onInvalid();
-      }
+      this.setFormValidState(allIsValid);
 
       // Tell the form that it can start to trigger change events
       this.setState({
