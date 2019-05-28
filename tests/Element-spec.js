@@ -607,6 +607,38 @@ export default {
 
   },
 
+  'input should call shouldComponentUpdate with correct value': function (test) {
+
+    var renderSpy = sinon.spy();
+
+    const Input = InputFactory({
+      shouldComponentUpdate: function(prevProps) {
+        return prevProps.value !== this.props.value
+       },
+       render: function() {
+        renderSpy();
+        return <input type={this.props.type} value={this.props.value} onChange={this.updateValue}/>;
+      }
+    });
+
+    const form = TestUtils.renderIntoDocument(
+      <Formsy>
+        <Input name="foo" value="foo"/>
+      </Formsy>
+    );
+
+    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
+
+    test.equal(renderSpy.calledOnce, true);
+
+    TestUtils.Simulate.change(input, {target: {value: 'fooz'}});
+    test.equal(input.value, 'fooz');
+    test.equal(renderSpy.calledTwice, true);
+
+    test.done();
+
+  },
+
   'binds all necessary methods': function (test) {
     const onInputRef = input => {
       [
