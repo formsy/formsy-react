@@ -31,6 +31,21 @@ This project was originally located at https://github.com/christianalfoni/formsy
 
 `yarn add formsy-react react react-dom` and use with webpack, browserify, etc.
 
+## Upgrading from 1.x to 2.x
+
+**Element prop breaking changes:**
+- getErrorMessage() => errorMessage
+- getErrorMessages() => errorMessages
+- getValue() => value
+- hasValue() => hasValue,
+- isFormDisabled(): => isFormDisabled,
+- isValid(): => isValid,
+- isPristine(): => isPristine,
+- isFormSubmitted(): => isFormSubmitted,
+- isRequired(): => isRequired,
+- showRequired(): => showRequired,
+- showError(): => showError,
+
 ## Quick Start
 
 ### 1. Build a Formsy element
