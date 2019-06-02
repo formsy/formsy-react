@@ -17,6 +17,7 @@ class Formsy extends React.Component {
       canChange: false,
     };
     this.inputs = [];
+    this.emptyArray = [];
   }
 
   getChildContext = () => (
@@ -54,9 +55,8 @@ class Formsy extends React.Component {
 
   getCurrentValues = () => (
     this.inputs.reduce((data, component) => {
-      const { name } = component.props;
-      const dataCopy = Object.assign({}, data); // avoid param reassignment
-      dataCopy[name] = component.state.value;
+      const dataCopy = typeof component.state.value === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
+      dataCopy[component.props.name] = component.state.value;
       return dataCopy;
     }, {})
   )
@@ -69,7 +69,7 @@ class Formsy extends React.Component {
   getPristineValues = () => (
     this.inputs.reduce((data, component) => {
       const { name } = component.props;
-      const dataCopy = Object.assign({}, data); // avoid param reassignment
+      const dataCopy = typeof component.state.value === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
       dataCopy[name] = component.props.value;
       return dataCopy;
     }, {})
@@ -193,7 +193,7 @@ class Formsy extends React.Component {
       isValid: isRequired ? false : isValid,
       error: (() => {
         if (isValid && !isRequired) {
-          return [];
+          return this.emptyArray;
         }
 
         if (validationResults.errors.length) {

@@ -47,9 +47,7 @@ const propTypes = {
   value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
 };
 
-export {
-  propTypes,
-};
+export { propTypes };
 
 export default (Component) => {
   class WrappedComponent extends React.Component {
@@ -85,6 +83,17 @@ export default (Component) => {
     // We have to make sure the validate method is kept when new props are added
     componentWillReceiveProps(nextProps) {
       this.setValidations(nextProps.validations, nextProps.required);
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+      const isPropsChanged = Object
+        .keys(this.props)
+        .some(k => (this.props[k] !== nextProps[k]));
+      const isStateChanged = Object
+        .keys(this.state)
+        .some(k => (this.state[k] !== nextState[k]));
+
+      return isPropsChanged || isStateChanged;
     }
 
     componentDidUpdate(prevProps) {

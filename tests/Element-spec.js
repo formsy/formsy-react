@@ -169,22 +169,17 @@ export default {
 
   'should return true or false when calling isPristine() depending on input has been "touched" or not': function (test) {
 
-    let isPristine = null;
-    const Input = InputFactory({
-      componentWillReceiveProps: function(nextProps) {
-        isPristine = nextProps.isPristine;
-      }
-    });
+    const Input = InputFactory();
     const form = TestUtils.renderIntoDocument(
       <Formsy action="/users">
         <Input name="A" value="foo"/>
       </Formsy>
     );
 
-    test.equal(isPristine, true);
+    test.equal(form.inputs[0].isPristine(), true);
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
     TestUtils.Simulate.change(input, {target: {value: 'foo'}});
-    test.equal(isPristine, false);
+    test.equal(form.inputs[0].isPristine(), false);
 
     test.done();
 
