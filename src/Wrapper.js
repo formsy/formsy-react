@@ -175,7 +175,6 @@ export default (Component) => {
     render() {
       const { innerRef } = this.props;
       const propsForElement = {
-        ...this.props,
         errorMessage: this.getErrorMessage(),
         errorMessages: this.getErrorMessages(),
         hasValue: this.hasValue(),
@@ -191,6 +190,7 @@ export default (Component) => {
         showError: this.showError(),
         showRequired: this.showRequired(),
         value: this.getValue(),
+        ...this.props,
       };
 
       if (innerRef) {
