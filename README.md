@@ -8,8 +8,8 @@
 
 A form input builder and validator for React.
 
-| [Quick Start](#quick-start) | [API](/API.md) | [Examples](/examples) |
-| --------------------------- | -------------- | --------------------- |
+| [Quick Start](#quick-start) | [API](/API.md) |
+| --------------------------- | -------------- |
 
 ## Background
 
@@ -30,6 +30,29 @@ This project was originally located at https://github.com/christianalfoni/formsy
 ## Install
 
 `yarn add formsy-react react react-dom` and use with webpack, browserify, etc.
+
+## Join the 2.x beta
+
+The 2.0 release is currently in active development on master, but not yet released publicly. The API docs are still
+written for the 1.x branch and will remain that way until release. However, the API changes are minor and listed below.
+If you'd like to upgrade to formsy 2.x you can run:
+
+```
+yarn upgrade formsy-react@2.0.0-beta.2
+```
+
+**Element prop breaking changes:**
+- getErrorMessage() => errorMessage
+- getErrorMessages() => errorMessages
+- getValue() => value
+- hasValue() => hasValue,
+- isFormDisabled(): => isFormDisabled,
+- isValid(): => isValid,
+- isPristine(): => isPristine,
+- isFormSubmitted(): => isFormSubmitted,
+- isRequired(): => isRequired,
+- showRequired(): => showRequired,
+- showError(): => showError,
 
 ## Quick Start
 
