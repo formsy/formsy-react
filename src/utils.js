@@ -18,7 +18,7 @@ export default {
     if (Object.keys(a).length !== Object.keys(b).length) {
       isDifferent = true;
     } else {
-      Object.keys(a).forEach((key) => {
+      Object.keys(a).forEach(key => {
         if (!this.isSame(a[key], b[key])) {
           isDifferent = true;
         }
@@ -61,7 +61,7 @@ export default {
     };
 
     if (Object.keys(validations).length) {
-      Object.keys(validations).forEach((validationMethod) => {
+      Object.keys(validations).forEach(validationMethod => {
         if (validationRules[validationMethod] && typeof validations[validationMethod] === 'function') {
           throw new Error(`Formsy does not allow you to override default validations: ${validationMethod}`);
         }
@@ -80,11 +80,7 @@ export default {
           }
           return;
         } else if (typeof validations[validationMethod] !== 'function') {
-          const validation = validationRules[validationMethod](
-            currentValues,
-            value,
-            validations[validationMethod],
-          );
+          const validation = validationRules[validationMethod](currentValues, value, validations[validationMethod]);
 
           if (typeof validation === 'string') {
             results.errors.push(validation);

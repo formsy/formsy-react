@@ -1,9 +1,7 @@
 import utils from './../src/utils.js';
 
 export default {
-
-  'should check equality of objects and arrays': function (test) {
-
+  'should check equality of objects and arrays': function(test) {
     const objA = { foo: 'bar' };
     const objB = { foo: 'bar' };
     const objC = [{ foo: ['bar'] }];
@@ -31,7 +29,5 @@ export default {
     test.equal(utils.isSame(() => {}, objA), false);
 
     test.done();
-
-  }
-
+  },
 };

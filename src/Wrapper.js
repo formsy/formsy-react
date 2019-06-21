@@ -4,13 +4,13 @@ import utils from './utils';
 
 /* eslint-disable react/default-props-match-prop-types */
 
-const convertValidationsToObject = (validations) => {
+const convertValidationsToObject = validations => {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
       let args = validation.split(':');
       const validateMethod = args.shift();
 
-      args = args.map((arg) => {
+      args = args.map(arg => {
         try {
           return JSON.parse(arg);
         } catch (e) {
@@ -19,7 +19,9 @@ const convertValidationsToObject = (validations) => {
       });
 
       if (args.length > 1) {
-        throw new Error('Formsy does not support multiple args on string validations. Use object format of validations instead.');
+        throw new Error(
+          'Formsy does not support multiple args on string validations. Use object format of validations instead.',
+        );
       }
 
       // Avoid parameter reassignment
@@ -35,21 +37,14 @@ const convertValidationsToObject = (validations) => {
 const propTypes = {
   innerRef: PropTypes.func,
   name: PropTypes.string.isRequired,
-  required: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.object,
-    PropTypes.string,
-  ]),
-  validations: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.string,
-  ]),
+  required: PropTypes.oneOfType([PropTypes.bool, PropTypes.object, PropTypes.string]),
+  validations: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
 };
 
 export { propTypes };
 
-export default (Component) => {
+export default Component => {
   class WrappedComponent extends React.Component {
     constructor(props) {
       super(props);
@@ -86,12 +81,8 @@ export default (Component) => {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-      const isPropsChanged = Object
-        .keys(this.props)
-        .some(k => (this.props[k] !== nextProps[k]));
-      const isStateChanged = Object
-        .keys(this.state)
-        .some(k => (this.state[k] !== nextState[k]));
+      const isPropsChanged = Object.keys(this.props).some(k => this.props[k] !== nextProps[k]);
+      const isStateChanged = Object.keys(this.state).some(k => this.state[k] !== nextState[k]);
 
       return isPropsChanged || isStateChanged;
     }
@@ -104,8 +95,10 @@ export default (Component) => {
       }
 
       // If validations or required is changed, run a new validation
-      if (!utils.isSame(this.props.validations, prevProps.validations) ||
-        !utils.isSame(this.props.required, prevProps.required)) {
+      if (
+        !utils.isSame(this.props.validations, prevProps.validations) ||
+        !utils.isSame(this.props.required, prevProps.required)
+      ) {
         this.context.formsy.validate(this);
       }
     }
@@ -118,23 +111,23 @@ export default (Component) => {
     getErrorMessage = () => {
       const messages = this.getErrorMessages();
       return messages.length ? messages[0] : null;
-    }
+    };
 
     getErrorMessages = () => {
       if (!this.isValid() || this.showRequired()) {
         return this.state.externalError || this.state.validationError || [];
       }
       return [];
-    }
+    };
 
     getValue = () => this.state.value;
 
     setValidations = (validations, required) => {
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
-      this.requiredValidations = required === true ? { isDefaultRequiredValue: true } :
-        convertValidationsToObject(required);
-    }
+      this.requiredValidations =
+        required === true ? { isDefaultRequiredValue: true } : convertValidationsToObject(required);
+    };
 
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
@@ -144,14 +137,17 @@ export default (Component) => {
           value,
         });
       } else {
-        this.setState({
-          value,
-          isPristine: false,
-        }, () => {
-          this.context.formsy.validate(this);
-        });
+        this.setState(
+          {
+            value,
+            isPristine: false,
+          },
+          () => {
+            this.context.formsy.validate(this);
+          },
+        );
       }
-    }
+    };
 
     hasValue = () => this.state.value !== '';
 
@@ -165,17 +161,19 @@ export default (Component) => {
 
     isValid = () => this.state.isValid;
 
-    isValidValue = value =>
-      this.context.formsy.isValidValue.call(null, this, value);
+    isValidValue = value => this.context.formsy.isValidValue.call(null, this, value);
 
     resetValue = () => {
-      this.setState({
-        value: this.state.pristineValue,
-        isPristine: true,
-      }, () => {
-        this.context.formsy.validate(this);
-      });
-    }
+      this.setState(
+        {
+          value: this.state.pristineValue,
+          isPristine: true,
+        },
+        () => {
+          this.context.formsy.validate(this);
+        },
+      );
+    };
 
     showError = () => !this.showRequired() && !this.isValid();
 
@@ -211,11 +209,7 @@ export default (Component) => {
   }
 
   function getDisplayName(component) {
-    return (
-      component.displayName ||
-      component.name ||
-      (typeof component === 'string' ? component : 'Component')
-    );
+    return component.displayName || component.name || (typeof component === 'string' ? component : 'Component');
   }
 
   WrappedComponent.displayName = `Formsy(${getDisplayName(Component)})`;
