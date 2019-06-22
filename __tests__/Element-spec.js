@@ -4,11 +4,11 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import sinon from 'sinon';
 
 import Formsy, { withFormsy } from './..';
-import TestInput, { InputFactory } from './utils/TestInput';
-import immediate from './utils/immediate';
+import TestInput, { InputFactory } from '../__test_utils__/TestInput';
+import immediate from '../__test_utils__/immediate';
 
-export default {
-  'should pass down correct value prop after using setValue()': function(test) {
+describe('Element', () => {
+  it('should pass down correct value prop after using setValue()', () => {
     const form = TestUtils.renderIntoDocument(
       <Formsy>
         <TestInput name="foo" value="foo" />
@@ -16,21 +16,25 @@ export default {
     );
 
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
-    test.equal(input.value, 'foo');
+    expect(input.value).toEqual('foo');
     TestUtils.Simulate.change(input, { target: { value: 'foobar' } });
-    test.equal(input.value, 'foobar');
+    expect(input.value).toEqual('foobar');
+  });
 
-    test.done();
-  },
-
-  'withFormsy: should only set the value and not validate when calling setValue(val, false)': function(test) {
+  it('withFormsy: should only set the value and not validate when calling setValue(val, false)', () => {
     const Input = withFormsy(
       class TestInput extends React.Component {
         updateValue = event => {
           this.props.setValue(event.target.value, false);
         };
         render() {
-          return <input type="text" value={this.props.value} onChange={this.updateValue} />;
+          return (
+            <input
+              type="text"
+              value={this.props.value}
+              onChange={this.updateValue}
+            />
+          );
         }
       },
     );
@@ -41,16 +45,18 @@ export default {
     );
     const inputComponent = TestUtils.findRenderedComponentWithType(form, Input);
     const setStateSpy = sinon.spy(inputComponent, 'setState');
-    const inputElement = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
+    const inputElement = TestUtils.findRenderedDOMComponentWithTag(
+      form,
+      'INPUT',
+    );
 
-    test.equal(setStateSpy.called, false);
+    expect(setStateSpy.called).toEqual(false);
     TestUtils.Simulate.change(inputElement, { target: { value: 'foobar' } });
-    test.equal(setStateSpy.calledOnce, true);
-    test.equal(setStateSpy.calledWithExactly({ value: 'foobar' }), true);
-    test.done();
-  },
+    expect(setStateSpy.calledOnce).toEqual(true);
+    expect(setStateSpy.calledWithExactly({ value: 'foobar' })).toEqual(true);
+  });
 
-  'should set back to pristine value when running reset': function(test) {
+  it('should set back to pristine value when running reset', () => {
     let reset = null;
     const Input = InputFactory({
       componentDidMount: function() {
@@ -66,12 +72,10 @@ export default {
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
     TestUtils.Simulate.change(input, { target: { value: 'foobar' } });
     reset();
-    test.equal(input.value, 'foo');
+    expect(input.value).toEqual('foo');
+  });
 
-    test.done();
-  },
-
-  'should return error message passed when calling getErrorMessage()': function(test) {
+  it('should return error message passed when calling getErrorMessage()', () => {
     let errorMessage = null;
     const Input = InputFactory({
       componentDidMount: function() {
@@ -80,16 +84,19 @@ export default {
     });
     TestUtils.renderIntoDocument(
       <Formsy>
-        <Input name="foo" value="foo" validations="isEmail" validationError="Has to be email" />
+        <Input
+          name="foo"
+          value="foo"
+          validations="isEmail"
+          validationError="Has to be email"
+        />
       </Formsy>,
     );
 
-    test.equal(errorMessage, 'Has to be email');
+    expect(errorMessage).toEqual('Has to be email');
+  });
 
-    test.done();
-  },
-
-  'should return true or false when calling isValid() depending on valid state': function(test) {
+  it('should return true or false when calling isValid() depending on valid state', () => {
     let isValid = null;
     const Input = InputFactory({
       componentWillReceiveProps: function(nextProps) {
@@ -102,15 +109,13 @@ export default {
       </Formsy>,
     );
 
-    test.equal(isValid, false);
+    expect(isValid).toEqual(false);
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
     TestUtils.Simulate.change(input, { target: { value: 'foo@foo.com' } });
-    test.equal(isValid, true);
+    expect(isValid).toEqual(true);
+  });
 
-    test.done();
-  },
-
-  'should return true or false when calling isRequired() depending on passed required attribute': function(test) {
+  it('should return true or false when calling isRequired() depending on passed required attribute', () => {
     const isRequireds = [];
     const Input = InputFactory({
       componentDidMount: function() {
@@ -125,16 +130,12 @@ export default {
       </Formsy>,
     );
 
-    test.equal(isRequireds[0], false);
-    test.equal(isRequireds[1], true);
-    test.equal(isRequireds[2], true);
+    expect(isRequireds[0]).toEqual(false);
+    expect(isRequireds[1]).toEqual(true);
+    expect(isRequireds[2]).toEqual(true);
+  });
 
-    test.done();
-  },
-
-  'should return true or false when calling showRequired() depending on input being empty and required is passed, or not': function(
-    test,
-  ) {
+  it('should return true or false when calling showRequired() depending on input being empty and required is passed, or not', () => {
     const showRequireds = [];
     const Input = InputFactory({
       componentDidMount: function() {
@@ -149,14 +150,12 @@ export default {
       </Formsy>,
     );
 
-    test.equal(showRequireds[0], false);
-    test.equal(showRequireds[1], true);
-    test.equal(showRequireds[2], false);
+    expect(showRequireds[0]).toEqual(false);
+    expect(showRequireds[1]).toEqual(true);
+    expect(showRequireds[2]).toEqual(false);
+  });
 
-    test.done();
-  },
-
-  'should return true or false when calling isPristine() depending on input has been "touched" or not': function(test) {
+  it('should return true or false when calling isPristine() depending on input has been "touched" or not', () => {
     const Input = InputFactory();
     const form = TestUtils.renderIntoDocument(
       <Formsy action="/users">
@@ -164,15 +163,13 @@ export default {
       </Formsy>,
     );
 
-    test.equal(form.inputs[0].isPristine(), true);
+    expect(form.inputs[0].isPristine()).toEqual(true);
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
     TestUtils.Simulate.change(input, { target: { value: 'foo' } });
-    test.equal(form.inputs[0].isPristine(), false);
+    expect(form.inputs[0].isPristine()).toEqual(false);
+  });
 
-    test.done();
-  },
-
-  'should allow an undefined value to be updated to a value': function(test) {
+  it('should allow an undefined value to be updated to a value', () => {
     class TestForm extends React.Component {
       state = { value: undefined };
       changeValue = () => {
@@ -193,12 +190,11 @@ export default {
     form.changeValue();
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
     immediate(() => {
-      test.equal(input.value, 'foo');
-      test.done();
+      expect(input.value).toEqual('foo');
     });
-  },
+  });
 
-  'should be able to test a values validity': function(test) {
+  it('should be able to test a values validity', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -211,12 +207,11 @@ export default {
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
     const input = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(input.isValidValue('foo@bar.com'), true);
-    test.equal(input.isValidValue('foo@bar'), false);
-    test.done();
-  },
+    expect(input.isValidValue('foo@bar.com')).toEqual(true);
+    expect(input.isValidValue('foo@bar')).toEqual(false);
+  });
 
-  'should be able to use an object as validations property': function(test) {
+  it('should be able to use an object as validations property', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -234,13 +229,11 @@ export default {
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
     const input = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(input.isValidValue('foo@bar.com'), true);
-    test.equal(input.isValidValue('foo@bar'), false);
+    expect(input.isValidValue('foo@bar.com')).toEqual(true);
+    expect(input.isValidValue('foo@bar')).toEqual(false);
+  });
 
-    test.done();
-  },
-
-  'should be able to pass complex values to a validation rule': function(test) {
+  it('should be able to pass complex values to a validation rule', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -258,16 +251,17 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(inputComponent.isValid(), true);
+    const inputComponent = TestUtils.findRenderedComponentWithType(
+      form,
+      TestInput,
+    );
+    expect(inputComponent.isValid()).toEqual(true);
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
     TestUtils.Simulate.change(input, { target: { value: 'bar' } });
-    test.equal(inputComponent.isValid(), false);
+    expect(inputComponent.isValid()).toEqual(false);
+  });
 
-    test.done();
-  },
-
-  'should be able to run a function to validate': function(test) {
+  it('should be able to run a function to validate', () => {
     class TestForm extends React.Component {
       customValidationA(values, value) {
         return value === 'foo';
@@ -298,20 +292,19 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    const inputComponent = TestUtils.scryRenderedComponentsWithType(form, TestInput);
-    test.equal(inputComponent[0].isValid(), true);
-    test.equal(inputComponent[1].isValid(), true);
+    const inputComponent = TestUtils.scryRenderedComponentsWithType(
+      form,
+      TestInput,
+    );
+    expect(inputComponent[0].isValid()).toEqual(true);
+    expect(inputComponent[1].isValid()).toEqual(true);
     const input = TestUtils.scryRenderedDOMComponentsWithTag(form, 'INPUT');
     TestUtils.Simulate.change(input[0], { target: { value: 'bar' } });
-    test.equal(inputComponent[0].isValid(), false);
-    test.equal(inputComponent[1].isValid(), false);
+    expect(inputComponent[0].isValid()).toEqual(false);
+    expect(inputComponent[1].isValid()).toEqual(false);
+  });
 
-    test.done();
-  },
-
-  'should not override error messages with error messages passed by form if passed eror messages is an empty object': function(
-    test,
-  ) {
+  it('should not override error messages with error messages passed by form if passed eror messages is an empty object', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -331,13 +324,14 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(inputComponent.getErrorMessage(), 'bar3');
+    const inputComponent = TestUtils.findRenderedComponentWithType(
+      form,
+      TestInput,
+    );
+    expect(inputComponent.getErrorMessage()).toEqual('bar3');
+  });
 
-    test.done();
-  },
-
-  'should override all error messages with error messages passed by form': function(test) {
+  it('should override all error messages with error messages passed by form', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -357,13 +351,14 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(inputComponent.getErrorMessage(), 'bar');
+    const inputComponent = TestUtils.findRenderedComponentWithType(
+      form,
+      TestInput,
+    );
+    expect(inputComponent.getErrorMessage()).toEqual('bar');
+  });
 
-    test.done();
-  },
-
-  'should override validation rules with required rules': function(test) {
+  it('should override validation rules with required rules', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -386,13 +381,14 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(inputComponent.getErrorMessage(), 'bar3');
+    const inputComponent = TestUtils.findRenderedComponentWithType(
+      form,
+      TestInput,
+    );
+    expect(inputComponent.getErrorMessage()).toEqual('bar3');
+  });
 
-    test.done();
-  },
-
-  'should fall back to default error message when non exist in validationErrors map': function(test) {
+  it('should fall back to default error message when non exist in validationErrors map', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -412,13 +408,14 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(inputComponent.getErrorMessage(), 'bar1');
+    const inputComponent = TestUtils.findRenderedComponentWithType(
+      form,
+      TestInput,
+    );
+    expect(inputComponent.getErrorMessage()).toEqual('bar1');
+  });
 
-    test.done();
-  },
-
-  'should not be valid if it is required and required rule is true': function(test) {
+  it('should not be valid if it is required and required rule is true', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -430,13 +427,14 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(inputComponent.isValid(), false);
+    const inputComponent = TestUtils.findRenderedComponentWithType(
+      form,
+      TestInput,
+    );
+    expect(inputComponent.isValid()).toEqual(false);
+  });
 
-    test.done();
-  },
-
-  'should return the validationError if the field is invalid and required rule is true': function(test) {
+  it('should return the validationError if the field is invalid and required rule is true', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -448,14 +446,15 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(inputComponent.isValid(), false);
-    test.equal(inputComponent.getErrorMessage(), 'Field is required');
+    const inputComponent = TestUtils.findRenderedComponentWithType(
+      form,
+      TestInput,
+    );
+    expect(inputComponent.isValid()).toEqual(false);
+    expect(inputComponent.getErrorMessage()).toEqual('Field is required');
+  });
 
-    test.done();
-  },
-
-  'should handle objects and arrays as values': function(test) {
+  it('should handle objects and arrays as values', () => {
     class TestForm extends React.Component {
       state = {
         foo: { foo: 'bar' },
@@ -478,13 +477,11 @@ export default {
     });
 
     const inputs = TestUtils.scryRenderedComponentsWithType(form, TestInput);
-    test.deepEqual(inputs[0].getValue(), { foo: 'foo' });
-    test.deepEqual(inputs[1].getValue(), ['bar']);
+    expect(inputs[0].getValue()).toEqual({ foo: 'foo' });
+    expect(inputs[1].getValue()).toEqual(['bar']);
+  });
 
-    test.done();
-  },
-
-  'should handle isFormDisabled with dynamic inputs': function(test) {
+  it('should handle isFormDisabled with dynamic inputs', () => {
     class TestForm extends React.Component {
       state = { bool: true };
       flip = () => {
@@ -495,7 +492,11 @@ export default {
       render() {
         return (
           <Formsy disabled={this.state.bool}>
-            {this.state.bool ? <TestInput name="foo" /> : <TestInput name="bar" />}
+            {this.state.bool ? (
+              <TestInput name="foo" />
+            ) : (
+              <TestInput name="bar" />
+            )}
           </Formsy>
         );
       }
@@ -503,17 +504,15 @@ export default {
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
     const input = TestUtils.findRenderedComponentWithType(form, TestInput);
-    test.equal(input.isFormDisabled(), true);
+    expect(input.isFormDisabled()).toEqual(true);
     form.flip();
-    test.equal(input.isFormDisabled(), false);
+    expect(input.isFormDisabled()).toEqual(false);
+  });
 
-    test.done();
-  },
-
-  'should allow for dot notation in name which maps to a deep object': function(test) {
+  it('should allow for dot notation in name which maps to a deep object', () => {
     class TestForm extends React.Component {
       onSubmit(model) {
-        test.deepEqual(model, { foo: { bar: 'foo', test: 'test' } });
+        expect(model).toEqual({ foo: { bar: 'foo', test: 'test' } });
       }
       render() {
         return (
@@ -526,18 +525,16 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    test.expect(1);
+    expect(true).toBe(true);
 
     const formEl = TestUtils.findRenderedDOMComponentWithTag(form, 'form');
     TestUtils.Simulate.submit(formEl);
+  });
 
-    test.done();
-  },
-
-  'should allow for application/x-www-form-urlencoded syntax and convert to object': function(test) {
+  it('should allow for application/x-www-form-urlencoded syntax and convert to object', () => {
     class TestForm extends React.Component {
       onSubmit(model) {
-        test.deepEqual(model, { foo: ['foo', 'bar'] });
+        expect(model).toEqual({ foo: ['foo', 'bar'] });
       }
       render() {
         return (
@@ -550,15 +547,13 @@ export default {
     }
     const form = TestUtils.renderIntoDocument(<TestForm />);
 
-    test.expect(1);
+    expect(true).toBe(true);
 
     const formEl = TestUtils.findRenderedDOMComponentWithTag(form, 'form');
     TestUtils.Simulate.submit(formEl);
+  });
 
-    test.done();
-  },
-
-  'input should rendered once with PureRenderMixin': function(test) {
+  it('input should rendered once with PureRenderMixin', () => {
     var renderSpy = sinon.spy();
 
     const Input = InputFactory({
@@ -567,7 +562,13 @@ export default {
       },
       render: function() {
         renderSpy();
-        return <input type={this.props.type} value={this.props.value} onChange={this.updateValue} />;
+        return (
+          <input
+            type={this.props.type}
+            value={this.props.value}
+            onChange={this.updateValue}
+          />
+        );
       },
     });
 
@@ -577,12 +578,10 @@ export default {
       </Formsy>,
     );
 
-    test.equal(renderSpy.calledOnce, true);
+    expect(renderSpy.calledOnce).toEqual(true);
+  });
 
-    test.done();
-  },
-
-  'input should call shouldComponentUpdate with correct value': function(test) {
+  it('input should call shouldComponentUpdate with correct value', () => {
     var renderSpy = sinon.spy();
 
     const Input = InputFactory({
@@ -591,7 +590,13 @@ export default {
       },
       render: function() {
         renderSpy();
-        return <input type={this.props.type} value={this.props.value} onChange={this.updateValue} />;
+        return (
+          <input
+            type={this.props.type}
+            value={this.props.value}
+            onChange={this.updateValue}
+          />
+        );
       },
     });
 
@@ -603,27 +608,25 @@ export default {
 
     const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
 
-    test.equal(renderSpy.calledOnce, true);
+    expect(renderSpy.calledOnce).toEqual(true);
 
     TestUtils.Simulate.change(input, { target: { value: 'fooz' } });
-    test.equal(input.value, 'fooz');
-    test.equal(renderSpy.calledTwice, true);
+    expect(input.value).toEqual('fooz');
+    expect(renderSpy.calledTwice).toEqual(true);
+  });
 
-    test.done();
-  },
-
-  'binds all necessary methods': function(test) {
+  it('binds all necessary methods', () => {
     const onInputRef = input => {
-      ['isValidValue', 'resetValue', 'setValidations', 'setValue'].forEach(fnName => {
-        const fn = input[fnName];
-        try {
-          fn();
-        } catch (e) {
-          throw new Error(`Method '${fnName}' isn't bound.`);
-        }
-      });
-
-      test.done();
+      ['isValidValue', 'resetValue', 'setValidations', 'setValue'].forEach(
+        fnName => {
+          const fn = input[fnName];
+          try {
+            fn();
+          } catch (e) {
+            throw new Error(`Method '${fnName}' isn't bound.`);
+          }
+        },
+      );
     };
 
     TestUtils.renderIntoDocument(
@@ -631,5 +634,5 @@ export default {
         <TestInput ref={onInputRef} name="name" value="foo" />
       </Formsy>,
     );
-  },
-};
+  });
+});

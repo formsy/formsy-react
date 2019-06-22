@@ -39,7 +39,7 @@
     "format": "prettier --write src/**/* tests/**/*  tests/*",
     "lint": "eslint src/**/*.js",
     "prepublish": "rm -Rf ./lib && babel ./src/ -d ./lib/",
-    "test": "babel-node testrunner",
+    "test": "jest",
     "version": "npm run build && git add lib && git add release && npm run changelog && git add CHANGELOG.md"
   },
   "dependencies": {
@@ -54,6 +54,7 @@
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
     "babel-eslint": "^10.0.2",
+    "babel-jest": "^24.8.0",
     "babel-loader": "^8.0.6",
     "eslint": "^4.14.0",
     "eslint-config-airbnb": "^16.1.0",
@@ -62,6 +63,7 @@
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.5.1",
     "husky": "^2.4.1",
+    "jest": "^24.8.0",
     "jsdom": "^11.5.1",
     "nodeunit": "^0.11.1",
     "np": "^5.0.2",
