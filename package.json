@@ -20,6 +20,14 @@
       "pre-commit": "pretty-quick --staged"
     }
   },
+  "jest": {
+    "transform": {
+      "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
+    },
+    "setupFilesAfterEnv": [
+      "./setupTests.js"
+    ]
+  },
   "license": "MIT",
   "homepage": "https://github.com/formsy/formsy-react",
   "bugs": "https://github.com/formsy/formsy-react/issues",
@@ -36,26 +44,29 @@
     "build": "NODE_ENV=production webpack -p --config webpack.config.js && yarn run prepublish",
     "changelog": "standard-changelog",
     "deploy": "np --any-branch",
-    "format": "prettier --write src/**/* tests/**/*  tests/*",
+    "format": "prettier --write src/**/* __tests__/**/*  __tests__/* __test_utils__/**/*  __test_utils__/*",
     "lint": "eslint src/**/*.js",
     "prepublish": "rm -Rf ./lib && babel ./src/ -d ./lib/",
     "test": "jest",
     "version": "npm run build && git add lib && git add release && npm run changelog && git add CHANGELOG.md"
   },
   "dependencies": {
-    "@babel/node": "^7.4.5",
     "form-data-to-object": "^0.2.0",
-    "prop-types": "^15.5.10"
+    "prop-types": "^15.5.10",
+    "react-dom": "^16.8.6"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
+    "@babel/node": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
     "babel-eslint": "^10.0.2",
     "babel-jest": "^24.8.0",
     "babel-loader": "^8.0.6",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^4.14.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-prettier": "^5.0.0",
@@ -72,13 +83,11 @@
     "react": "^16.2.0 || ^16.0.0",
     "react-addons-pure-render-mixin": "^15.6.0",
     "react-addons-test-utils": "^15.6.0",
-    "react-dom": "^16.2.0 || ^16.0.0",
     "sinon": "^7.3.2",
     "standard-changelog": "^2.0.11",
     "webpack": "^3.10.0"
   },
   "peerDependencies": {
-    "react": "^15.6.1 || ^16.0.0",
-    "react-dom": "^15.6.1 || ^16.0.0"
+    "react": "^15.6.1 || ^16.0.0"
   }
 }
