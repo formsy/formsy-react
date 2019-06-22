@@ -42,7 +42,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "NODE_ENV=production webpack -p --config webpack.config.js && yarn run prepublish",
-    "changelog": "standard-changelog",
+    "changelog": "auto-changelog",
     "deploy": "np --any-branch",
     "format": "prettier --write src/**/* __tests__/**/*  __tests__/* __test_utils__/**/*  __test_utils__/*",
     "lint": "eslint src/**/*.js",
@@ -61,6 +61,7 @@
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
+    "auto-changelog": "^1.13.0",
     "babel-eslint": "^10.0.2",
     "babel-jest": "^24.8.0",
     "babel-loader": "^8.0.6",
@@ -84,7 +85,6 @@
     "react-addons-test-utils": "^15.6.0",
     "react-dom": "^16.2.0 || ^16.0.0",
     "sinon": "^7.3.2",
-    "standard-changelog": "^2.0.11",
     "webpack": "^3.10.0"
   },
   "peerDependencies": {
