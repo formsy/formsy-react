@@ -1,5 +1,5 @@
 import React from 'react';
-import Formsy, { withFormsy } from './../..';
+import Formsy, { withFormsy } from '../lib';
 
 class TestComponent extends React.Component {
   methodOnWrappedInstance = param => {
