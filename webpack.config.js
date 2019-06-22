@@ -11,6 +11,13 @@ module.exports = {
       amd: 'react',
       umd: 'react',
     },
+    'react-dom': {
+      root: 'ReactDOM',
+      commonjs2: 'react-dom',
+      commonjs: 'react-dom',
+      amd: 'react-dom',
+      umd: 'react-dom',
+    },
   },
   output: {
     path: path.resolve(__dirname, 'release'),
