@@ -3,7 +3,7 @@
 [![GitHub release](https://img.shields.io/github/release/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/releases)
 [![Build status](https://travis-ci.org/formsy/formsy-react.svg?branch=master)](https://travis-ci.org/formsy/formsy-react)
 [![Gzipped size](http://img.badgesize.io/https://unpkg.com/formsy-react?compression=gzip)](https://unpkg.com/formsy-react)
-[![Gitter chat](https://badges.gitter.im/formsy.png)](https://gitter.im/formsy/Lobby)
+[![Gitter](https://badges.gitter.im/formsy/Lobby.svg)](https://gitter.im/formsy/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
 A form input builder and validator for React.
