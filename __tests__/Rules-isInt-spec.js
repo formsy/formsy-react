@@ -1,8 +1,8 @@
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
 
 import Formsy from './..';
 import { InputFactory } from '../__test_utils__/TestInput';
+import { mount } from 'enzyme';
 
 const TestInput = InputFactory({
   render() {
@@ -14,11 +14,7 @@ class TestForm extends React.Component {
   render() {
     return (
       <Formsy>
-        <TestInput
-          name="foo"
-          validations="isInt"
-          value={this.props.inputValue}
-        />
+        <TestInput name="foo" validations="isInt" value={this.props.inputValue} />
       </Formsy>
     );
   }
@@ -26,107 +22,68 @@ class TestForm extends React.Component {
 
 describe('isInt', () => {
   it('should pass with a default value', () => {
-    const form = TestUtils.renderIntoDocument(<TestForm />);
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(true);
+    const form = mount(<TestForm />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(true);
   });
 
   it('should pass with an empty string', () => {
-    const form = TestUtils.renderIntoDocument(<TestForm inputValue="" />);
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(true);
+    const form = mount(<TestForm inputValue="" />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(true);
   });
 
   it('should fail with a string', () => {
-    const form = TestUtils.renderIntoDocument(<TestForm inputValue="abc" />);
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(false);
+    const form = mount(<TestForm inputValue="abc" />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
   it('should pass with a number as string', () => {
-    const form = TestUtils.renderIntoDocument(<TestForm inputValue="+42" />);
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(true);
+    const form = mount(<TestForm inputValue="+42" />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(true);
   });
 
   it('should fail string with digits', () => {
-    const form = TestUtils.renderIntoDocument(
-      <TestForm inputValue="42 is an answer" />,
-    );
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(false);
+    const form = mount(<TestForm inputValue="42 is an answer" />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
   it('should pass with an int', () => {
-    const form = TestUtils.renderIntoDocument(<TestForm inputValue={42} />);
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(true);
+    const form = mount(<TestForm inputValue={42} />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(true);
   });
 
   it('should fail with a float', () => {
-    const form = TestUtils.renderIntoDocument(
-      <TestForm inputValue={Math.PI} />,
-    );
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(false);
+    const form = mount(<TestForm inputValue={Math.PI} />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
   it('should fail with a float in science notation', () => {
-    const form = TestUtils.renderIntoDocument(<TestForm inputValue="-1e3" />);
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(false);
+    const form = mount(<TestForm inputValue="-1e3" />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
   it('should pass with undefined', () => {
-    const form = TestUtils.renderIntoDocument(
-      <TestForm inputValue={undefined} />,
-    );
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(true);
+    const form = mount(<TestForm inputValue={undefined} />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(true);
   });
 
   it('should pass with null', () => {
-    const form = TestUtils.renderIntoDocument(<TestForm inputValue={null} />);
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(true);
+    const form = mount(<TestForm inputValue={null} />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(true);
   });
 
   it('should pass with a zero', () => {
-    const form = TestUtils.renderIntoDocument(<TestForm inputValue={0} />);
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(true);
+    const form = mount(<TestForm inputValue={0} />);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(true);
   });
 });
