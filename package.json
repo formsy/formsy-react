@@ -41,12 +41,14 @@
   ],
   "main": "lib/index.js",
   "scripts": {
-    "build": "NODE_ENV=production webpack -p --config webpack.config.js && yarn run prepublish",
+    "build": "npm run build:clean && npm run build:js",
+    "build:clean": "rm -r lib/* || true",
+    "build:js": "NODE_ENV=production webpack -p --config webpack.config.js && babel ./src/ -d ./lib/",
     "changelog": "auto-changelog",
-    "deploy": "np --any-branch",
+    "deploy": "np",
     "format": "prettier --write src/**/* __tests__/**/*  __tests__/* __test_utils__/**/*  __test_utils__/*",
     "lint": "eslint src/**/*.js",
-    "prepublish": "rm -Rf ./lib && babel ./src/ -d ./lib/",
+    "preversion": "npm run lint",
     "test": "jest",
     "version": "npm run build && git add lib && git add release && npm run changelog && git add CHANGELOG.md"
   },
