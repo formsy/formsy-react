@@ -1,24 +1,23 @@
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import sinon from 'sinon';
+import { mount } from 'enzyme';
 
 import Formsy, { withFormsy } from './..';
-import TestInput, { InputFactory } from '../__test_utils__/TestInput';
 import immediate from '../__test_utils__/immediate';
+import TestInput, { InputFactory } from '../__test_utils__/TestInput';
 
 describe('Element', () => {
   it('should pass down correct value prop after using setValue()', () => {
-    const form = TestUtils.renderIntoDocument(
+    const form = mount(
       <Formsy>
         <TestInput name="foo" value="foo" />
       </Formsy>,
     );
 
-    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
-    expect(input.value).toEqual('foo');
-    TestUtils.Simulate.change(input, { target: { value: 'foobar' } });
-    expect(input.value).toEqual('foobar');
+    const input = form.find('input');
+    expect(input.instance().value).toEqual('foo');
+    input.simulate('change', { target: { value: 'foobar' } });
+    expect(input.instance().value).toEqual('foobar');
   });
 
   it('withFormsy: should only set the value and not validate when calling setValue(val, false)', () => {
@@ -28,30 +27,21 @@ describe('Element', () => {
           this.props.setValue(event.target.value, false);
         };
         render() {
-          return (
-            <input
-              type="text"
-              value={this.props.value}
-              onChange={this.updateValue}
-            />
-          );
+          return <input type="text" value={this.props.value} onChange={this.updateValue} />;
         }
       },
     );
-    const form = TestUtils.renderIntoDocument(
+    const form = mount(
       <Formsy>
         <Input name="foo" value="foo" innerRef="comp" />
       </Formsy>,
     );
-    const inputComponent = TestUtils.findRenderedComponentWithType(form, Input);
-    const setStateSpy = sinon.spy(inputComponent, 'setState');
-    const inputElement = TestUtils.findRenderedDOMComponentWithTag(
-      form,
-      'INPUT',
-    );
+    const inputComponent = form.find(Input);
+    const setStateSpy = sinon.spy(inputComponent.instance(), 'setState');
+    const inputElement = form.find('input');
 
     expect(setStateSpy.called).toEqual(false);
-    TestUtils.Simulate.change(inputElement, { target: { value: 'foobar' } });
+    inputElement.simulate('change', { target: { value: 'foobar' } });
     expect(setStateSpy.calledOnce).toEqual(true);
     expect(setStateSpy.calledWithExactly({ value: 'foobar' })).toEqual(true);
   });
@@ -63,16 +53,16 @@ describe('Element', () => {
         reset = this.props.resetValue;
       },
     });
-    const form = TestUtils.renderIntoDocument(
+    const form = mount(
       <Formsy>
         <Input name="foo" value="foo" />
       </Formsy>,
     );
 
-    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
-    TestUtils.Simulate.change(input, { target: { value: 'foobar' } });
+    const input = form.find('input');
+    input.simulate('change', { target: { value: 'foobar' } });
     reset();
-    expect(input.value).toEqual('foo');
+    expect(input.instance().value).toEqual('foo');
   });
 
   it('should return error message passed when calling getErrorMessage()', () => {
@@ -82,14 +72,9 @@ describe('Element', () => {
         errorMessage = this.props.errorMessage;
       },
     });
-    TestUtils.renderIntoDocument(
+    mount(
       <Formsy>
-        <Input
-          name="foo"
-          value="foo"
-          validations="isEmail"
-          validationError="Has to be email"
-        />
+        <Input name="foo" value="foo" validations="isEmail" validationError="Has to be email" />
       </Formsy>,
     );
 
@@ -103,15 +88,15 @@ describe('Element', () => {
         isValid = nextProps.isValid;
       },
     });
-    const form = TestUtils.renderIntoDocument(
+    const form = mount(
       <Formsy action="/users">
         <Input name="foo" value="foo" validations="isEmail" />
       </Formsy>,
     );
 
     expect(isValid).toEqual(false);
-    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
-    TestUtils.Simulate.change(input, { target: { value: 'foo@foo.com' } });
+    const input = form.find('input');
+    input.simulate('change', { target: { value: 'foo@foo.com' } });
     expect(isValid).toEqual(true);
   });
 
@@ -122,7 +107,7 @@ describe('Element', () => {
         isRequireds.push(this.props.isRequired);
       },
     });
-    TestUtils.renderIntoDocument(
+    mount(
       <Formsy action="/users">
         <Input name="foo" value="" />
         <Input name="foo" value="" required />
@@ -142,7 +127,7 @@ describe('Element', () => {
         showRequireds.push(this.props.showRequired);
       },
     });
-    TestUtils.renderIntoDocument(
+    mount(
       <Formsy action="/users">
         <Input name="A" value="foo" />
         <Input name="B" value="" required />
@@ -157,16 +142,16 @@ describe('Element', () => {
 
   it('should return true or false when calling isPristine() depending on input has been "touched" or not', () => {
     const Input = InputFactory();
-    const form = TestUtils.renderIntoDocument(
+    const form = mount(
       <Formsy action="/users">
         <Input name="A" value="foo" />
       </Formsy>,
     );
 
-    expect(form.inputs[0].isPristine()).toEqual(true);
-    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
-    TestUtils.Simulate.change(input, { target: { value: 'foo' } });
-    expect(form.inputs[0].isPristine()).toEqual(false);
+    expect(form.instance().inputs[0].isPristine()).toEqual(true);
+    const input = form.find('input');
+    input.simulate('change', { target: { value: 'foo' } });
+    expect(form.instance().inputs[0].isPristine()).toEqual(false);
   });
 
   it('should allow an undefined value to be updated to a value', () => {
@@ -185,12 +170,12 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    form.changeValue();
-    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
+    form.instance().changeValue();
+    const input = form.find('input');
     immediate(() => {
-      expect(input.value).toEqual('foo');
+      expect(input.instance().value).toEqual('foo');
     });
   });
 
@@ -204,11 +189,11 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const input = TestUtils.findRenderedComponentWithType(form, TestInput);
-    expect(input.isValidValue('foo@bar.com')).toEqual(true);
-    expect(input.isValidValue('foo@bar')).toEqual(false);
+    const input = form.find(TestInput);
+    expect(input.instance().isValidValue('foo@bar.com')).toEqual(true);
+    expect(input.instance().isValidValue('foo@bar')).toEqual(false);
   });
 
   it('should be able to use an object as validations property', () => {
@@ -226,11 +211,11 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const input = TestUtils.findRenderedComponentWithType(form, TestInput);
-    expect(input.isValidValue('foo@bar.com')).toEqual(true);
-    expect(input.isValidValue('foo@bar')).toEqual(false);
+    const input = form.find(TestInput);
+    expect(input.instance().isValidValue('foo@bar.com')).toEqual(true);
+    expect(input.instance().isValidValue('foo@bar')).toEqual(false);
   });
 
   it('should be able to pass complex values to a validation rule', () => {
@@ -249,16 +234,13 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(true);
-    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
-    TestUtils.Simulate.change(input, { target: { value: 'bar' } });
-    expect(inputComponent.isValid()).toEqual(false);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(true);
+    const input = form.find('input');
+    input.simulate('change', { target: { value: 'bar' } });
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
   it('should be able to run a function to validate', () => {
@@ -290,18 +272,35 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const inputComponent = TestUtils.scryRenderedComponentsWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent[0].isValid()).toEqual(true);
-    expect(inputComponent[1].isValid()).toEqual(true);
-    const input = TestUtils.scryRenderedDOMComponentsWithTag(form, 'INPUT');
-    TestUtils.Simulate.change(input[0], { target: { value: 'bar' } });
-    expect(inputComponent[0].isValid()).toEqual(false);
-    expect(inputComponent[1].isValid()).toEqual(false);
+    const inputComponent = form.find(TestInput);
+    expect(
+      inputComponent
+        .at(0)
+        .instance()
+        .isValid(),
+    ).toEqual(true);
+    expect(
+      inputComponent
+        .at(1)
+        .instance()
+        .isValid(),
+    ).toEqual(true);
+    const input = form.find('input');
+    input.at(0).simulate('change', { target: { value: 'bar' } });
+    expect(
+      inputComponent
+        .at(0)
+        .instance()
+        .isValid(),
+    ).toEqual(false);
+    expect(
+      inputComponent
+        .at(1)
+        .instance()
+        .isValid(),
+    ).toEqual(false);
   });
 
   it('should not override error messages with error messages passed by form if passed eror messages is an empty object', () => {
@@ -322,13 +321,10 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.getErrorMessage()).toEqual('bar3');
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().getErrorMessage()).toEqual('bar3');
   });
 
   it('should override all error messages with error messages passed by form', () => {
@@ -349,13 +345,10 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.getErrorMessage()).toEqual('bar');
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().getErrorMessage()).toEqual('bar');
   });
 
   it('should override validation rules with required rules', () => {
@@ -379,13 +372,10 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.getErrorMessage()).toEqual('bar3');
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().getErrorMessage()).toEqual('bar3');
   });
 
   it('should fall back to default error message when non exist in validationErrors map', () => {
@@ -406,13 +396,10 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.getErrorMessage()).toEqual('bar1');
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().getErrorMessage()).toEqual('bar1');
   });
 
   it('should not be valid if it is required and required rule is true', () => {
@@ -425,13 +412,10 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(false);
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
   it('should return the validationError if the field is invalid and required rule is true', () => {
@@ -444,14 +428,11 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const inputComponent = TestUtils.findRenderedComponentWithType(
-      form,
-      TestInput,
-    );
-    expect(inputComponent.isValid()).toEqual(false);
-    expect(inputComponent.getErrorMessage()).toEqual('Field is required');
+    const inputComponent = form.find(TestInput);
+    expect(inputComponent.instance().isValid()).toEqual(false);
+    expect(inputComponent.instance().getErrorMessage()).toEqual('Field is required');
   });
 
   it('should handle objects and arrays as values', () => {
@@ -469,16 +450,26 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
     form.setState({
       foo: { foo: 'foo' },
       bar: ['bar'],
     });
 
-    const inputs = TestUtils.scryRenderedComponentsWithType(form, TestInput);
-    expect(inputs[0].getValue()).toEqual({ foo: 'foo' });
-    expect(inputs[1].getValue()).toEqual(['bar']);
+    const inputs = form.find(TestInput);
+    expect(
+      inputs
+        .at(0)
+        .instance()
+        .getValue(),
+    ).toEqual({ foo: 'foo' });
+    expect(
+      inputs
+        .at(1)
+        .instance()
+        .getValue(),
+    ).toEqual(['bar']);
   });
 
   it('should handle isFormDisabled with dynamic inputs', () => {
@@ -492,21 +483,17 @@ describe('Element', () => {
       render() {
         return (
           <Formsy disabled={this.state.bool}>
-            {this.state.bool ? (
-              <TestInput name="foo" />
-            ) : (
-              <TestInput name="bar" />
-            )}
+            {this.state.bool ? <TestInput name="foo" /> : <TestInput name="bar" />}
           </Formsy>
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
-    const input = TestUtils.findRenderedComponentWithType(form, TestInput);
-    expect(input.isFormDisabled()).toEqual(true);
-    form.flip();
-    expect(input.isFormDisabled()).toEqual(false);
+    const input = form.find(TestInput);
+    expect(input.instance().isFormDisabled()).toEqual(true);
+    form.instance().flip();
+    expect(input.instance().isFormDisabled()).toEqual(false);
   });
 
   it('should allow for dot notation in name which maps to a deep object', () => {
@@ -523,12 +510,12 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
     expect(true).toBe(true);
 
-    const formEl = TestUtils.findRenderedDOMComponentWithTag(form, 'form');
-    TestUtils.Simulate.submit(formEl);
+    const formEl = form.find('form');
+    formEl.simulate('submit');
   });
 
   it('should allow for application/x-www-form-urlencoded syntax and convert to object', () => {
@@ -545,12 +532,12 @@ describe('Element', () => {
         );
       }
     }
-    const form = TestUtils.renderIntoDocument(<TestForm />);
+    const form = mount(<TestForm />);
 
     expect(true).toBe(true);
 
-    const formEl = TestUtils.findRenderedDOMComponentWithTag(form, 'form');
-    TestUtils.Simulate.submit(formEl);
+    const formEl = form.find('form');
+    formEl.simulate('submit');
   });
 
   it('input should rendered once with PureRenderMixin', () => {
@@ -562,17 +549,11 @@ describe('Element', () => {
       },
       render: function() {
         renderSpy();
-        return (
-          <input
-            type={this.props.type}
-            value={this.props.value}
-            onChange={this.updateValue}
-          />
-        );
+        return <input type={this.props.type} value={this.props.value} onChange={this.updateValue} />;
       },
     });
 
-    const form = TestUtils.renderIntoDocument(
+    const form = mount(
       <Formsy>
         <Input name="foo" value="foo" />
       </Formsy>,
@@ -590,46 +571,38 @@ describe('Element', () => {
       },
       render: function() {
         renderSpy();
-        return (
-          <input
-            type={this.props.type}
-            value={this.props.value}
-            onChange={this.updateValue}
-          />
-        );
+        return <input type={this.props.type} value={this.props.value} onChange={this.updateValue} />;
       },
     });
 
-    const form = TestUtils.renderIntoDocument(
+    const form = mount(
       <Formsy>
         <Input name="foo" value="foo" />
       </Formsy>,
     );
 
-    const input = TestUtils.findRenderedDOMComponentWithTag(form, 'INPUT');
+    const input = form.find('input');
 
     expect(renderSpy.calledOnce).toEqual(true);
 
-    TestUtils.Simulate.change(input, { target: { value: 'fooz' } });
-    expect(input.value).toEqual('fooz');
+    input.simulate('change', { target: { value: 'fooz' } });
+    expect(input.instance().value).toEqual('fooz');
     expect(renderSpy.calledTwice).toEqual(true);
   });
 
   it('binds all necessary methods', () => {
     const onInputRef = input => {
-      ['isValidValue', 'resetValue', 'setValidations', 'setValue'].forEach(
-        fnName => {
-          const fn = input[fnName];
-          try {
-            fn();
-          } catch (e) {
-            throw new Error(`Method '${fnName}' isn't bound.`);
-          }
-        },
-      );
+      ['isValidValue', 'resetValue', 'setValidations', 'setValue'].forEach(fnName => {
+        const fn = input[fnName];
+        try {
+          fn();
+        } catch (e) {
+          throw new Error(`Method '${fnName}' isn't bound.`);
+        }
+      });
     };
 
-    TestUtils.renderIntoDocument(
+    mount(
       <Formsy>
         <TestInput ref={onInputRef} name="name" value="foo" />
       </Formsy>,
