@@ -39,16 +39,16 @@
   "files": [
     "dist"
   ],
+  "browser": "dist/formsy-react.umd.js",
   "main": "dist/formsy-react.cjs.js",
   "module": "dist/formsy-react.esm.js",
-  "browser": "dist/formsy-react.umd.js",
   "scripts": {
     "build": "npm run build:clean && npm run build:js",
     "build:clean": "rm -r dist/* || true",
     "build:js": "rollup -c",
     "changelog": "auto-changelog",
     "deploy": "np",
-    "format": "prettier --write src/**/* __tests__/**/*  __tests__/* __test_utils__/**/*  __test_utils__/*",
+    "format": "prettier --write \"**/*.{js,ts}\"",
     "lint": "eslint src/**/*.js",
     "preversion": "npm run lint",
     "test": "jest",
