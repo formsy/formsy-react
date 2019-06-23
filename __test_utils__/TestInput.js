@@ -1,5 +1,5 @@
 import React from 'react';
-import Formsy, { withFormsy } from '../lib';
+import { withFormsy } from './..';
 
 class TestInput extends React.Component {
   static defaultProps = { type: 'text' };

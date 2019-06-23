@@ -1,8 +1,6 @@
 .babelrc
 .editorconfig
 .travis.yml
-testrunner.js
-webpack.config.js
-examples/
-release/
-tests/
+rollup.config.js
+__tests__/
+__test_utils__/
