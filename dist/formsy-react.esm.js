@@ -1471,7 +1471,7 @@ var isEmpty = function isEmpty(value) {
 };
 
 var validations = {
-  isDefaultRequiredValue: function isDefaultRequiredValue(values, value) {
+  isDefaultRequiredValue: function isDefaultRequiredValue(_values, value) {
     return value === undefined || value === null || value === '';
   },
   isExisty: function isExisty(_values, value) {
@@ -1496,7 +1496,7 @@ var validations = {
   isTrue: function isTrue(_values, value) {
     return value === true;
   },
-  isFalse: function isFalse(values, value) {
+  isFalse: function isFalse(_values, value) {
     return value === false;
   },
   isNumeric: function isNumeric(values, value) {
