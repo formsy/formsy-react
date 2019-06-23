@@ -5,19 +5,11 @@ class TestInput extends React.Component {
   static defaultProps = { type: 'text' };
 
   updateValue = event => {
-    this.props.setValue(
-      event.target[this.props.type === 'checkbox' ? 'checked' : 'value'],
-    );
+    this.props.setValue(event.target[this.props.type === 'checkbox' ? 'checked' : 'value']);
   };
 
   render() {
-    return (
-      <input
-        type={this.props.type}
-        value={this.props.value}
-        onChange={this.updateValue}
-      />
-    );
+    return <input type={this.props.type} value={this.props.value} onChange={this.updateValue} />;
   }
 }
 

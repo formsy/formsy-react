@@ -1,8 +1,8 @@
 import React from 'react';
+import { mount } from 'enzyme';
 
 import Formsy from './..';
 import { InputFactory } from '../__test_utils__/TestInput';
-import { mount } from 'enzyme';
 
 const TestInput = InputFactory({
   render: function() {

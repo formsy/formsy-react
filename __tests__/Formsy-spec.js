@@ -1,13 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
 import { mount } from 'enzyme';
+import sinon from 'sinon';
 
 import Formsy, { addValidationRule } from './..';
 import TestInput from '../__test_utils__/TestInput';
 import TestInputHoc from '../__test_utils__/TestInputHoc';
 import immediate from '../__test_utils__/immediate';
-import sinon from 'sinon';
 
 describe('Setting up a form', () => {
   it('should expose the users DOM node through an innerRef prop', () => {
