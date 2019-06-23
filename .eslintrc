@@ -1,4 +1,14 @@
 {
   "parser": "babel-eslint",
+  "rules": {
+    "import/extensions": [".js", ".ts"]
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".ts"]
+      }
+    }
+  },
   "extends": ["airbnb", "prettier"]
 }
