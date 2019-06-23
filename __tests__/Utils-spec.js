@@ -1,4 +1,4 @@
-import utils from './../src/utils.js';
+import utils from '../src/utils';
 
 describe('Utils', () => {
   it('should check equality of objects and arrays', () => {
