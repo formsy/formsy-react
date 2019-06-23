@@ -42,21 +42,23 @@
   "browser": "dist/formsy-react.umd.js",
   "main": "dist/formsy-react.cjs.js",
   "module": "dist/formsy-react.esm.js",
+  "types": "dist/formsy-react.d.ts",
   "scripts": {
-    "build": "npm run build:clean && npm run build:js",
+    "build": "npm run build:clean && npm run build:types && npm run build:js",
     "build:clean": "rm -r dist/* || true",
     "build:js": "rollup -c",
+    "build:types": "tsc --emitDeclarationOnly",
     "changelog": "auto-changelog",
     "deploy": "np",
     "format": "prettier --write \"**/*.{js,ts}\"",
-    "lint": "eslint src/**/*.js",
+    "lint": "eslint src/**/*",
     "preversion": "npm run lint",
     "test": "jest",
     "version": "npm run build && git add lib && git add release && npm run changelog && git add CHANGELOG.md"
   },
   "dependencies": {
     "form-data-to-object": "^0.2.0",
-    "prop-types": "^15.5.10"
+    "prop-types": "^15.7.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
@@ -65,6 +67,8 @@
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.3.3",
+    "@types/react": "^16.8.22",
     "auto-changelog": "^1.13.0",
     "babel-eslint": "^10.0.2",
     "babel-jest": "^24.8.0",
@@ -75,7 +79,7 @@
     "eslint": "^4.14.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-prettier": "^5.0.0",
-    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-import": "^2.17.3",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.5.1",
     "husky": "^2.4.1",
@@ -90,7 +94,8 @@
     "rollup-plugin-commonjs": "^10.0.0",
     "rollup-plugin-node-resolve": "^5.0.4",
     "rollup-plugin-peer-deps-external": "^2.2.0",
-    "sinon": "^7.3.2"
+    "sinon": "^7.3.2",
+    "typescript": "^3.5.2"
   },
   "peerDependencies": {
     "react": "^15.6.1 || ^16.0.0",

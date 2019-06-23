@@ -8,7 +8,7 @@ import pkg from './package.json';
 
 const name = 'formsy-react',
   input = 'src/index.js',
-  extensions = ['.js'],
+  extensions = ['.js', '.ts'],
   babelConfig = {
     ...babelrc({ addExternalHelpersPlugin: false }),
     exclude: 'node_modules/**',
