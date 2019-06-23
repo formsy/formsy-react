@@ -5,16 +5,16 @@ const validations = {
   isDefaultRequiredValue(values, value) {
     return value === undefined || value === null || value === '';
   },
-  isExisty(values, value) {
+  isExisty(_values, value) {
     return isExisty(value);
   },
-  matchRegexp(values, value, regexp) {
+  matchRegexp(_values, value, regexp) {
     return !isExisty(value) || isEmpty(value) || regexp.test(value);
   },
-  isUndefined(values, value) {
+  isUndefined(_values, value) {
     return value === undefined;
   },
-  isEmptyString(values, value) {
+  isEmptyString(_values, value) {
     return isEmpty(value);
   },
   isEmail(values, value) {
@@ -28,7 +28,7 @@ const validations = {
   isUrl(values, value) {
     return validations.matchRegexp(values, value, /^(?:\w+:)?\/\/([^\s.]+\.\S{2}|localhost[:?\d]*)\S*$/i);
   },
-  isTrue(values, value) {
+  isTrue(_values, value) {
     return value === true;
   },
   isFalse(values, value) {
@@ -58,19 +58,19 @@ const validations = {
   isSpecialWords(values, value) {
     return validations.matchRegexp(values, value, /^[A-Z\s\u00C0-\u017F]+$/i);
   },
-  isLength(values, value, length) {
+  isLength(_values, value, length) {
     return !isExisty(value) || isEmpty(value) || value.length === length;
   },
-  equals(values, value, eql) {
+  equals(_values, value, eql) {
     return !isExisty(value) || isEmpty(value) || value === eql;
   },
   equalsField(values, value, field) {
     return value === values[field];
   },
-  maxLength(values, value, length) {
+  maxLength(_values, value, length) {
     return !isExisty(value) || value.length <= length;
   },
-  minLength(values, value, length) {
+  minLength(_values, value, length) {
     return !isExisty(value) || isEmpty(value) || value.length >= length;
   },
 };
