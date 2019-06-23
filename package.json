@@ -70,6 +70,7 @@
     "@babel/preset-typescript": "^7.3.3",
     "@types/prop-types": "^15.7.1",
     "@types/react": "^16.8.22",
+    "@types/react-dom": "^16.8.4",
     "auto-changelog": "^1.13.0",
     "babel-eslint": "^10.0.2",
     "babel-jest": "^24.8.0",
