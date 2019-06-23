@@ -37,13 +37,15 @@
   },
   "author": "Christian Alfoni",
   "files": [
-    "lib"
+    "dist"
   ],
-  "main": "lib/index.js",
+  "main": "dist/formsy-react.cjs.js",
+  "module": "dist/formsy-react.esm.js",
+  "browser": "dist/formsy-react.umd.js",
   "scripts": {
     "build": "npm run build:clean && npm run build:js",
-    "build:clean": "rm -r lib/* || true",
-    "build:js": "NODE_ENV=production webpack -p --config webpack.config.js && babel ./src/ -d ./lib/",
+    "build:clean": "rm -r dist/* || true",
+    "build:js": "rollup -c",
     "changelog": "auto-changelog",
     "deploy": "np",
     "format": "prettier --write src/**/* __tests__/**/*  __tests__/* __test_utils__/**/*  __test_utils__/*",
@@ -67,6 +69,7 @@
     "babel-eslint": "^10.0.2",
     "babel-jest": "^24.8.0",
     "babel-loader": "^8.0.6",
+    "babelrc-rollup": "^3.0.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^4.14.0",
@@ -82,8 +85,12 @@
     "pretty-quick": "^1.11.1",
     "react": "^16.2.0 || ^16.0.0",
     "react-dom": "^16.2.0 || ^16.0.0",
-    "sinon": "^7.3.2",
-    "webpack": "^3.10.0"
+    "rollup": "^1.16.2",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^10.0.0",
+    "rollup-plugin-node-resolve": "^5.0.4",
+    "rollup-plugin-peer-deps-external": "^2.2.0",
+    "sinon": "^7.3.2"
   },
   "peerDependencies": {
     "react": "^15.6.1 || ^16.0.0",
