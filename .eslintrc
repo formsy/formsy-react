@@ -1,7 +1,10 @@
 {
   "parser": "babel-eslint",
   "rules": {
-    "import/extensions": [".js", ".ts"]
+    "no-else-return": 0,
+    "react/destructuring-assignment": 0,
+    "react/forbid-prop-types": 0,
+    "react/no-access-state-in-setstate": 0
   },
   "settings": {
     "import/resolver": {
