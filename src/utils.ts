@@ -1,5 +1,7 @@
+import { Validations, Value, Values } from './interfaces';
+
 export default {
-  arraysDiffer(a, b) {
+  arraysDiffer(a: unknown[], b: unknown[]) {
     let isDifferent = false;
     if (a.length !== b.length) {
       isDifferent = true;
@@ -13,7 +15,7 @@ export default {
     return isDifferent;
   },
 
-  objectsDiffer(a, b) {
+  objectsDiffer(a: object, b: object) {
     let isDifferent = false;
     if (Object.keys(a).length !== Object.keys(b).length) {
       isDifferent = true;
@@ -27,27 +29,31 @@ export default {
     return isDifferent;
   },
 
-  isSame(a, b) {
+  isSame(a: unknown, b: unknown) {
     if (typeof a !== typeof b) {
       return false;
     }
+
     if (Array.isArray(a) && Array.isArray(b)) {
       return !this.arraysDiffer(a, b);
     }
-    if (typeof a === 'function') {
+
+    if (typeof a === 'function' && typeof b === 'function') {
       return a.toString() === b.toString();
     }
+
     if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
       return a.toString() === b.toString();
     }
-    if (typeof a === 'object' && a !== null && b !== null) {
+
+    if (typeof a === 'object' && typeof b === 'object' && a !== null && b !== null) {
       return !this.objectsDiffer(a, b);
     }
 
     return a === b;
   },
 
-  find(collection, fn) {
+  find<T>(collection: T[], fn: (item: T) => boolean): T {
     for (let i = 0, l = collection.length; i < l; i += 1) {
       const item = collection[i];
       if (fn(item)) {
@@ -57,8 +63,12 @@ export default {
     return null;
   },
 
-  runRules(value, currentValues, validations, validationRules) {
-    const results = {
+  runRules(value: Value, currentValues: Values, validations: Validations, validationRules: Validations) {
+    const results: {
+      errors: string[];
+      failed: string[];
+      success: string[];
+    } = {
       errors: [],
       failed: [],
       success: [],
@@ -66,16 +76,19 @@ export default {
 
     if (Object.keys(validations).length) {
       Object.keys(validations).forEach(validationMethod => {
-        if (validationRules[validationMethod] && typeof validations[validationMethod] === 'function') {
+        const validationsVal = validations[validationMethod];
+        const validationRulesVal = validationRules[validationMethod];
+
+        if (validationRulesVal && typeof validationsVal === 'function') {
           throw new Error(`Formsy does not allow you to override default validations: ${validationMethod}`);
         }
 
-        if (!validationRules[validationMethod] && typeof validations[validationMethod] !== 'function') {
+        if (!validationRulesVal && typeof validationsVal !== 'function') {
           throw new Error(`Formsy does not have the validation rule: ${validationMethod}`);
         }
 
-        if (typeof validations[validationMethod] === 'function') {
-          const validation = validations[validationMethod](currentValues, value);
+        if (typeof validationsVal === 'function') {
+          const validation = validationsVal(currentValues, value);
           if (typeof validation === 'string') {
             results.errors.push(validation);
             results.failed.push(validationMethod);
@@ -84,8 +97,8 @@ export default {
           }
           return;
         }
-        if (typeof validations[validationMethod] !== 'function') {
-          const validation = validationRules[validationMethod](currentValues, value, validations[validationMethod]);
+        if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
+          const validation = validationRulesVal(currentValues, value, validationsVal);
 
           if (typeof validation === 'string') {
             results.errors.push(validation);

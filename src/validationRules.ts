@@ -1,9 +1,9 @@
-import { IValidationFunction, Value, Values } from './interfaces';
+import { ValidationFunction, Value, Values } from './interfaces';
 
 const isExisty = (value: Value) => value !== null && value !== undefined;
 const isEmpty = (value: Value) => value === '';
 
-const validations: { [key: string]: IValidationFunction } = {
+const validations: { [key: string]: ValidationFunction } = {
   isDefaultRequiredValue(_values: Values, value: Value) {
     return value === undefined || value === null || value === '';
   },
