@@ -10,7 +10,9 @@ import Wrapper, { propTypes } from './Wrapper';
 
 class Formsy extends React.Component<any, any> {
   private inputs: any;
+
   private emptyArray: any[];
+
   private prevInputNames: any;
 
   constructor(props) {
