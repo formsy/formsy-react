@@ -78,14 +78,14 @@ export default function<Props, State, CompState>(
     public constructor(props) {
       super(props);
       this.state = {
-        value: props.value,
-        isRequired: false,
-        isValid: true,
-        isPristine: true,
-        pristineValue: props.value,
-        validationError: [],
         externalError: null,
         formSubmitted: false,
+        isPristine: true,
+        isRequired: false,
+        isValid: true,
+        pristineValue: props.value,
+        validationError: [],
+        value: props.value,
       };
     }
 

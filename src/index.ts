@@ -18,9 +18,9 @@ class Formsy extends React.Component<any, any> {
   public constructor(props) {
     super(props);
     this.state = {
-      isValid: true,
-      isSubmitting: false,
       canChange: false,
+      isSubmitting: false,
+      isValid: true,
     };
     this.inputs = [];
     this.emptyArray = [];
@@ -30,9 +30,9 @@ class Formsy extends React.Component<any, any> {
     formsy: {
       attachToForm: this.attachToForm,
       detachFromForm: this.detachFromForm,
-      validate: this.validate,
       isFormDisabled: this.isFormDisabled,
       isValidValue: (component, value) => this.runValidation(component, value).isValid,
+      validate: this.validate,
     },
   });
 
@@ -357,6 +357,7 @@ class Formsy extends React.Component<any, any> {
 
   public render = () => {
     const {
+      /* eslint-disable @typescript-eslint/no-unused-vars */
       getErrorMessage,
       getErrorMessages,
       getValue,
@@ -369,21 +370,20 @@ class Formsy extends React.Component<any, any> {
       isValidValue,
       mapping,
       onChange,
-      // onError,
-      onInvalidSubmit,
       onInvalid,
+      onInvalidSubmit,
       onReset,
       onSubmit,
       onValid,
       onValidSubmit,
       preventExternalInvalidation,
-      // reset,
       resetValue,
       setValidations,
       setValue,
       showError,
       showRequired,
       validationErrors,
+      /* eslint-enable @typescript-eslint/no-unused-vars */
       ...nonFormsyProps
     } = this.props;
 
