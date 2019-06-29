@@ -42,10 +42,39 @@ const propTypes = {
   value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
 };
 
+interface IProps {
+  innerRef?: (ref: any) => void;
+  name: string;
+  required?: string | object | boolean;
+  validations?: string | object;
+  value?: any;
+}
+
+interface IState {
+  externalError: null | any;
+  formSubmitted: boolean;
+  isPristine: boolean;
+  isRequired: boolean;
+  isValid: boolean;
+  pristineValue: any;
+  validationError: any[];
+  value: any;
+}
+
 export { propTypes };
 
-export default Component => {
-  class WrappedComponent extends React.Component {
+function getDisplayName(component) {
+  return component.displayName || component.name || (typeof component === 'string' ? component : 'Component');
+}
+
+export default function<Props, State, CompState>(
+  WrappedComponent: React.ComponentClass<Props & State>,
+): React.ComponentClass<Props & State> {
+  return class extends React.Component<Props & State & IProps, IState> {
+    private validations: any;
+
+    private requiredValidations: any;
+
     constructor(props) {
       super(props);
       this.state = {
@@ -181,7 +210,7 @@ export default Component => {
 
     render() {
       const { innerRef } = this.props;
-      const propsForElement = {
+      const propsForElement: any = {
         ...this.props,
         errorMessage: this.getErrorMessage(),
         errorMessages: this.getErrorMessages(),
@@ -204,30 +233,24 @@ export default Component => {
         propsForElement.ref = innerRef;
       }
 
-      return React.createElement(Component, propsForElement);
+      return React.createElement(WrappedComponent, propsForElement);
     }
-  }
 
-  function getDisplayName(component) {
-    return component.displayName || component.name || (typeof component === 'string' ? component : 'Component');
-  }
+    public static displayName: any = `Formsy(${getDisplayName(WrappedComponent)})`;
 
-  WrappedComponent.displayName = `Formsy(${getDisplayName(Component)})`;
+    public static contextTypes: any = {
+      formsy: PropTypes.object, // What about required?
+    };
 
-  WrappedComponent.contextTypes = {
-    formsy: PropTypes.object, // What about required?
+    public static defaultProps: any = {
+      innerRef: null,
+      required: false,
+      validationError: '',
+      validationErrors: {},
+      validations: null,
+      value: (WrappedComponent as any).defaultValue,
+    };
+
+    public static propTypes: any = propTypes;
   };
-
-  WrappedComponent.defaultProps = {
-    innerRef: null,
-    required: false,
-    validationError: '',
-    validationErrors: {},
-    validations: null,
-    value: Component.defaultValue,
-  };
-
-  WrappedComponent.propTypes = propTypes;
-
-  return WrappedComponent;
-};
+}
