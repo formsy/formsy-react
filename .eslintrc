@@ -19,6 +19,7 @@
     "@typescript-eslint/interface-name-prefix":  0,
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/no-unused-vars": 0,
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": ["setupTests.ts", "**/*spec.tsx"]}],
     "import/no-unresolved": 0,
     "prettier/prettier": ["error", { "singleQuote": true }],
     "react/destructuring-assignment": 0,
