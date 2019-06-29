@@ -50,6 +50,17 @@ interface IProps {
   value?: any;
 }
 
+interface IState {
+  externalError: null | any;
+  formSubmitted: boolean;
+  isPristine: boolean;
+  isRequired: boolean;
+  isValid: boolean;
+  pristineValue: any;
+  validationError: any[];
+  value: any;
+}
+
 export { propTypes };
 
 function getDisplayName(component) {
@@ -59,7 +70,7 @@ function getDisplayName(component) {
 export default function<Props, State, CompState>(
   WrappedComponent: React.ComponentClass<Props & State>,
 ): React.ComponentClass<Props & State> {
-  return class extends React.Component<Props & State & IProps, CompState & any> {
+  return class extends React.Component<Props & State & IProps, IState> {
     private validations: any;
 
     private requiredValidations: any;
