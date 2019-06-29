@@ -107,14 +107,17 @@ export default function<Props, State, CompState>(
     }
 
     public componentWillMount() {
+      const { validations, required, name } = this.props;
+      const { formsy } = this.context;
+
       const configure = () => {
-        this.setValidations(this.props.validations, this.props.required);
+        this.setValidations(validations, required);
 
         // Pass a function instead?
-        this.context.formsy.attachToForm(this);
+        formsy.attachToForm(this);
       };
 
-      if (!this.props.name) {
+      if (!name) {
         throw new Error('Form Input requires a name property when used');
       }
 
@@ -127,31 +130,35 @@ export default function<Props, State, CompState>(
     }
 
     public shouldComponentUpdate(nextProps, nextState) {
+      // eslint-disable-next-line react/destructuring-assignment
       const isPropsChanged = Object.keys(this.props).some(k => this.props[k] !== nextProps[k]);
+
+      // eslint-disable-next-line react/destructuring-assignment
       const isStateChanged = Object.keys(this.state).some(k => this.state[k] !== nextState[k]);
 
       return isPropsChanged || isStateChanged;
     }
 
     public componentDidUpdate(prevProps) {
+      const { value, validations, required } = this.props;
+      const { formsy } = this.context;
+
       // If the value passed has changed, set it. If value is not passed it will
       // internally update, and this will never run
-      if (!utils.isSame(this.props.value, prevProps.value)) {
-        this.setValue(this.props.value);
+      if (!utils.isSame(value, prevProps.value)) {
+        this.setValue(value);
       }
 
       // If validations or required is changed, run a new validation
-      if (
-        !utils.isSame(this.props.validations, prevProps.validations) ||
-        !utils.isSame(this.props.required, prevProps.required)
-      ) {
-        this.context.formsy.validate(this);
+      if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+        formsy.validate(this);
       }
     }
 
     // Detach it when component unmounts
     public componentWillUnmount() {
-      this.context.formsy.detachFromForm(this);
+      const { formsy } = this.context;
+      formsy.detachFromForm(this);
     }
 
     public getErrorMessage = () => {
@@ -160,13 +167,18 @@ export default function<Props, State, CompState>(
     };
 
     public getErrorMessages = () => {
+      const { externalError, validationError } = this.state;
+
       if (!this.isValid() || this.showRequired()) {
-        return this.state.externalError || this.state.validationError || [];
+        return externalError || validationError || [];
       }
       return [];
     };
 
-    public getValue = () => this.state.value;
+    public getValue = () => {
+      const { value } = this.state;
+      return value;
+    };
 
     public setValidations = (validations, required) => {
       // Add validations to the store itself as the props object can not be modified
@@ -178,6 +190,8 @@ export default function<Props, State, CompState>(
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
     public setValue = (value, validate = true) => {
+      const { formsy } = this.context;
+
       if (!validate) {
         this.setState({
           value,
@@ -189,40 +203,51 @@ export default function<Props, State, CompState>(
             isPristine: false,
           },
           () => {
-            this.context.formsy.validate(this);
+            formsy.validate(this);
           },
         );
       }
     };
 
+    // eslint-disable-next-line react/destructuring-assignment
     public hasValue = () => this.state.value !== '';
 
+    // eslint-disable-next-line react/destructuring-assignment
     public isFormDisabled = () => this.context.formsy.isFormDisabled();
 
+    // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = () => this.state.formSubmitted;
 
+    // eslint-disable-next-line react/destructuring-assignment
     public isPristine = () => this.state.isPristine;
 
+    // eslint-disable-next-line react/destructuring-assignment
     public isRequired = () => !!this.props.required;
 
+    // eslint-disable-next-line react/destructuring-assignment
     public isValid = () => this.state.isValid;
 
+    // eslint-disable-next-line react/destructuring-assignment
     public isValidValue = value => this.context.formsy.isValidValue.call(null, this, value);
 
     public resetValue = () => {
+      const { pristineValue } = this.state;
+      const { formsy } = this.context;
+
       this.setState(
         {
-          value: this.state.pristineValue,
+          value: pristineValue,
           isPristine: true,
         },
         () => {
-          this.context.formsy.validate(this);
+          formsy.validate(this);
         },
       );
     };
 
     public showError = () => !this.showRequired() && !this.isValid();
 
+    // eslint-disable-next-line react/destructuring-assignment
     public showRequired = () => this.state.isRequired;
 
     public render() {
