@@ -127,7 +127,7 @@ describe('Validation', () => {
   it('should be able to use provided validate function', () => {
     let isValid = false;
     const CustomInput = InputFactory({
-      componentDidMount: function() {
+      componentDidMount() {
         isValid = this.props.isValid;
       },
     });

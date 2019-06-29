@@ -2,6 +2,7 @@
   "compilerOptions": {
     "declaration": true,
     "esModuleInterop": true,
+    "jsx": "react",
     "lib": ["dom", "es5", "es6", "es7", "es2017.object"],
     "outDir": "dist",
     "sourceMap": true

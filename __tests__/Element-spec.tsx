@@ -2,7 +2,7 @@ import React from 'react';
 import sinon from 'sinon';
 import { mount } from 'enzyme';
 
-import Formsy, { withFormsy } from './..';
+import Formsy, { withFormsy } from '..';
 import immediate from '../__test_utils__/immediate';
 import TestInput, { InputFactory } from '../__test_utils__/TestInput';
 
@@ -49,7 +49,7 @@ describe('Element', () => {
   it('should set back to pristine value when running reset', () => {
     let reset = null;
     const Input = InputFactory({
-      componentDidMount: function() {
+      componentDidMount() {
         reset = this.props.resetValue;
       },
     });
@@ -68,7 +68,7 @@ describe('Element', () => {
   it('should return error message passed when calling getErrorMessage()', () => {
     let errorMessage = null;
     const Input = InputFactory({
-      componentDidMount: function() {
+      componentDidMount() {
         errorMessage = this.props.errorMessage;
       },
     });
@@ -103,7 +103,7 @@ describe('Element', () => {
   it('should return true or false when calling isRequired() depending on passed required attribute', () => {
     const isRequireds = [];
     const Input = InputFactory({
-      componentDidMount: function() {
+      componentDidMount() {
         isRequireds.push(this.props.isRequired);
       },
     });
@@ -123,7 +123,7 @@ describe('Element', () => {
   it('should return true or false when calling showRequired() depending on input being empty and required is passed, or not', () => {
     const showRequireds = [];
     const Input = InputFactory({
-      componentDidMount: function() {
+      componentDidMount() {
         showRequireds.push(this.props.showRequired);
       },
     });
