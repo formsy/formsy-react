@@ -30,13 +30,17 @@ export default {
   isSame(a, b) {
     if (typeof a !== typeof b) {
       return false;
-    } else if (Array.isArray(a) && Array.isArray(b)) {
+    }
+    if (Array.isArray(a) && Array.isArray(b)) {
       return !this.arraysDiffer(a, b);
-    } else if (typeof a === 'function') {
+    }
+    if (typeof a === 'function') {
       return a.toString() === b.toString();
-    } else if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
+    }
+    if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
       return a.toString() === b.toString();
-    } else if (typeof a === 'object' && a !== null && b !== null) {
+    }
+    if (typeof a === 'object' && a !== null && b !== null) {
       return !this.objectsDiffer(a, b);
     }
 
@@ -79,7 +83,8 @@ export default {
             results.failed.push(validationMethod);
           }
           return;
-        } else if (typeof validations[validationMethod] !== 'function') {
+        }
+        if (typeof validations[validationMethod] !== 'function') {
           const validation = validationRules[validationMethod](currentValues, value, validations[validationMethod]);
 
           if (typeof validation === 'string') {

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "declaration": true,
+    "esModuleInterop": true,
     "lib": ["dom", "es5", "es6", "es7", "es2017.object"],
     "outDir": "dist",
     "sourceMap": true

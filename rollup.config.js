@@ -7,7 +7,7 @@ import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import pkg from './package.json';
 
 const name = 'formsy-react',
-  input = 'src/index.js',
+  input = 'src/index.ts',
   extensions = ['.js', '.ts'],
   babelConfig = {
     ...babelrc({ addExternalHelpersPlugin: false }),

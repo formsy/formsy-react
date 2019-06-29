@@ -1,6 +1,6 @@
-import formDataToObject from 'form-data-to-object';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import formDataToObject from 'form-data-to-object';
 
 import utils from './utils';
 import validationRules from './validationRules';
@@ -8,7 +8,13 @@ import Wrapper, { propTypes } from './Wrapper';
 
 /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
 
-class Formsy extends React.Component {
+class Formsy extends React.Component<any, any> {
+  private inputs: any;
+
+  private emptyArray: any[];
+
+  private prevInputNames: any;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -139,7 +145,7 @@ class Formsy extends React.Component {
     );
   };
 
-  reset = data => {
+  reset = (data?: any) => {
     this.setFormPristine(true);
     this.resetModel(data);
   };
@@ -392,74 +398,74 @@ class Formsy extends React.Component {
       this.props.children,
     );
   };
+
+  public static displayName = 'Formsy';
+
+  public static defaultProps = {
+    children: null,
+    disabled: false,
+    getErrorMessage: () => {},
+    getErrorMessages: () => {},
+    getValue: () => {},
+    hasValue: () => {},
+    isFormDisabled: () => {},
+    isFormSubmitted: () => {},
+    isPristine: () => {},
+    isRequired: () => {},
+    isValid: () => {},
+    isValidValue: () => {},
+    mapping: null,
+    onChange: () => {},
+    onError: () => {},
+    onInvalid: () => {},
+    onInvalidSubmit: () => {},
+    onReset: () => {},
+    onSubmit: () => {},
+    onValid: () => {},
+    onValidSubmit: () => {},
+    preventExternalInvalidation: false,
+    resetValue: () => {},
+    setValidations: () => {},
+    setValue: () => {},
+    showError: () => {},
+    showRequired: () => {},
+    validationErrors: null,
+  };
+
+  public static propTypes = {
+    children: PropTypes.node,
+    disabled: PropTypes.bool,
+    getErrorMessage: PropTypes.func,
+    getErrorMessages: PropTypes.func,
+    getValue: PropTypes.func,
+    hasValue: PropTypes.func,
+    isFormDisabled: PropTypes.func,
+    isFormSubmitted: PropTypes.func,
+    isPristine: PropTypes.func,
+    isRequired: PropTypes.func,
+    isValid: PropTypes.func,
+    isValidValue: PropTypes.func,
+    mapping: PropTypes.func,
+    onChange: PropTypes.func,
+    onInvalid: PropTypes.func,
+    onInvalidSubmit: PropTypes.func,
+    onReset: PropTypes.func,
+    onSubmit: PropTypes.func,
+    onValid: PropTypes.func,
+    onValidSubmit: PropTypes.func,
+    preventExternalInvalidation: PropTypes.bool,
+    resetValue: PropTypes.func,
+    setValidations: PropTypes.func,
+    setValue: PropTypes.func,
+    showError: PropTypes.func,
+    showRequired: PropTypes.func,
+    validationErrors: PropTypes.object, // eslint-disable-line
+  };
+
+  public static childContextTypes = {
+    formsy: PropTypes.object,
+  };
 }
-
-Formsy.displayName = 'Formsy';
-
-Formsy.defaultProps = {
-  children: null,
-  disabled: false,
-  getErrorMessage: () => {},
-  getErrorMessages: () => {},
-  getValue: () => {},
-  hasValue: () => {},
-  isFormDisabled: () => {},
-  isFormSubmitted: () => {},
-  isPristine: () => {},
-  isRequired: () => {},
-  isValid: () => {},
-  isValidValue: () => {},
-  mapping: null,
-  onChange: () => {},
-  onError: () => {},
-  onInvalid: () => {},
-  onInvalidSubmit: () => {},
-  onReset: () => {},
-  onSubmit: () => {},
-  onValid: () => {},
-  onValidSubmit: () => {},
-  preventExternalInvalidation: false,
-  resetValue: () => {},
-  setValidations: () => {},
-  setValue: () => {},
-  showError: () => {},
-  showRequired: () => {},
-  validationErrors: null,
-};
-
-Formsy.propTypes = {
-  children: PropTypes.node,
-  disabled: PropTypes.bool,
-  getErrorMessage: PropTypes.func,
-  getErrorMessages: PropTypes.func,
-  getValue: PropTypes.func,
-  hasValue: PropTypes.func,
-  isFormDisabled: PropTypes.func,
-  isFormSubmitted: PropTypes.func,
-  isPristine: PropTypes.func,
-  isRequired: PropTypes.func,
-  isValid: PropTypes.func,
-  isValidValue: PropTypes.func,
-  mapping: PropTypes.func,
-  onChange: PropTypes.func,
-  onInvalid: PropTypes.func,
-  onInvalidSubmit: PropTypes.func,
-  onReset: PropTypes.func,
-  onSubmit: PropTypes.func,
-  onValid: PropTypes.func,
-  onValidSubmit: PropTypes.func,
-  preventExternalInvalidation: PropTypes.bool,
-  resetValue: PropTypes.func,
-  setValidations: PropTypes.func,
-  setValue: PropTypes.func,
-  showError: PropTypes.func,
-  showRequired: PropTypes.func,
-  validationErrors: PropTypes.object, // eslint-disable-line
-};
-
-Formsy.childContextTypes = {
-  formsy: PropTypes.object,
-};
 
 const addValidationRule = (name, func) => {
   validationRules[name] = func;
