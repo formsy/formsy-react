@@ -42,6 +42,14 @@ const propTypes = {
   value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
 };
 
+interface IProps {
+  innerRef?: (ref: any) => void;
+  name: string;
+  required?: string | object | boolean;
+  validations?: string | object;
+  value?: any;
+}
+
 export { propTypes };
 
 function getDisplayName(component) {
@@ -51,7 +59,7 @@ function getDisplayName(component) {
 export default function<Props, State, CompState>(
   WrappedComponent: React.ComponentClass<Props & State>,
 ): React.ComponentClass<Props & State> {
-  return class extends React.Component<Props & State & any, CompState & any> {
+  return class extends React.Component<Props & State & IProps, CompState & any> {
     private validations: any;
 
     private requiredValidations: any;
