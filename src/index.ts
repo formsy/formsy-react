@@ -15,7 +15,7 @@ class Formsy extends React.Component<any, any> {
 
   private prevInputNames: any;
 
-  constructor(props) {
+  public constructor(props) {
     super(props);
     this.state = {
       isValid: true,
@@ -26,7 +26,7 @@ class Formsy extends React.Component<any, any> {
     this.emptyArray = [];
   }
 
-  getChildContext = () => ({
+  public getChildContext = () => ({
     formsy: {
       attachToForm: this.attachToForm,
       detachFromForm: this.detachFromForm,
@@ -36,17 +36,17 @@ class Formsy extends React.Component<any, any> {
     },
   });
 
-  componentDidMount = () => {
+  public componentDidMount = () => {
     this.validateForm();
   };
 
-  componentWillUpdate = () => {
+  public componentWillUpdate = () => {
     // Keep a reference to input names before form updates,
     // to check if inputs has changed after render
     this.prevInputNames = this.inputs.map(component => component.props.name);
   };
 
-  componentDidUpdate = () => {
+  public componentDidUpdate = () => {
     if (
       this.props.validationErrors &&
       typeof this.props.validationErrors === 'object' &&
@@ -61,19 +61,19 @@ class Formsy extends React.Component<any, any> {
     }
   };
 
-  getCurrentValues = () =>
+  public getCurrentValues = () =>
     this.inputs.reduce((data, component) => {
       const dataCopy = typeof component.state.value === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
       dataCopy[component.props.name] = component.state.value;
       return dataCopy;
     }, {});
 
-  getModel = () => {
+  public getModel = () => {
     const currentValues = this.getCurrentValues();
     return this.mapModel(currentValues);
   };
 
-  getPristineValues = () =>
+  public getPristineValues = () =>
     this.inputs.reduce((data, component) => {
       const { name } = component.props;
       const dataCopy = typeof component.state.value === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
@@ -81,7 +81,7 @@ class Formsy extends React.Component<any, any> {
       return dataCopy;
     }, {});
 
-  setFormPristine = isPristine => {
+  public setFormPristine = isPristine => {
     this.setState({
       formSubmitted: !isPristine,
     });
@@ -96,7 +96,7 @@ class Formsy extends React.Component<any, any> {
     });
   };
 
-  setInputValidationErrors = errors => {
+  public setInputValidationErrors = errors => {
     this.inputs.forEach(component => {
       const { name } = component.props;
       const args = [
@@ -112,7 +112,7 @@ class Formsy extends React.Component<any, any> {
     }
   };
 
-  setFormValidState = allIsValid => {
+  public setFormValidState = allIsValid => {
     this.setState({
       isValid: allIsValid,
     });
@@ -124,9 +124,9 @@ class Formsy extends React.Component<any, any> {
     }
   };
 
-  isFormDisabled = () => this.props.disabled;
+  public isFormDisabled = () => this.props.disabled;
 
-  mapModel = model => {
+  public mapModel = model => {
     if (this.props.mapping) {
       return this.props.mapping(model);
     }
@@ -145,12 +145,12 @@ class Formsy extends React.Component<any, any> {
     );
   };
 
-  reset = (data?: any) => {
+  public reset = (data?: any) => {
     this.setFormPristine(true);
     this.resetModel(data);
   };
 
-  resetInternal = event => {
+  public resetInternal = event => {
     event.preventDefault();
     this.reset();
     if (this.props.onReset) {
@@ -159,7 +159,7 @@ class Formsy extends React.Component<any, any> {
   };
 
   // Reset each key in the model to the original / initial / specified value
-  resetModel = data => {
+  public resetModel = data => {
     this.inputs.forEach(component => {
       const { name } = component.props;
       if (data && Object.prototype.hasOwnProperty.call(data, name)) {
@@ -172,7 +172,7 @@ class Formsy extends React.Component<any, any> {
   };
 
   // Checks validation on current value or a passed value
-  runValidation = (component, value = component.state.value) => {
+  public runValidation = (component, value = component.state.value) => {
     const currentValues = this.getCurrentValues();
     const { validationError, validationErrors } = component.props;
 
@@ -221,7 +221,7 @@ class Formsy extends React.Component<any, any> {
 
   // Method put on each input component to register
   // itself to the form
-  attachToForm = component => {
+  public attachToForm = component => {
     if (this.inputs.indexOf(component) === -1) {
       this.inputs.push(component);
     }
@@ -231,7 +231,7 @@ class Formsy extends React.Component<any, any> {
 
   // Method put on each input component to unregister
   // itself from the form
-  detachFromForm = component => {
+  public detachFromForm = component => {
     const componentPos = this.inputs.indexOf(component);
 
     if (componentPos !== -1) {
@@ -242,10 +242,10 @@ class Formsy extends React.Component<any, any> {
   };
 
   // Checks if the values have changed from their initial value
-  isChanged = () => !utils.isSame(this.getPristineValues(), this.getCurrentValues());
+  public isChanged = () => !utils.isSame(this.getPristineValues(), this.getCurrentValues());
 
   // Update model, submit to url prop and send the model
-  submit = event => {
+  public submit = event => {
     if (event && event.preventDefault) {
       event.preventDefault();
     }
@@ -266,7 +266,7 @@ class Formsy extends React.Component<any, any> {
   // Go through errors from server and grab the components
   // stored in the inputs map. Change their state to invalid
   // and set the serverError message
-  updateInputsWithError = (errors, invalidate) => {
+  public updateInputsWithError = (errors, invalidate) => {
     Object.keys(errors).forEach(name => {
       const component = utils.find(this.inputs, input => input.props.name === name);
       if (!component) {
@@ -292,7 +292,7 @@ class Formsy extends React.Component<any, any> {
   // Use the binded values and the actual input value to
   // validate the input and set its state. Then check the
   // state of the form itself
-  validate = component => {
+  public validate = component => {
     // Trigger onChange
     if (this.state.canChange) {
       this.props.onChange(this.getModel(), this.isChanged());
@@ -314,7 +314,7 @@ class Formsy extends React.Component<any, any> {
 
   // Validate the form by going through all child input components
   // and check their state
-  validateForm = () => {
+  public validateForm = () => {
     // We need a callback as we are validating all inputs again. This will
     // run when the last component has set its state
     const onValidationComplete = () => {
@@ -355,7 +355,7 @@ class Formsy extends React.Component<any, any> {
     }
   };
 
-  render = () => {
+  public render = () => {
     const {
       getErrorMessage,
       getErrorMessages,

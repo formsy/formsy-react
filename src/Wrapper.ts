@@ -75,7 +75,7 @@ export default function<Props, State, CompState>(
 
     private requiredValidations: any;
 
-    constructor(props) {
+    public constructor(props) {
       super(props);
       this.state = {
         value: props.value,
@@ -89,7 +89,7 @@ export default function<Props, State, CompState>(
       };
     }
 
-    componentWillMount() {
+    public componentWillMount() {
       const configure = () => {
         this.setValidations(this.props.validations, this.props.required);
 
@@ -105,18 +105,18 @@ export default function<Props, State, CompState>(
     }
 
     // We have to make sure the validate method is kept when new props are added
-    componentWillReceiveProps(nextProps) {
+    public componentWillReceiveProps(nextProps) {
       this.setValidations(nextProps.validations, nextProps.required);
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
+    public shouldComponentUpdate(nextProps, nextState) {
       const isPropsChanged = Object.keys(this.props).some(k => this.props[k] !== nextProps[k]);
       const isStateChanged = Object.keys(this.state).some(k => this.state[k] !== nextState[k]);
 
       return isPropsChanged || isStateChanged;
     }
 
-    componentDidUpdate(prevProps) {
+    public componentDidUpdate(prevProps) {
       // If the value passed has changed, set it. If value is not passed it will
       // internally update, and this will never run
       if (!utils.isSame(this.props.value, prevProps.value)) {
@@ -133,25 +133,25 @@ export default function<Props, State, CompState>(
     }
 
     // Detach it when component unmounts
-    componentWillUnmount() {
+    public componentWillUnmount() {
       this.context.formsy.detachFromForm(this);
     }
 
-    getErrorMessage = () => {
+    public getErrorMessage = () => {
       const messages = this.getErrorMessages();
       return messages.length ? messages[0] : null;
     };
 
-    getErrorMessages = () => {
+    public getErrorMessages = () => {
       if (!this.isValid() || this.showRequired()) {
         return this.state.externalError || this.state.validationError || [];
       }
       return [];
     };
 
-    getValue = () => this.state.value;
+    public getValue = () => this.state.value;
 
-    setValidations = (validations, required) => {
+    public setValidations = (validations, required) => {
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations =
@@ -160,7 +160,7 @@ export default function<Props, State, CompState>(
 
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
-    setValue = (value, validate = true) => {
+    public setValue = (value, validate = true) => {
       if (!validate) {
         this.setState({
           value,
@@ -178,21 +178,21 @@ export default function<Props, State, CompState>(
       }
     };
 
-    hasValue = () => this.state.value !== '';
+    public hasValue = () => this.state.value !== '';
 
-    isFormDisabled = () => this.context.formsy.isFormDisabled();
+    public isFormDisabled = () => this.context.formsy.isFormDisabled();
 
-    isFormSubmitted = () => this.state.formSubmitted;
+    public isFormSubmitted = () => this.state.formSubmitted;
 
-    isPristine = () => this.state.isPristine;
+    public isPristine = () => this.state.isPristine;
 
-    isRequired = () => !!this.props.required;
+    public isRequired = () => !!this.props.required;
 
-    isValid = () => this.state.isValid;
+    public isValid = () => this.state.isValid;
 
-    isValidValue = value => this.context.formsy.isValidValue.call(null, this, value);
+    public isValidValue = value => this.context.formsy.isValidValue.call(null, this, value);
 
-    resetValue = () => {
+    public resetValue = () => {
       this.setState(
         {
           value: this.state.pristineValue,
@@ -204,11 +204,11 @@ export default function<Props, State, CompState>(
       );
     };
 
-    showError = () => !this.showRequired() && !this.isValid();
+    public showError = () => !this.showRequired() && !this.isValid();
 
-    showRequired = () => this.state.isRequired;
+    public showRequired = () => this.state.isRequired;
 
-    render() {
+    public render() {
       const { innerRef } = this.props;
       const propsForElement: any = {
         ...this.props,
