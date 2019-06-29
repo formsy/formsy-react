@@ -15,6 +15,73 @@ class Formsy extends React.Component<any, any> {
 
   private prevInputNames: any;
 
+  public static displayName = 'Formsy';
+
+  public static defaultProps = {
+    children: null,
+    disabled: false,
+    getErrorMessage: () => {},
+    getErrorMessages: () => {},
+    getValue: () => {},
+    hasValue: () => {},
+    isFormDisabled: () => {},
+    isFormSubmitted: () => {},
+    isPristine: () => {},
+    isRequired: () => {},
+    isValid: () => {},
+    isValidValue: () => {},
+    mapping: null,
+    onChange: () => {},
+    onError: () => {},
+    onInvalid: () => {},
+    onInvalidSubmit: () => {},
+    onReset: () => {},
+    onSubmit: () => {},
+    onValid: () => {},
+    onValidSubmit: () => {},
+    preventExternalInvalidation: false,
+    resetValue: () => {},
+    setValidations: () => {},
+    setValue: () => {},
+    showError: () => {},
+    showRequired: () => {},
+    validationErrors: null,
+  };
+
+  public static propTypes = {
+    children: PropTypes.node,
+    disabled: PropTypes.bool,
+    getErrorMessage: PropTypes.func,
+    getErrorMessages: PropTypes.func,
+    getValue: PropTypes.func,
+    hasValue: PropTypes.func,
+    isFormDisabled: PropTypes.func,
+    isFormSubmitted: PropTypes.func,
+    isPristine: PropTypes.func,
+    isRequired: PropTypes.func,
+    isValid: PropTypes.func,
+    isValidValue: PropTypes.func,
+    mapping: PropTypes.func,
+    onChange: PropTypes.func,
+    onInvalid: PropTypes.func,
+    onInvalidSubmit: PropTypes.func,
+    onReset: PropTypes.func,
+    onSubmit: PropTypes.func,
+    onValid: PropTypes.func,
+    onValidSubmit: PropTypes.func,
+    preventExternalInvalidation: PropTypes.bool,
+    resetValue: PropTypes.func,
+    setValidations: PropTypes.func,
+    setValue: PropTypes.func,
+    showError: PropTypes.func,
+    showRequired: PropTypes.func,
+    validationErrors: PropTypes.object, // eslint-disable-line
+  };
+
+  public static childContextTypes = {
+    formsy: PropTypes.object,
+  };
+
   public constructor(props) {
     super(props);
     this.state = {
@@ -397,73 +464,6 @@ class Formsy extends React.Component<any, any> {
       },
       this.props.children,
     );
-  };
-
-  public static displayName = 'Formsy';
-
-  public static defaultProps = {
-    children: null,
-    disabled: false,
-    getErrorMessage: () => {},
-    getErrorMessages: () => {},
-    getValue: () => {},
-    hasValue: () => {},
-    isFormDisabled: () => {},
-    isFormSubmitted: () => {},
-    isPristine: () => {},
-    isRequired: () => {},
-    isValid: () => {},
-    isValidValue: () => {},
-    mapping: null,
-    onChange: () => {},
-    onError: () => {},
-    onInvalid: () => {},
-    onInvalidSubmit: () => {},
-    onReset: () => {},
-    onSubmit: () => {},
-    onValid: () => {},
-    onValidSubmit: () => {},
-    preventExternalInvalidation: false,
-    resetValue: () => {},
-    setValidations: () => {},
-    setValue: () => {},
-    showError: () => {},
-    showRequired: () => {},
-    validationErrors: null,
-  };
-
-  public static propTypes = {
-    children: PropTypes.node,
-    disabled: PropTypes.bool,
-    getErrorMessage: PropTypes.func,
-    getErrorMessages: PropTypes.func,
-    getValue: PropTypes.func,
-    hasValue: PropTypes.func,
-    isFormDisabled: PropTypes.func,
-    isFormSubmitted: PropTypes.func,
-    isPristine: PropTypes.func,
-    isRequired: PropTypes.func,
-    isValid: PropTypes.func,
-    isValidValue: PropTypes.func,
-    mapping: PropTypes.func,
-    onChange: PropTypes.func,
-    onInvalid: PropTypes.func,
-    onInvalidSubmit: PropTypes.func,
-    onReset: PropTypes.func,
-    onSubmit: PropTypes.func,
-    onValid: PropTypes.func,
-    onValidSubmit: PropTypes.func,
-    preventExternalInvalidation: PropTypes.bool,
-    resetValue: PropTypes.func,
-    setValidations: PropTypes.func,
-    setValue: PropTypes.func,
-    showError: PropTypes.func,
-    showRequired: PropTypes.func,
-    validationErrors: PropTypes.object, // eslint-disable-line
-  };
-
-  public static childContextTypes = {
-    formsy: PropTypes.object,
   };
 }
 

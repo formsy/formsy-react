@@ -20,8 +20,7 @@
     "prettier/prettier": ["error", { "singleQuote": true }],
     "react/destructuring-assignment": 0,
     "react/forbid-prop-types": 0,
-    "react/no-access-state-in-setstate": 0,
-    "react/sort-comp": 0
+    "react/no-access-state-in-setstate": 0
   },
   "settings": {
     "react": {

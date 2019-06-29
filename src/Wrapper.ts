@@ -75,6 +75,23 @@ export default function<Props, State, CompState>(
 
     private requiredValidations: any;
 
+    public static displayName: any = `Formsy(${getDisplayName(WrappedComponent)})`;
+
+    public static contextTypes: any = {
+      formsy: PropTypes.object, // What about required?
+    };
+
+    public static defaultProps: any = {
+      innerRef: null,
+      required: false,
+      validationError: '',
+      validationErrors: {},
+      validations: null,
+      value: (WrappedComponent as any).defaultValue,
+    };
+
+    public static propTypes: any = propTypes;
+
     public constructor(props) {
       super(props);
       this.state = {
@@ -235,22 +252,5 @@ export default function<Props, State, CompState>(
 
       return React.createElement(WrappedComponent, propsForElement);
     }
-
-    public static displayName: any = `Formsy(${getDisplayName(WrappedComponent)})`;
-
-    public static contextTypes: any = {
-      formsy: PropTypes.object, // What about required?
-    };
-
-    public static defaultProps: any = {
-      innerRef: null,
-      required: false,
-      validationError: '',
-      validationErrors: {},
-      validations: null,
-      value: (WrappedComponent as any).defaultValue,
-    };
-
-    public static propTypes: any = propTypes;
   };
 }
