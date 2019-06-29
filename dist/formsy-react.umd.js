@@ -1394,13 +1394,21 @@
     isSame: function isSame(a, b) {
       if (_typeof(a) !== _typeof(b)) {
         return false;
-      } else if (Array.isArray(a) && Array.isArray(b)) {
+      }
+
+      if (Array.isArray(a) && Array.isArray(b)) {
         return !this.arraysDiffer(a, b);
-      } else if (typeof a === 'function') {
+      }
+
+      if (typeof a === 'function') {
         return a.toString() === b.toString();
-      } else if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
+      }
+
+      if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
         return a.toString() === b.toString();
-      } else if (_typeof(a) === 'object' && a !== null && b !== null) {
+      }
+
+      if (_typeof(a) === 'object' && a !== null && b !== null) {
         return !this.objectsDiffer(a, b);
       }
 
@@ -1445,7 +1453,9 @@
             }
 
             return;
-          } else if (typeof validations[validationMethod] !== 'function') {
+          }
+
+          if (typeof validations[validationMethod] !== 'function') {
             var _validation = validationRules[validationMethod](currentValues, value, validations[validationMethod]);
 
             if (typeof _validation === 'string') {
@@ -1584,18 +1594,27 @@
     value: propTypes.any // eslint-disable-line react/forbid-prop-types
 
   };
-  var Wrapper = (function (Component) {
-    var WrappedComponent =
+
+  function getDisplayName(component) {
+    return component.displayName || component.name || (typeof component === 'string' ? component : 'Component');
+  }
+
+  function Wrapper (WrappedComponent) {
+    var _class, _temp;
+
+    return _temp = _class =
     /*#__PURE__*/
     function (_React$Component) {
-      _inherits(WrappedComponent, _React$Component);
+      _inherits(_class, _React$Component);
 
-      function WrappedComponent(props) {
+      function _class(props) {
         var _this;
 
-        _classCallCheck(this, WrappedComponent);
+        _classCallCheck(this, _class);
 
-        _this = _possibleConstructorReturn(this, _getPrototypeOf(WrappedComponent).call(this, props));
+        _this = _possibleConstructorReturn(this, _getPrototypeOf(_class).call(this, props));
+        _this.validations = void 0;
+        _this.requiredValidations = void 0;
 
         _this.getErrorMessage = function () {
           var messages = _this.getErrorMessages();
@@ -1698,7 +1717,7 @@
         return _this;
       }
 
-      _createClass(WrappedComponent, [{
+      _createClass(_class, [{
         key: "componentWillMount",
         value: function componentWillMount() {
           var _this2 = this;
@@ -1782,33 +1801,23 @@
             propsForElement.ref = innerRef;
           }
 
-          return React.createElement(Component, propsForElement);
+          return React.createElement(WrappedComponent, propsForElement);
         }
       }]);
 
-      return WrappedComponent;
-    }(React.Component);
-
-    function getDisplayName(component) {
-      return component.displayName || component.name || (typeof component === 'string' ? component : 'Component');
-    }
-
-    WrappedComponent.displayName = "Formsy(".concat(getDisplayName(Component), ")");
-    WrappedComponent.contextTypes = {
+      return _class;
+    }(React.Component), _class.displayName = "Formsy(".concat(getDisplayName(WrappedComponent), ")"), _class.contextTypes = {
       formsy: propTypes.object // What about required?
 
-    };
-    WrappedComponent.defaultProps = {
+    }, _class.defaultProps = {
       innerRef: null,
       required: false,
       validationError: '',
       validationErrors: {},
       validations: null,
-      value: Component.defaultValue
-    };
-    WrappedComponent.propTypes = propTypes$1;
-    return WrappedComponent;
-  });
+      value: WrappedComponent.defaultValue
+    }, _class.propTypes = propTypes$1, _temp;
+  }
 
   /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
 
