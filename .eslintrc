@@ -15,22 +15,20 @@
   },
   "rules": {
     "@typescript-eslint/explicit-function-return-type": 0,
-    "@typescript-eslint/explicit-member-accessibility": 0,
-    "@typescript-eslint/interface-name-prefix":  0,
     "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/no-unused-vars": 0,
     "import/no-extraneous-dependencies": ["error", {"devDependencies": ["setupTests.ts", "**/*spec.tsx"]}],
-    "import/no-unresolved": 0,
     "prettier/prettier": ["error", { "singleQuote": true }],
-    "react/destructuring-assignment": 0,
-    "react/forbid-prop-types": 0,
-    "react/no-access-state-in-setstate": 0,
-    "react/sort-comp": 0
+    "react/forbid-prop-types": 0
   },
   "settings": {
     "react": {
       "pragma": "React",
       "version": "detect"
+    },
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
     }
   },
   "parser": "@typescript-eslint/parser"

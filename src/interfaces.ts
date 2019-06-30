@@ -1,7 +1,7 @@
-export type IValue = any;
+export type Value = any;
 
-export interface IValues {
-  [key: string]: IValue;
+export interface Values {
+  [key: string]: Value;
 }
 
-export type IValidationFunction = (values: IValues, value: IValue, extra?: any) => boolean;
+export type IValidationFunction = (values: Values, value: Value, extra?: any) => boolean;

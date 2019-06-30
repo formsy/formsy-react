@@ -1,25 +1,25 @@
-import { IValidationFunction, IValue, IValues } from './interfaces';
+import { IValidationFunction, Value, Values } from './interfaces';
 
-const isExisty = (value: IValue) => value !== null && value !== undefined;
-const isEmpty = (value: IValue) => value === '';
+const isExisty = (value: Value) => value !== null && value !== undefined;
+const isEmpty = (value: Value) => value === '';
 
 const validations: { [key: string]: IValidationFunction } = {
-  isDefaultRequiredValue(_values: IValues, value: IValue) {
+  isDefaultRequiredValue(_values: Values, value: Value) {
     return value === undefined || value === null || value === '';
   },
-  isExisty(_values: IValues, value: IValue) {
+  isExisty(_values: Values, value: Value) {
     return isExisty(value);
   },
-  matchRegexp(_values: IValues, value: IValue, regexp: RegExp) {
+  matchRegexp(_values: Values, value: Value, regexp: RegExp) {
     return !isExisty(value) || isEmpty(value) || regexp.test(value);
   },
-  isUndefined(_values: IValues, value: IValue) {
+  isUndefined(_values: Values, value: Value) {
     return value === undefined;
   },
-  isEmptyString(_values: IValues, value: IValue) {
+  isEmptyString(_values: Values, value: Value) {
     return isEmpty(value);
   },
-  isEmail(values: IValues, value: IValue) {
+  isEmail(values: Values, value: Value) {
     // Regex from http://emailregex.com/
     return validations.matchRegexp(
       values,
@@ -27,52 +27,52 @@ const validations: { [key: string]: IValidationFunction } = {
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i,
     );
   },
-  isUrl(values: IValues, value: IValue) {
+  isUrl(values: Values, value: Value) {
     return validations.matchRegexp(values, value, /^(?:\w+:)?\/\/([^\s.]+\.\S{2}|localhost[:?\d]*)\S*$/i);
   },
-  isTrue(_values: IValues, value: IValue) {
+  isTrue(_values: Values, value: Value) {
     return value === true;
   },
-  isFalse(_values: IValues, value: IValue) {
+  isFalse(_values: Values, value: Value) {
     return value === false;
   },
-  isNumeric(values: IValues, value: IValue) {
+  isNumeric(values: Values, value: Value) {
     if (typeof value === 'number') {
       return true;
     }
     return validations.matchRegexp(values, value, /^[-+]?(?:\d*[.])?\d+$/);
   },
-  isAlpha(values: IValues, value: IValue) {
+  isAlpha(values: Values, value: Value) {
     return validations.matchRegexp(values, value, /^[A-Z]+$/i);
   },
-  isAlphanumeric(values: IValues, value: IValue) {
+  isAlphanumeric(values: Values, value: Value) {
     return validations.matchRegexp(values, value, /^[0-9A-Z]+$/i);
   },
-  isInt(values: IValues, value: IValue) {
+  isInt(values: Values, value: Value) {
     return validations.matchRegexp(values, value, /^(?:[-+]?(?:0|[1-9]\d*))$/);
   },
-  isFloat(values: IValues, value: IValue) {
+  isFloat(values: Values, value: Value) {
     return validations.matchRegexp(values, value, /^(?:[-+]?(?:\d+))?(?:\.\d*)?(?:[eE][+-]?(?:\d+))?$/);
   },
-  isWords(values: IValues, value: IValue) {
+  isWords(values: Values, value: Value) {
     return validations.matchRegexp(values, value, /^[A-Z\s]+$/i);
   },
-  isSpecialWords(values: IValues, value: IValue) {
+  isSpecialWords(values: Values, value: Value) {
     return validations.matchRegexp(values, value, /^[A-Z\s\u00C0-\u017F]+$/i);
   },
-  isLength(_values: IValues, value: IValue, length: number) {
+  isLength(_values: Values, value: Value, length: number) {
     return !isExisty(value) || isEmpty(value) || value.length === length;
   },
-  equals(_values: IValues, value: IValue, eql: IValue) {
+  equals(_values: Values, value: Value, eql: Value) {
     return !isExisty(value) || isEmpty(value) || value === eql;
   },
-  equalsField(values: IValues, value: IValue, field: string) {
+  equalsField(values: Values, value: Value, field: string) {
     return value === values[field];
   },
-  maxLength(_values: IValues, value: IValue, length: number) {
+  maxLength(_values: Values, value: Value, length: number) {
     return !isExisty(value) || value.length <= length;
   },
-  minLength(_values: IValues, value: IValue, length: number) {
+  minLength(_values: Values, value: Value, length: number) {
     return !isExisty(value) || isEmpty(value) || value.length >= length;
   },
 };
