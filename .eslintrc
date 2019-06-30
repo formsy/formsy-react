@@ -18,8 +18,7 @@
     "@typescript-eslint/no-explicit-any": 0,
     "import/no-extraneous-dependencies": ["error", {"devDependencies": ["setupTests.ts", "**/*spec.tsx"]}],
     "prettier/prettier": ["error", { "singleQuote": true }],
-    "react/forbid-prop-types": 0,
-    "react/no-access-state-in-setstate": 0
+    "react/forbid-prop-types": 0
   },
   "settings": {
     "react": {
