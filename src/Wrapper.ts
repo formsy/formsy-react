@@ -2,15 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import utils from './utils';
-import {
-  PassDownProps,
-  Validations,
-  WrapperProps,
-  WrapperState,
-  WrappedComponentClass,
-  wrapperPropTypes,
-  RequiredValidation,
-} from './interfaces';
+import { PassDownProps, Validations, WrapperState, WrappedComponentClass, RequiredValidation } from './interfaces';
 
 /* eslint-disable react/default-props-match-prop-types */
 
@@ -48,7 +40,25 @@ const convertValidationsToObject = (validations: string | Validations): Validati
   return validations || {};
 };
 
-export { wrapperPropTypes };
+const propTypes = {
+  innerRef: PropTypes.func,
+  name: PropTypes.string.isRequired,
+  required: PropTypes.oneOfType([PropTypes.bool, PropTypes.object, PropTypes.string]),
+  validations: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
+};
+
+export interface WrapperProps {
+  innerRef: (ref: any) => void;
+  name: string;
+  required: RequiredValidation;
+  validationError: any;
+  validationErrors: any;
+  validations: Validations | string;
+  value: any;
+}
+
+export { propTypes };
 
 function getDisplayName(component: WrappedComponentClass) {
   return (
@@ -81,7 +91,7 @@ export default function<Props, State, CompState>(
       value: (WrappedComponent as any).defaultValue,
     };
 
-    public static propTypes: any = wrapperPropTypes;
+    public static propTypes: any = propTypes;
 
     public constructor(props) {
       super(props);

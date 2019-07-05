@@ -1,5 +1,5 @@
 import React, { ComponentClass } from 'react';
-import PropTypes from 'prop-types';
+import { WrapperProps } from './Wrapper';
 
 export type Value = any;
 export interface Values {
@@ -97,24 +97,6 @@ export interface PassDownProps {
   validationError: any;
   validationErrors: any;
   value: Value;
-}
-
-export const wrapperPropTypes = {
-  innerRef: PropTypes.func,
-  name: PropTypes.string.isRequired,
-  required: PropTypes.oneOfType([PropTypes.bool, PropTypes.object, PropTypes.string]),
-  validations: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
-  value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
-};
-
-export interface WrapperProps {
-  innerRef: (ref: any) => void;
-  name: string;
-  required: RequiredValidation;
-  validationError: any;
-  validationErrors: any;
-  validations: Validations | string;
-  value: any;
 }
 
 export interface WrappedComponentSomething extends React.Component<WrapperProps, WrapperState> {

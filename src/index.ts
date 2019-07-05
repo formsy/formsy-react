@@ -4,7 +4,7 @@ import formDataToObject from 'form-data-to-object';
 
 import utils from './utils';
 import validationRules from './validationRules';
-import Wrapper, { wrapperPropTypes } from './Wrapper';
+import Wrapper, { propTypes } from './Wrapper';
 
 import {
   FormsyProps,
@@ -20,11 +20,11 @@ import {
 /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
 
 class Formsy extends React.Component<FormsyProps, FormsyState> {
-  public prevInputNames: any[] | null = null;
+  public inputs: any[];
 
   public emptyArray: any[];
 
-  public inputs: any[];
+  public prevInputNames: any[] | null = null;
 
   public static displayName = 'Formsy';
 
@@ -497,6 +497,6 @@ const addValidationRule = (name: string, func: ValidationFunction) => {
   validationRules[name] = func;
 };
 
-export { addValidationRule, wrapperPropTypes, validationRules, Wrapper as withFormsy };
+export { addValidationRule, propTypes, validationRules, Wrapper as withFormsy };
 
 export default Formsy;
