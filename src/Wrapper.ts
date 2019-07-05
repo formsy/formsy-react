@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import utils from './utils';
-import { PassDownProps, Validations, WrapperState, WrappedComponentClass, RequiredValidation } from './interfaces';
+import { Validations, WrapperState, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
 
 /* eslint-disable react/default-props-match-prop-types */
 
@@ -49,13 +49,47 @@ const propTypes = {
 };
 
 export interface WrapperProps {
-  innerRef: (ref: any) => void;
+  innerRef?: (ref: any) => void;
   name: string;
   required: RequiredValidation;
   validationError: any;
   validationErrors: any;
   validations: Validations | string;
   value: any;
+}
+
+export interface WrapperState {
+  [key: string]: unknown;
+  externalError: null;
+  formSubmitted: boolean;
+  isPristine: boolean;
+  isRequired: boolean;
+  isValid: boolean;
+  pristineValue: any;
+  validationError: any[];
+  value: any;
+}
+
+export interface PassDownProps {
+  errorMessage: any;
+  errorMessages: any;
+  hasValue: boolean;
+  isFormDisabled: boolean;
+  isFormSubmitted: boolean;
+  isPristine: boolean;
+  isRequired: boolean;
+  isValid: boolean;
+  isValidValue: (value: Value) => boolean;
+  name: string;
+  ref?: any;
+  resetValue: any;
+  setValidations: any;
+  setValue: (value: Value) => void;
+  showError: boolean;
+  showRequired: boolean;
+  validationError: any;
+  validationErrors: any;
+  value: Value;
 }
 
 export { propTypes };

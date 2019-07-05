@@ -6,18 +6,46 @@ import utils from './utils';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
 
-import {
-  FormsyProps,
-  FormsyState,
-  IData,
-  IModel,
-  IResetModel,
-  IUpdateInputsWithError,
-  ValidationFunction,
-  WrappedComponentSomething,
-} from './interfaces';
+import { IData, IModel, InputComponent, IResetModel, IUpdateInputsWithError, ValidationFunction } from './interfaces';
 
 /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
+export interface FormsyProps {
+  disabled: boolean;
+  getErrorMessage: any;
+  getErrorMessages: any;
+  getValue: any;
+  hasValue: any;
+  isFormDisabled: any;
+  isFormSubmitted: any;
+  isPristine: any;
+  isRequired: any;
+  isValid: any;
+  isValidValue: any;
+  mapping: null | ((model: IModel) => IModel);
+  onChange: (model: IModel, isChanged: boolean) => void;
+  onError: any;
+  onInvalid: () => void;
+  onInvalidSubmit: any;
+  onReset?: () => void;
+  onSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
+  onValid: () => void;
+  onValidSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
+  preventExternalInvalidation?: boolean;
+  resetValue: any;
+  setValidations: any;
+  setValue: any;
+  showError: any;
+  showRequired: any;
+  validationErrors?: null | object;
+}
+
+export interface FormsyState {
+  canChange: boolean;
+  formSubmitted?: boolean;
+  isPristine?: boolean;
+  isSubmitting: boolean;
+  isValid: boolean;
+}
 
 class Formsy extends React.Component<FormsyProps, FormsyState> {
   public inputs: any[];
@@ -256,7 +284,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Checks validation on current value or a passed value
-  public runValidation = (component: WrappedComponentSomething, value = component.state.value) => {
+  public runValidation = (component: InputComponent, value = component.state.value) => {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
     const validationResults = utils.runRules(value, currentValues, component.validations, validationRules);
@@ -314,7 +342,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   // Method put on each input component to unregister
   // itself from the form
-  public detachFromForm = (component: WrappedComponentSomething) => {
+  public detachFromForm = (component: InputComponent) => {
     const componentPos = this.inputs.indexOf(component);
 
     if (componentPos !== -1) {
@@ -381,7 +409,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // Use the binded values and the actual input value to
   // validate the input and set its state. Then check the
   // state of the form itself
-  public validate = (component: WrappedComponentSomething) => {
+  public validate = (component: InputComponent) => {
     const { onChange } = this.props;
     const { canChange } = this.state;
 
