@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import utils from './utils';
-import { Validations, WrapperState, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
+import { Validations, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
 
 /* eslint-disable react/default-props-match-prop-types */
 
