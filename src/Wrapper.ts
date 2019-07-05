@@ -1,14 +1,20 @@
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import utils from './utils';
+import { Validations, WrapperState, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
 
 /* eslint-disable react/default-props-match-prop-types */
 
-const convertValidationsToObject = validations => {
+const convertValidationsToObject = (validations: string | Validations): Validations => {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
       let args = validation.split(':');
       const validateMethod = args.shift();
+
+      if (typeof validateMethod !== 'string') {
+        throw new Error('Formsy encountered unexpected problem parsing validation string');
+      }
 
       args = args.map(arg => {
         try {
@@ -25,7 +31,7 @@ const convertValidationsToObject = validations => {
       }
 
       // Avoid parameter reassignment
-      const validationsAccumulatorCopy = Object.assign({}, validationsAccumulator);
+      const validationsAccumulatorCopy: Validations = Object.assign({}, validationsAccumulator);
       validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
       return validationsAccumulatorCopy;
     }, {});
@@ -42,16 +48,19 @@ const propTypes = {
   value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
 };
 
-interface WrapperProps {
+export interface WrapperProps {
   innerRef?: (ref: any) => void;
   name: string;
-  required?: string | object | boolean;
-  validations?: string | object;
-  value?: any;
+  required: RequiredValidation;
+  validationError: any;
+  validationErrors: any;
+  validations: Validations | string;
+  value: any;
 }
 
-interface WrapperState {
-  externalError: null | any;
+export interface WrapperState {
+  [key: string]: unknown;
+  externalError: null;
   formSubmitted: boolean;
   isPristine: boolean;
   isRequired: boolean;
@@ -61,23 +70,49 @@ interface WrapperState {
   value: any;
 }
 
+export interface PassDownProps {
+  errorMessage: any;
+  errorMessages: any;
+  hasValue: boolean;
+  isFormDisabled: boolean;
+  isFormSubmitted: boolean;
+  isPristine: boolean;
+  isRequired: boolean;
+  isValid: boolean;
+  isValidValue: (value: Value) => boolean;
+  name: string;
+  ref?: any;
+  resetValue: any;
+  setValidations: any;
+  setValue: (value: Value) => void;
+  showError: boolean;
+  showRequired: boolean;
+  validationError: any;
+  validationErrors: any;
+  value: Value;
+}
+
 export { propTypes };
 
-function getDisplayName(component) {
-  return component.displayName || component.name || (typeof component === 'string' ? component : 'Component');
+function getDisplayName(component: WrappedComponentClass) {
+  return (
+    (component as { displayName?: string }).displayName ||
+    component.name ||
+    (typeof component === 'string' ? component : 'Component')
+  );
 }
 
 export default function<Props, State, CompState>(
   WrappedComponent: React.ComponentClass<Props & State>,
 ): React.ComponentClass<Props & State> {
   return class extends React.Component<Props & State & WrapperProps, WrapperState> {
-    private validations: any;
+    public validations?: Validations;
 
-    private requiredValidations: any;
+    public requiredValidations?: Validations;
 
-    public static displayName: any = `Formsy(${getDisplayName(WrappedComponent)})`;
+    public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
-    public static contextTypes: any = {
+    public static contextTypes = {
       formsy: PropTypes.object, // What about required?
     };
 
@@ -175,12 +210,10 @@ export default function<Props, State, CompState>(
       return [];
     };
 
-    public getValue = () => {
-      const { value } = this.state;
-      return value;
-    };
+    // eslint-disable-next-line react/destructuring-assignment
+    public getValue = () => this.state.value;
 
-    public setValidations = (validations, required) => {
+    public setValidations = (validations: string | Validations, required: RequiredValidation) => {
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations =
@@ -252,7 +285,7 @@ export default function<Props, State, CompState>(
 
     public render() {
       const { innerRef } = this.props;
-      const propsForElement: any = {
+      const propsForElement: PassDownProps = {
         ...this.props,
         errorMessage: this.getErrorMessage(),
         errorMessages: this.getErrorMessages(),
@@ -275,7 +308,7 @@ export default function<Props, State, CompState>(
         propsForElement.ref = innerRef;
       }
 
-      return React.createElement(WrappedComponent, propsForElement);
+      return React.createElement(WrappedComponent, propsForElement as any);
     }
   };
 }
