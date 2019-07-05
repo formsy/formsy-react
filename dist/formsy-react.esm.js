@@ -1394,7 +1394,7 @@ var utils = {
       return !this.arraysDiffer(a, b);
     }
 
-    if (typeof a === 'function') {
+    if (typeof a === 'function' && typeof b === 'function') {
       return a.toString() === b.toString();
     }
 
@@ -1402,7 +1402,7 @@ var utils = {
       return a.toString() === b.toString();
     }
 
-    if (_typeof(a) === 'object' && a !== null && b !== null) {
+    if (_typeof(a) === 'object' && _typeof(b) === 'object' && a !== null && b !== null) {
       return !this.objectsDiffer(a, b);
     }
 
@@ -1410,10 +1410,10 @@ var utils = {
   },
   find: function find(collection, fn) {
     for (var i = 0, l = collection.length; i < l; i += 1) {
-      var item = collection[i];
+      var _item = collection[i];
 
-      if (fn(item)) {
-        return item;
+      if (fn(_item)) {
+        return _item;
       }
     }
 
@@ -1428,16 +1428,19 @@ var utils = {
 
     if (Object.keys(validations).length) {
       Object.keys(validations).forEach(function (validationMethod) {
-        if (validationRules[validationMethod] && typeof validations[validationMethod] === 'function') {
+        var validationsVal = validations[validationMethod];
+        var validationRulesVal = validationRules[validationMethod];
+
+        if (validationRulesVal && typeof validationsVal === 'function') {
           throw new Error("Formsy does not allow you to override default validations: ".concat(validationMethod));
         }
 
-        if (!validationRules[validationMethod] && typeof validations[validationMethod] !== 'function') {
+        if (!validationRulesVal && typeof validationsVal !== 'function') {
           throw new Error("Formsy does not have the validation rule: ".concat(validationMethod));
         }
 
-        if (typeof validations[validationMethod] === 'function') {
-          var validation = validations[validationMethod](currentValues, value);
+        if (typeof validationsVal === 'function') {
+          var validation = validationsVal(currentValues, value);
 
           if (typeof validation === 'string') {
             results.errors.push(validation);
@@ -1449,8 +1452,8 @@ var utils = {
           return;
         }
 
-        if (typeof validations[validationMethod] !== 'function') {
-          var _validation = validationRules[validationMethod](currentValues, value, validations[validationMethod]);
+        if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
+          var _validation = validationRulesVal(currentValues, value, validationsVal);
 
           if (typeof _validation === 'string') {
             results.errors.push(_validation);
@@ -1552,12 +1555,16 @@ var validations = {
 };
 
 /* eslint-disable react/default-props-match-prop-types */
-
 var convertValidationsToObject = function convertValidationsToObject(validations) {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce(function (validationsAccumulator, validation) {
       var args = validation.split(':');
       var validateMethod = args.shift();
+
+      if (typeof validateMethod !== 'string') {
+        throw new Error('Formsy encountered unexpected problem parsing validation string');
+      }
+
       args = args.map(function (arg) {
         try {
           return JSON.parse(arg);
@@ -1617,8 +1624,12 @@ function Wrapper (WrappedComponent) {
       };
 
       _this.getErrorMessages = function () {
+        var _this$state = _this.state,
+            externalError = _this$state.externalError,
+            validationError = _this$state.validationError;
+
         if (!_this.isValid() || _this.showRequired()) {
-          return _this.state.externalError || _this.state.validationError || [];
+          return externalError || validationError || [];
         }
 
         return [];
@@ -1638,6 +1649,7 @@ function Wrapper (WrappedComponent) {
 
       _this.setValue = function (value) {
         var validate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+        var formsy = _this.context.formsy;
 
         if (!validate) {
           _this.setState({
@@ -1648,7 +1660,7 @@ function Wrapper (WrappedComponent) {
             value: value,
             isPristine: false
           }, function () {
-            _this.context.formsy.validate(_assertThisInitialized(_this));
+            formsy.validate(_assertThisInitialized(_this));
           });
         }
       };
@@ -1682,11 +1694,14 @@ function Wrapper (WrappedComponent) {
       };
 
       _this.resetValue = function () {
+        var pristineValue = _this.state.pristineValue;
+        var formsy = _this.context.formsy;
+
         _this.setState({
-          value: _this.state.pristineValue,
+          value: pristineValue,
           isPristine: true
         }, function () {
-          _this.context.formsy.validate(_assertThisInitialized(_this));
+          formsy.validate(_assertThisInitialized(_this));
         });
       };
 
@@ -1699,14 +1714,14 @@ function Wrapper (WrappedComponent) {
       };
 
       _this.state = {
-        value: props.value,
+        externalError: null,
+        formSubmitted: false,
+        isPristine: true,
         isRequired: false,
         isValid: true,
-        isPristine: true,
         pristineValue: props.value,
         validationError: [],
-        externalError: null,
-        formSubmitted: false
+        value: props.value
       };
       return _this;
     }
@@ -1716,14 +1731,20 @@ function Wrapper (WrappedComponent) {
       value: function componentWillMount() {
         var _this2 = this;
 
+        var _this$props = this.props,
+            validations = _this$props.validations,
+            required = _this$props.required,
+            name = _this$props.name;
+        var formsy = this.context.formsy;
+
         var configure = function configure() {
-          _this2.setValidations(_this2.props.validations, _this2.props.required); // Pass a function instead?
+          _this2.setValidations(validations, required); // Pass a function instead?
 
 
-          _this2.context.formsy.attachToForm(_this2);
+          formsy.attachToForm(_this2);
         };
 
-        if (!this.props.name) {
+        if (!name) {
           throw new Error('Form Input requires a name property when used');
         }
 
@@ -1740,9 +1761,11 @@ function Wrapper (WrappedComponent) {
       value: function shouldComponentUpdate(nextProps, nextState) {
         var _this3 = this;
 
+        // eslint-disable-next-line react/destructuring-assignment
         var isPropsChanged = Object.keys(this.props).some(function (k) {
           return _this3.props[k] !== nextProps[k];
-        });
+        }); // eslint-disable-next-line react/destructuring-assignment
+
         var isStateChanged = Object.keys(this.state).some(function (k) {
           return _this3.state[k] !== nextState[k];
         });
@@ -1751,22 +1774,28 @@ function Wrapper (WrappedComponent) {
     }, {
       key: "componentDidUpdate",
       value: function componentDidUpdate(prevProps) {
-        // If the value passed has changed, set it. If value is not passed it will
+        var _this$props2 = this.props,
+            value = _this$props2.value,
+            validations = _this$props2.validations,
+            required = _this$props2.required;
+        var formsy = this.context.formsy; // If the value passed has changed, set it. If value is not passed it will
         // internally update, and this will never run
-        if (!utils.isSame(this.props.value, prevProps.value)) {
-          this.setValue(this.props.value);
+
+        if (!utils.isSame(value, prevProps.value)) {
+          this.setValue(value);
         } // If validations or required is changed, run a new validation
 
 
-        if (!utils.isSame(this.props.validations, prevProps.validations) || !utils.isSame(this.props.required, prevProps.required)) {
-          this.context.formsy.validate(this);
+        if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+          formsy.validate(this);
         }
       } // Detach it when component unmounts
 
     }, {
       key: "componentWillUnmount",
       value: function componentWillUnmount() {
-        this.context.formsy.detachFromForm(this);
+        var formsy = this.context.formsy;
+        formsy.detachFromForm(this);
       }
     }, {
       key: "render",
@@ -1813,8 +1842,6 @@ function Wrapper (WrappedComponent) {
   }, _class.propTypes = propTypes$1, _temp;
 }
 
-/* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
-
 var Formsy =
 /*#__PURE__*/
 function (_React$Component) {
@@ -1828,18 +1855,18 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Formsy).call(this, props));
     _this.inputs = void 0;
     _this.emptyArray = void 0;
-    _this.prevInputNames = void 0;
+    _this.prevInputNames = null;
 
     _this.getChildContext = function () {
       return {
         formsy: {
           attachToForm: _this.attachToForm,
           detachFromForm: _this.detachFromForm,
-          validate: _this.validate,
           isFormDisabled: _this.isFormDisabled,
           isValidValue: function isValidValue(component, value) {
             return _this.runValidation(component, value).isValid;
-          }
+          },
+          validate: _this.validate
         }
       };
     };
@@ -1857,15 +1884,17 @@ function (_React$Component) {
     };
 
     _this.componentDidUpdate = function () {
-      if (_this.props.validationErrors && _typeof(_this.props.validationErrors) === 'object' && Object.keys(_this.props.validationErrors).length > 0) {
-        _this.setInputValidationErrors(_this.props.validationErrors);
+      var validationErrors = _this.props.validationErrors;
+
+      if (validationErrors && _typeof(validationErrors) === 'object' && Object.keys(validationErrors).length > 0) {
+        _this.setInputValidationErrors(validationErrors);
       }
 
       var newInputNames = _this.inputs.map(function (component) {
         return component.props.name;
       });
 
-      if (utils.arraysDiffer(_this.prevInputNames, newInputNames)) {
+      if (_this.prevInputNames && utils.arraysDiffer(_this.prevInputNames, newInputNames)) {
         _this.validateForm();
       }
     };
@@ -1911,6 +1940,9 @@ function (_React$Component) {
     };
 
     _this.setInputValidationErrors = function (errors) {
+      var preventExternalInvalidation = _this.props.preventExternalInvalidation;
+      var isValid = _this.state.isValid;
+
       _this.inputs.forEach(function (component) {
         var name = component.props.name;
         var args = [{
@@ -1920,20 +1952,24 @@ function (_React$Component) {
         component.setState.apply(component, args);
       });
 
-      if (!_this.props.preventExternalInvalidation && _this.state.isValid) {
+      if (!preventExternalInvalidation && isValid) {
         _this.setFormValidState(false);
       }
     };
 
     _this.setFormValidState = function (allIsValid) {
+      var _this$props = _this.props,
+          onValid = _this$props.onValid,
+          onInvalid = _this$props.onInvalid;
+
       _this.setState({
         isValid: allIsValid
       });
 
       if (allIsValid) {
-        _this.props.onValid();
+        onValid();
       } else {
-        _this.props.onInvalid();
+        onInvalid();
       }
     };
 
@@ -1942,8 +1978,10 @@ function (_React$Component) {
     };
 
     _this.mapModel = function (model) {
-      if (_this.props.mapping) {
-        return _this.props.mapping(model);
+      var mapping = _this.props.mapping;
+
+      if (mapping) {
+        return mapping(model);
       }
 
       return formDataToObject.toObj(Object.keys(model).reduce(function (mappedModel, key) {
@@ -1967,12 +2005,13 @@ function (_React$Component) {
     };
 
     _this.resetInternal = function (event) {
+      var onReset = _this.props.onReset;
       event.preventDefault();
 
       _this.reset();
 
-      if (_this.props.onReset) {
-        _this.props.onReset();
+      if (onReset) {
+        onReset();
       }
     };
 
@@ -1992,16 +2031,14 @@ function (_React$Component) {
 
     _this.runValidation = function (component) {
       var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : component.state.value;
+      var validationErrors = _this.props.validationErrors;
 
       var currentValues = _this.getCurrentValues();
 
-      var _component$props = component.props,
-          validationError = _component$props.validationError,
-          validationErrors = _component$props.validationErrors;
       var validationResults = utils.runRules(value, currentValues, component.validations, validations);
       var requiredResults = utils.runRules(value, currentValues, component.requiredValidations, validations);
       var isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
-      var isValid = !validationResults.failed.length && !(_this.props.validationErrors && _this.props.validationErrors[component.props.name]);
+      var isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
       return {
         isRequired: isRequired,
         isValid: isRequired ? false : isValid,
@@ -2014,18 +2051,18 @@ function (_React$Component) {
             return validationResults.errors;
           }
 
-          if (_this.props.validationErrors && _this.props.validationErrors[component.props.name]) {
-            return typeof _this.props.validationErrors[component.props.name] === 'string' ? [_this.props.validationErrors[component.props.name]] : _this.props.validationErrors[component.props.name];
+          if (validationErrors && validationErrors[component.props.name]) {
+            return typeof validationErrors[component.props.name] === 'string' ? [validationErrors[component.props.name]] : validationErrors[component.props.name];
           }
 
           if (isRequired) {
-            var error = validationErrors[requiredResults.success[0]] || validationError;
+            var error = component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
             return error ? [error] : null;
           }
 
           if (validationResults.failed.length) {
             return validationResults.failed.map(function (failed) {
-              return validationErrors[failed] ? validationErrors[failed] : validationError;
+              return component.props.validationErrors[failed] ? component.props.validationErrors[failed] : component.props.validationError;
             }).filter(function (x, pos, arr) {
               return arr.indexOf(x) === pos;
             }); // remove duplicates
@@ -2059,6 +2096,12 @@ function (_React$Component) {
     };
 
     _this.submit = function (event) {
+      var _this$props2 = _this.props,
+          onSubmit = _this$props2.onSubmit,
+          onValidSubmit = _this$props2.onValidSubmit,
+          onInvalidSubmit = _this$props2.onInvalidSubmit;
+      var isValid = _this.state.isValid;
+
       if (event && event.preventDefault) {
         event.preventDefault();
       } // Trigger form as not pristine.
@@ -2070,16 +2113,18 @@ function (_React$Component) {
 
       var model = _this.getModel();
 
-      _this.props.onSubmit(model, _this.resetModel, _this.updateInputsWithError);
+      onSubmit(model, _this.resetModel, _this.updateInputsWithError);
 
-      if (_this.state.isValid) {
-        _this.props.onValidSubmit(model, _this.resetModel, _this.updateInputsWithError);
+      if (isValid) {
+        onValidSubmit(model, _this.resetModel, _this.updateInputsWithError);
       } else {
-        _this.props.onInvalidSubmit(model, _this.resetModel, _this.updateInputsWithError);
+        onInvalidSubmit(model, _this.resetModel, _this.updateInputsWithError);
       }
     };
 
     _this.updateInputsWithError = function (errors, invalidate) {
+      var preventExternalInvalidation = _this.props.preventExternalInvalidation;
+      var isValid = _this.state.isValid;
       Object.keys(errors).forEach(function (name) {
         var component = utils.find(_this.inputs, function (input) {
           return input.props.name === name;
@@ -2090,21 +2135,23 @@ function (_React$Component) {
         }
 
         var args = [{
-          isValid: _this.props.preventExternalInvalidation,
+          isValid: preventExternalInvalidation,
           externalError: typeof errors[name] === 'string' ? [errors[name]] : errors[name]
         }];
         component.setState.apply(component, args);
       });
 
-      if (invalidate && _this.state.isValid) {
+      if (invalidate && isValid) {
         _this.setFormValidState(false);
       }
     };
 
     _this.validate = function (component) {
-      // Trigger onChange
-      if (_this.state.canChange) {
-        _this.props.onChange(_this.getModel(), _this.isChanged());
+      var onChange = _this.props.onChange;
+      var canChange = _this.state.canChange; // Trigger onChange
+
+      if (canChange) {
+        onChange(_this.getModel(), _this.isChanged());
       }
 
       var validation = _this.runValidation(component); // Run through the validations, split them up and call
@@ -2112,10 +2159,10 @@ function (_React$Component) {
 
 
       component.setState({
-        isValid: validation.isValid,
+        externalError: null,
         isRequired: validation.isRequired,
-        validationError: validation.error,
-        externalError: null
+        isValid: validation.isValid,
+        validationError: validation.error
       }, _this.validateForm);
     };
 
@@ -2162,46 +2209,47 @@ function (_React$Component) {
     };
 
     _this.render = function () {
-      var _this$props = _this.props,
-          getErrorMessage = _this$props.getErrorMessage,
-          getErrorMessages = _this$props.getErrorMessages,
-          getValue = _this$props.getValue,
-          hasValue = _this$props.hasValue,
-          isFormDisabled = _this$props.isFormDisabled,
-          isFormSubmitted = _this$props.isFormSubmitted,
-          isPristine = _this$props.isPristine,
-          isRequired = _this$props.isRequired,
-          isValid = _this$props.isValid,
-          isValidValue = _this$props.isValidValue,
-          mapping = _this$props.mapping,
-          onChange = _this$props.onChange,
-          onInvalidSubmit = _this$props.onInvalidSubmit,
-          onInvalid = _this$props.onInvalid,
-          onReset = _this$props.onReset,
-          onSubmit = _this$props.onSubmit,
-          onValid = _this$props.onValid,
-          onValidSubmit = _this$props.onValidSubmit,
-          preventExternalInvalidation = _this$props.preventExternalInvalidation,
-          resetValue = _this$props.resetValue,
-          setValidations = _this$props.setValidations,
-          setValue = _this$props.setValue,
-          showError = _this$props.showError,
-          showRequired = _this$props.showRequired,
-          validationErrors = _this$props.validationErrors,
-          nonFormsyProps = _objectWithoutProperties(_this$props, ["getErrorMessage", "getErrorMessages", "getValue", "hasValue", "isFormDisabled", "isFormSubmitted", "isPristine", "isRequired", "isValid", "isValidValue", "mapping", "onChange", "onInvalidSubmit", "onInvalid", "onReset", "onSubmit", "onValid", "onValidSubmit", "preventExternalInvalidation", "resetValue", "setValidations", "setValue", "showError", "showRequired", "validationErrors"]);
+      var _this$props3 = _this.props,
+          getErrorMessage = _this$props3.getErrorMessage,
+          getErrorMessages = _this$props3.getErrorMessages,
+          getValue = _this$props3.getValue,
+          hasValue = _this$props3.hasValue,
+          isFormDisabled = _this$props3.isFormDisabled,
+          isFormSubmitted = _this$props3.isFormSubmitted,
+          isPristine = _this$props3.isPristine,
+          isRequired = _this$props3.isRequired,
+          isValid = _this$props3.isValid,
+          isValidValue = _this$props3.isValidValue,
+          mapping = _this$props3.mapping,
+          onChange = _this$props3.onChange,
+          onInvalid = _this$props3.onInvalid,
+          onInvalidSubmit = _this$props3.onInvalidSubmit,
+          onReset = _this$props3.onReset,
+          onSubmit = _this$props3.onSubmit,
+          onValid = _this$props3.onValid,
+          onValidSubmit = _this$props3.onValidSubmit,
+          preventExternalInvalidation = _this$props3.preventExternalInvalidation,
+          resetValue = _this$props3.resetValue,
+          setValidations = _this$props3.setValidations,
+          setValue = _this$props3.setValue,
+          showError = _this$props3.showError,
+          showRequired = _this$props3.showRequired,
+          validationErrors = _this$props3.validationErrors,
+          nonFormsyProps = _objectWithoutProperties(_this$props3, ["getErrorMessage", "getErrorMessages", "getValue", "hasValue", "isFormDisabled", "isFormSubmitted", "isPristine", "isRequired", "isValid", "isValidValue", "mapping", "onChange", "onInvalid", "onInvalidSubmit", "onReset", "onSubmit", "onValid", "onValidSubmit", "preventExternalInvalidation", "resetValue", "setValidations", "setValue", "showError", "showRequired", "validationErrors"]);
 
       return React.createElement('form', _objectSpread({
         onReset: _this.resetInternal,
         onSubmit: _this.submit
       }, nonFormsyProps, {
         disabled: false
-      }), _this.props.children);
+      }), // eslint-disable-next-line react/destructuring-assignment
+      _this.props.children);
     };
 
     _this.state = {
-      isValid: true,
+      canChange: false,
       isSubmitting: false,
-      canChange: false
+      isValid: true
     };
     _this.inputs = [];
     _this.emptyArray = [];
@@ -2213,7 +2261,6 @@ function (_React$Component) {
 
 Formsy.displayName = 'Formsy';
 Formsy.defaultProps = {
-  children: null,
   disabled: false,
   getErrorMessage: function getErrorMessage() {},
   getErrorMessages: function getErrorMessages() {},
@@ -2243,7 +2290,6 @@ Formsy.defaultProps = {
   validationErrors: null
 };
 Formsy.propTypes = {
-  children: propTypes.node,
   disabled: propTypes.bool,
   getErrorMessage: propTypes.func,
   getErrorMessages: propTypes.func,
