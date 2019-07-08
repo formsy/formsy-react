@@ -1,7 +1,9 @@
 language: node_js
 sudo: false
 node_js:
-  - '8.2.1'
+  - '10'
+before_install:
+  - npm install -g yarn
 script:
   - yarn lint
   - yarn test

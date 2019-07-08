@@ -195,7 +195,7 @@ class MyForm extends React.Component {
     this.refs.form.updateInputsWithError({
       email: 'This email is taken',
       'field[10]': 'Some error!'
-    });
+    }, true);
   }
   render() {
     return (
@@ -207,7 +207,7 @@ class MyForm extends React.Component {
 }
 ```
 
-Manually invalidate the form by taking an object that maps to inputs. This is useful for server side validation. You can also use a third parameter to the [`onSubmit`](#onSubmit), [`onValidSubmit`](#onValid) or [`onInvalidSubmit`](#onInvalid).
+Manually set the form fields validation errors by taking an object that maps field name to error message as the first argument and optionally invalidate the form by passing `true` as the second argument. This is useful for server side validation. This is also passed as the third parameter to the [`onSubmit`](#onSubmit), [`onValidSubmit`](#onValid) or [`onInvalidSubmit`](#onInvalid).
 
 #### <a id="preventExternalInvalidation">preventExternalInvalidation</a>
 

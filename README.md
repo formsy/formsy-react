@@ -3,13 +3,13 @@
 [![GitHub release](https://img.shields.io/github/release/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/releases)
 [![Build status](https://travis-ci.org/formsy/formsy-react.svg?branch=master)](https://travis-ci.org/formsy/formsy-react)
 [![Gzipped size](http://img.badgesize.io/https://unpkg.com/formsy-react?compression=gzip)](https://unpkg.com/formsy-react)
-[![Gitter chat](https://badges.gitter.im/formsy.png)](https://gitter.im/formsy/Lobby)
+[![Gitter](https://badges.gitter.im/formsy/Lobby.svg)](https://gitter.im/formsy/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
 A form input builder and validator for React.
 
-| [Quick Start](#quick-start) | [API](/API.md) | [Examples](/examples) |
-| --------------------------- | -------------- | --------------------- |
+| [Quick Start](#quick-start) | [API](/API.md) |
+| --------------------------- | -------------- |
 
 ## Background
 
@@ -30,6 +30,29 @@ This project was originally located at https://github.com/christianalfoni/formsy
 ## Install
 
 `yarn add formsy-react react react-dom` and use with webpack, browserify, etc.
+
+## Join the 2.x beta
+
+The 2.0 release is currently in active development on master, but not yet released publicly. The API docs are still
+written for the 1.x branch and will remain that way until release. However, the API changes are minor and listed below.
+If you'd like to upgrade to formsy 2.x you can run:
+
+```
+yarn upgrade formsy-react@2.0.0-beta.2
+```
+
+**Element prop breaking changes:**
+- getErrorMessage() => errorMessage
+- getErrorMessages() => errorMessages
+- getValue() => value
+- hasValue() => hasValue,
+- isFormDisabled(): => isFormDisabled,
+- isValid(): => isValid,
+- isPristine(): => isPristine,
+- isFormSubmitted(): => isFormSubmitted,
+- isRequired(): => isRequired,
+- showRequired(): => showRequired,
+- showError(): => showError,
 
 ## Quick Start
 
@@ -135,9 +158,25 @@ This code results in a form with a submit button that will run the `submit` meth
 
 -   Fork repo
 -   `yarn`
--   `yarn examples` runs the development server on `localhost:8080`
 -   `yarn test` runs the tests
+-   `npm run deploy` build and release formsy
 
+## PR titles / commits
+
+We use `standard-changelog` to build out changelogs on release, which works off the 
+[Angular Commit Message Conventions](https://gist.github.com/stephenparish/9941e89d80e2bc58a153#format-of-the-commit-message).
+Please format your commit titles as:
+
+`<type>: <subject>`
+
+**With allowed `<type>`:**
+- feat (feature)
+- fix (bug fix)
+- docs (documentation)
+- style (formatting, missing semi colons, …)
+- refactor
+- test (when adding missing tests)
+- chore (maintain)
 
 ## Changelog
 
