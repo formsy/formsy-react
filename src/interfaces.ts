@@ -8,7 +8,8 @@ export interface Values {
 export type IModel = any;
 export type IData = any;
 export type IResetModel = (model?: IModel) => void;
-export type IUpdateInputsWithError = (errors: any, invalidate: boolean) => void;
+export type ISetInputValue = (name: string, value: Value, validate: boolean) => void;
+export type IUpdateInputsWithError = (errors: any, invalidate?: boolean) => void;
 
 export type ValidationFunction = (values: Values, value: Value, extra?: any) => boolean;
 

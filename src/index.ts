@@ -6,7 +6,15 @@ import utils from './utils';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
 
-import { IData, IModel, InputComponent, IResetModel, IUpdateInputsWithError, ValidationFunction } from './interfaces';
+import {
+  IData,
+  IModel,
+  InputComponent,
+  IResetModel,
+  ISetInputValue,
+  IUpdateInputsWithError,
+  ValidationFunction,
+} from './interfaces';
 
 /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
 export interface FormsyProps {
@@ -281,6 +289,14 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       }
     });
     this.validateForm();
+  };
+
+  // Set the value of one component
+  public setValue: ISetInputValue = (name, value, validate = false) => {
+    const input = this.inputs.find(component => component.pmrops.name === name);
+    if (input) {
+      input.setValue(value, validate);
+    }
   };
 
   // Checks validation on current value or a passed value
