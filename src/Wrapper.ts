@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import utils from './utils';
 import { Validations, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
 
-/* eslint-disable react/default-props-match-prop-types */
-
 const convertValidationsToObject = (validations: string | Validations): Validations => {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
@@ -165,10 +163,8 @@ export default function<Props, State, CompState>(
     }
 
     public shouldComponentUpdate(nextProps, nextState) {
-      // eslint-disable-next-line react/destructuring-assignment
       const isPropsChanged = Object.keys(this.props).some(k => this.props[k] !== nextProps[k]);
 
-      // eslint-disable-next-line react/destructuring-assignment
       const isStateChanged = Object.keys(this.state).some(k => this.state[k] !== nextState[k]);
 
       return isPropsChanged || isStateChanged;
@@ -210,7 +206,6 @@ export default function<Props, State, CompState>(
       return [];
     };
 
-    // eslint-disable-next-line react/destructuring-assignment
     public getValue = () => this.state.value;
 
     public setValidations = (validations: string | Validations, required: RequiredValidation) => {
@@ -242,25 +237,18 @@ export default function<Props, State, CompState>(
       }
     };
 
-    // eslint-disable-next-line react/destructuring-assignment
     public hasValue = () => this.state.value !== '';
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isFormDisabled = () => this.context.formsy.isFormDisabled();
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = () => this.state.formSubmitted;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isPristine = () => this.state.isPristine;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isRequired = () => !!this.props.required;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isValid = () => this.state.isValid;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isValidValue = value => this.context.formsy.isValidValue.call(null, this, value);
 
     public resetValue = () => {
@@ -280,7 +268,6 @@ export default function<Props, State, CompState>(
 
     public showError = () => !this.showRequired() && !this.isValid();
 
-    // eslint-disable-next-line react/destructuring-assignment
     public showRequired = () => this.state.isRequired;
 
     public render() {
