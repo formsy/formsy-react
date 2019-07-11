@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
-import { IModel, InputComponent, IResetModel, IUpdateInputsWithError, ValidationFunction } from './interfaces';
+import { IModel, InputComponent, IResetModel, ISetInputValue, IUpdateInputsWithError, ValidationFunction } from './interfaces';
 export interface FormsyProps {
     disabled: boolean;
     getErrorMessage: any;
@@ -100,6 +100,7 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     reset: (data?: any) => void;
     resetInternal: (event: any) => void;
     resetModel: IResetModel;
+    setValue: ISetInputValue;
     runValidation: (component: InputComponent, value?: any) => {
         isRequired: boolean;
         isValid: boolean;

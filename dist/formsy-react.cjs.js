@@ -1560,7 +1560,6 @@ var validations = {
   }
 };
 
-/* eslint-disable react/default-props-match-prop-types */
 var convertValidationsToObject = function convertValidationsToObject(validations) {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce(function (validationsAccumulator, validation) {
@@ -1767,11 +1766,9 @@ function Wrapper (WrappedComponent) {
       value: function shouldComponentUpdate(nextProps, nextState) {
         var _this3 = this;
 
-        // eslint-disable-next-line react/destructuring-assignment
         var isPropsChanged = Object.keys(this.props).some(function (k) {
           return _this3.props[k] !== nextProps[k];
-        }); // eslint-disable-next-line react/destructuring-assignment
-
+        });
         var isStateChanged = Object.keys(this.state).some(function (k) {
           return _this3.state[k] !== nextState[k];
         });
@@ -2033,6 +2030,18 @@ function (_React$Component) {
       });
 
       _this.validateForm();
+    };
+
+    _this.setValue = function (name, value) {
+      var validate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      var input = _this.inputs.find(function (component) {
+        return component.props.name === name;
+      });
+
+      if (input) {
+        input.setValue(value, validate);
+      }
     };
 
     _this.runValidation = function (component) {
