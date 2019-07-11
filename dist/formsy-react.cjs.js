@@ -2035,16 +2035,6 @@ function (_React$Component) {
       _this.validateForm();
     };
 
-    _this.setValue = function (name, value, validate) {
-      var input = utils.find(_this.inputs, function (input) {
-        return input.props.name === name;
-      });
-
-      if (input) {
-        input.setValue(value, validate);
-      }
-    };
-
     _this.runValidation = function (component) {
       var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : component.state.value;
       var validationErrors = _this.props.validationErrors;
