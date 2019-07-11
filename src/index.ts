@@ -8,7 +8,7 @@ import Wrapper, { propTypes } from './Wrapper';
 
 import { IData, IModel, InputComponent, IResetModel, IUpdateInputsWithError, ValidationFunction } from './interfaces';
 
-interface FormHTMLAttributesCleaned extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'> {}
+type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 
 /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
 export interface FormsyProps extends FormHTMLAttributesCleaned {
