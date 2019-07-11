@@ -42,7 +42,7 @@
   "browser": "dist/formsy-react.umd.js",
   "main": "dist/formsy-react.cjs.js",
   "module": "dist/formsy-react.esm.js",
-  "types": "dist/formsy-react.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "npm run build:clean && npm run build:types && npm run build:js",
     "build:clean": "rm -r dist/* || true",
