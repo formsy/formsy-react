@@ -293,7 +293,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   // Set the value of one component
   public setValue: ISetInputValue = (name, value, validate = false) => {
-    const input = this.inputs.find(component => component.pmrops.name === name);
+    const input = this.inputs.find(component => component.props.name === name);
     if (input) {
       input.setValue(value, validate);
     }
