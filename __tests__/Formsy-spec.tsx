@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import sinon from 'sinon';
 
-import Formsy, { addValidationRule } from './..';
+import Formsy, { addValidationRule } from '../src';
 import TestInput from '../__test_utils__/TestInput';
 import TestInputHoc from '../__test_utils__/TestInputHoc';
 import immediate from '../__test_utils__/immediate';

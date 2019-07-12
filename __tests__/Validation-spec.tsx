@@ -2,7 +2,7 @@ import React from 'react';
 import sinon from 'sinon';
 import { mount } from 'enzyme';
 
-import Formsy, { withFormsy } from './..';
+import Formsy, { withFormsy } from '../src';
 import { InputFactory } from '../__test_utils__/TestInput';
 import immediate from '../__test_utils__/immediate';
 
