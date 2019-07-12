@@ -35,7 +35,7 @@
     "type": "git",
     "url": "https://github.com/formsy/formsy-react.git"
   },
-  "author": "Christian Alfoni",
+  "author": "Christian Alfoni and the Formsy Authors",
   "files": [
     "dist"
   ],
@@ -50,7 +50,7 @@
     "build:types": "tsc --emitDeclarationOnly",
     "changelog": "auto-changelog",
     "deploy": "np",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md}\"",
     "lint": "eslint src/**/*",
     "preversion": "npm run lint",
     "test": "jest",
