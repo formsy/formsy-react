@@ -57,20 +57,34 @@ function _defineProperty(obj, key, value) {
   return obj;
 }
 
-function _objectSpread(target) {
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    keys.push.apply(keys, Object.getOwnPropertySymbols(object));
+  }
+
+  if (enumerableOnly) keys = keys.filter(function (sym) {
+    return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+  });
+  return keys;
+}
+
+function _objectSpread2(target) {
   for (var i = 1; i < arguments.length; i++) {
     var source = arguments[i] != null ? arguments[i] : {};
-    var ownKeys = Object.keys(source);
 
-    if (typeof Object.getOwnPropertySymbols === 'function') {
-      ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {
-        return Object.getOwnPropertyDescriptor(source, sym).enumerable;
-      }));
+    if (i % 2) {
+      ownKeys(source, true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(source).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
     }
-
-    ownKeys.forEach(function (key) {
-      _defineProperty(target, key, source[key]);
-    });
   }
 
   return target;
@@ -1808,7 +1822,7 @@ function Wrapper (WrappedComponent) {
       value: function render() {
         var innerRef = this.props.innerRef;
 
-        var propsForElement = _objectSpread({}, this.props, {
+        var propsForElement = _objectSpread2({}, this.props, {
           errorMessage: this.getErrorMessage(),
           errorMessages: this.getErrorMessages(),
           hasValue: this.hasValue(),
@@ -2243,7 +2257,7 @@ function (_React$Component) {
           validationErrors = _this$props3.validationErrors,
           nonFormsyProps = _objectWithoutProperties(_this$props3, ["getErrorMessage", "getErrorMessages", "getValue", "hasValue", "isFormDisabled", "isFormSubmitted", "isPristine", "isRequired", "isValid", "isValidValue", "mapping", "onChange", "onInvalid", "onInvalidSubmit", "onReset", "onSubmit", "onValid", "onValidSubmit", "preventExternalInvalidation", "resetValue", "setValidations", "setValue", "showError", "showRequired", "validationErrors"]);
 
-      return React.createElement('form', _objectSpread({
+      return React.createElement('form', _objectSpread2({
         onReset: _this.resetInternal,
         onSubmit: _this.submit
       }, nonFormsyProps, {
