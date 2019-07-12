@@ -114,7 +114,7 @@ export default function<Props, State>(
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
     public static contextType = FormsyContext;
-    context!: React.ContextType<typeof FormsyContext>;
+    public context!: React.ContextType<typeof FormsyContext>;
 
     public static defaultProps: any = {
       innerRef: null,
