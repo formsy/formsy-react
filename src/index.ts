@@ -16,8 +16,10 @@ import {
   ValidationFunction,
 } from './interfaces';
 
+type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
+
 /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
-export interface FormsyProps {
+export interface FormsyProps extends FormHTMLAttributesCleaned {
   disabled: boolean;
   getErrorMessage: any;
   getErrorMessages: any;
