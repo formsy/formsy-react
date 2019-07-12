@@ -1,12 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import formDataToObject from 'form-data-to-object';
+import FormsyContext from './FormsyContext';
 
 import utils from './utils';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
 
-import { IData, IModel, InputComponent, IResetModel, IUpdateInputsWithError, ValidationFunction } from './interfaces';
+import {
+  IData,
+  IModel,
+  InputComponent,
+  IResetModel,
+  IUpdateInputsWithError,
+  ValidationFunction,
+  FormsyContextInterface,
+} from './interfaces';
 
 type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 
@@ -53,6 +62,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public inputs: any[];
 
   public emptyArray: any[];
+
+  public contextValue: FormsyContextInterface;
 
   public prevInputNames: any[] | null = null;
 
@@ -130,17 +141,14 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     };
     this.inputs = [];
     this.emptyArray = [];
-  }
-
-  public getChildContext = () => ({
-    formsy: {
+    this.contextValue = {
       attachToForm: this.attachToForm,
       detachFromForm: this.detachFromForm,
       isFormDisabled: this.isFormDisabled,
       isValidValue: (component, value) => this.runValidation(component, value).isValid,
       validate: this.validate,
-    },
-  });
+    };
+  }
 
   public componentDidMount = () => {
     this.validateForm();
@@ -509,16 +517,20 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       ...nonFormsyProps
     } = this.props;
 
-    return React.createElement(
-      'form',
-      {
-        onReset: this.resetInternal,
-        onSubmit: this.submit,
-        ...nonFormsyProps,
-        disabled: false,
-      },
-      // eslint-disable-next-line react/destructuring-assignment
-      this.props.children,
+    return (
+      <FormsyContext.Provider value={this.contextValue}>
+        {React.createElement(
+          'form',
+          {
+            onReset: this.resetInternal,
+            onSubmit: this.submit,
+            ...nonFormsyProps,
+            disabled: false,
+          },
+          // eslint-disable-next-line react/destructuring-assignment
+          this.props.children,
+        )}
+      </FormsyContext.Provider>
     );
   };
 }

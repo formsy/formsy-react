@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import utils from './utils';
 import { Validations, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
+import FormsyContext from './FormsyContext';
 
 /* eslint-disable react/default-props-match-prop-types */
 
@@ -102,7 +103,7 @@ function getDisplayName(component: WrappedComponentClass) {
   );
 }
 
-export default function<Props, State, CompState>(
+export default function<Props, State>(
   WrappedComponent: React.ComponentClass<Props & State>,
 ): React.ComponentClass<Props & State> {
   return class extends React.Component<Props & State & WrapperProps, WrapperState> {
@@ -112,9 +113,8 @@ export default function<Props, State, CompState>(
 
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
-    public static contextTypes = {
-      formsy: PropTypes.object, // What about required?
-    };
+    public static contextType = FormsyContext;
+    context!: React.ContextType<typeof FormsyContext>;
 
     public static defaultProps: any = {
       innerRef: null,
@@ -143,13 +143,11 @@ export default function<Props, State, CompState>(
 
     public componentWillMount() {
       const { validations, required, name } = this.props;
-      const { formsy } = this.context;
-
       const configure = () => {
         this.setValidations(validations, required);
 
         // Pass a function instead?
-        formsy.attachToForm(this);
+        this.context.attachToForm(this);
       };
 
       if (!name) {
@@ -176,7 +174,6 @@ export default function<Props, State, CompState>(
 
     public componentDidUpdate(prevProps) {
       const { value, validations, required } = this.props;
-      const { formsy } = this.context;
 
       // If the value passed has changed, set it. If value is not passed it will
       // internally update, and this will never run
@@ -186,14 +183,13 @@ export default function<Props, State, CompState>(
 
       // If validations or required is changed, run a new validation
       if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
-        formsy.validate(this);
+        this.context.validate(this);
       }
     }
 
     // Detach it when component unmounts
     public componentWillUnmount() {
-      const { formsy } = this.context;
-      formsy.detachFromForm(this);
+      this.context.detachFromForm(this);
     }
 
     public getErrorMessage = () => {
@@ -222,9 +218,7 @@ export default function<Props, State, CompState>(
 
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
-    public setValue = (value, validate = true) => {
-      const { formsy } = this.context;
-
+    public setValue = (value: any, validate = true) => {
       if (!validate) {
         this.setState({
           value,
@@ -236,7 +230,7 @@ export default function<Props, State, CompState>(
             isPristine: false,
           },
           () => {
-            formsy.validate(this);
+            this.context.validate(this);
           },
         );
       }
@@ -246,7 +240,7 @@ export default function<Props, State, CompState>(
     public hasValue = () => this.state.value !== '';
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isFormDisabled = () => this.context.formsy.isFormDisabled();
+    public isFormDisabled = () => this.context.isFormDisabled();
 
     // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = () => this.state.formSubmitted;
@@ -261,11 +255,10 @@ export default function<Props, State, CompState>(
     public isValid = () => this.state.isValid;
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isValidValue = value => this.context.formsy.isValidValue.call(null, this, value);
+    public isValidValue = value => this.context.isValidValue(this, value);
 
     public resetValue = () => {
       const { pristineValue } = this.state;
-      const { formsy } = this.context;
 
       this.setState(
         {
@@ -273,7 +266,7 @@ export default function<Props, State, CompState>(
           isPristine: true,
         },
         () => {
-          formsy.validate(this);
+          this.context.validate(this);
         },
       );
     };
