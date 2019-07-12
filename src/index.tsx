@@ -128,10 +128,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     validationErrors: PropTypes.object, // eslint-disable-line
   };
 
-  public static childContextTypes = {
-    formsy: PropTypes.object,
-  };
-
   public constructor(props: FormsyProps) {
     super(props);
     this.state = {
