@@ -1,5 +1,5 @@
 import React from 'react';
-import { withFormsy } from './..';
+import { withFormsy } from '../src';
 import { PassDownProps } from '../src/Wrapper';
 
 class TestInput extends React.Component<React.HTMLProps<HTMLInputElement>> {
