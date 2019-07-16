@@ -136,8 +136,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     formsy: {
       attachToForm: this.attachToForm,
       detachFromForm: this.detachFromForm,
-      isFormDisabled: this.isFormDisabled,
-      isValidValue: (component, value) => this.runValidation(component, value).isValid,
+      isFormDisabled: this.isFormDisabled(),
+      isValidValue: this.isValidValue,
       validate: this.validate,
     },
   });
@@ -232,6 +232,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onInvalid();
     }
   };
+
+  public isValidValue = (component, value) => this.runValidation(component, value).isValid;
 
   // eslint-disable-next-line react/destructuring-assignment
   public isFormDisabled = () => this.props.disabled;
