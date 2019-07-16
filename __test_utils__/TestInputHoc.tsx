@@ -1,5 +1,5 @@
 import React from 'react';
-import { withFormsy } from './..';
+import { withFormsy } from '../src';
 
 class TestComponent extends React.Component {
   render() {
