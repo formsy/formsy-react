@@ -6,7 +6,15 @@ import utils from './utils';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
 
-import { IData, IModel, InputComponent, IResetModel, IUpdateInputsWithError, ValidationFunction } from './interfaces';
+import {
+  IData,
+  IModel,
+  InputComponent,
+  IResetModel,
+  ISetInputValue,
+  IUpdateInputsWithError,
+  ValidationFunction,
+} from './interfaces';
 
 type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 
@@ -283,6 +291,14 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       }
     });
     this.validateForm();
+  };
+
+  // Set the value of one component
+  public setValue: ISetInputValue = (name, value, validate) => {
+    const input = utils.find(this.inputs, component => component.props.name === name);
+    if (input) {
+      input.setValue(value, validate);
+    }
   };
 
   // Checks validation on current value or a passed value

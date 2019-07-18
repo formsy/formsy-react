@@ -551,6 +551,52 @@ describe('value === false', () => {
     expect(input.instance().getValue()).toEqual(true);
   });
 
+  it('should be able to set a value to one component with setValue', () => {
+    class TestForm extends React.Component {
+      state = {
+        valueFoo: true,
+        valueBar: true,
+      };
+      render() {
+        return (
+          <Formsy>
+            <TestInput name="foo" value={this.state.valueFoo} type="checkbox" />
+            <TestInput name="bar" value={this.state.valueBar} type="checkbox" />
+            <button type="submit">Save</button>
+          </Formsy>
+        );
+      }
+    }
+    const form = mount(<TestForm />);
+    const inputs = form.find(TestInput);
+    const formsyForm = form.find(Formsy);
+    expect(
+      inputs
+        .at(0)
+        .instance()
+        .getValue(),
+    ).toEqual(true);
+    expect(
+      inputs
+        .at(1)
+        .instance()
+        .getValue(),
+    ).toEqual(true);
+    formsyForm.instance().setValue('foo', false);
+    expect(
+      inputs
+        .at(0)
+        .instance()
+        .getValue(),
+    ).toEqual(false);
+    expect(
+      inputs
+        .at(1)
+        .instance()
+        .getValue(),
+    ).toEqual(true);
+  });
+
   it('should be able to reset the form using custom data', () => {
     class TestForm extends React.Component {
       state = {
