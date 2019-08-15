@@ -162,14 +162,19 @@ export default function<Props, State>(
       this.setValidations(nextProps.validations, nextProps.required);
     }
 
-    public shouldComponentUpdate(nextProps, nextState) {
-      // eslint-disable-next-line react/destructuring-assignment
-      const isPropsChanged = Object.keys(this.props).some(k => this.props[k] !== nextProps[k]);
+    public shouldComponentUpdate(nextProps, nextState, nextContext) {
+      const {
+        props,
+        state,
+        context: { formsy: formsyContext },
+      } = this;
+      const isPropsChanged = Object.keys(props).some(k => props[k] !== nextProps[k]);
 
-      // eslint-disable-next-line react/destructuring-assignment
-      const isStateChanged = Object.keys(this.state).some(k => this.state[k] !== nextState[k]);
+      const isStateChanged = Object.keys(state).some(k => state[k] !== nextState[k]);
 
-      return isPropsChanged || isStateChanged;
+      const isFormsyContextChanged = Object.keys(formsyContext).some(k => formsyContext[k] !== nextContext.formsy[k]);
+
+      return isPropsChanged || isStateChanged || isFormsyContextChanged;
     }
 
     public componentDidUpdate(prevProps) {
@@ -240,7 +245,7 @@ export default function<Props, State>(
     public hasValue = () => this.state.value !== '';
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isFormDisabled = () => this.context.isFormDisabled();
+    public isFormDisabled = () => this.context.isFormDisabled
 
     // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = () => this.state.formSubmitted;
