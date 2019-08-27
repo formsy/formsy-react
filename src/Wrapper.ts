@@ -141,27 +141,18 @@ export default function<Props, State, CompState>(
       };
     }
 
-    public componentWillMount() {
+    public componentDidMount() {
       const { validations, required, name } = this.props;
       const { formsy } = this.context;
-
-      const configure = () => {
-        this.setValidations(validations, required);
-
-        // Pass a function instead?
-        formsy.attachToForm(this);
-      };
 
       if (!name) {
         throw new Error('Form Input requires a name property when used');
       }
 
-      configure();
-    }
+      this.setValidations(validations, required);
 
-    // We have to make sure the validate method is kept when new props are added
-    public componentWillReceiveProps(nextProps) {
-      this.setValidations(nextProps.validations, nextProps.required);
+      // Pass a function instead?
+      formsy.attachToForm(this);
     }
 
     public shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -191,12 +182,14 @@ export default function<Props, State, CompState>(
 
       // If validations or required is changed, run a new validation
       if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+        this.setValidations(validations, required);
         formsy.validate(this);
       }
     }
 
     // Detach it when component unmounts
-    public componentWillUnmount() {
+    // eslint-disable-next-line react/sort-comp
+    public componentDidUnmount() {
       const { formsy } = this.context;
       formsy.detachFromForm(this);
     }

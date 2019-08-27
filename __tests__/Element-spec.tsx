@@ -49,7 +49,7 @@ describe('Element', () => {
   it('should set back to pristine value when running reset', () => {
     let reset = null;
     const Input = InputFactory({
-      componentDidMount() {
+      componentDidUpdate() {
         reset = this.props.resetValue;
       },
     });
@@ -68,7 +68,7 @@ describe('Element', () => {
   it('should return error message passed when calling getErrorMessage()', () => {
     let errorMessage = null;
     const Input = InputFactory({
-      componentDidMount() {
+      componentDidUpdate() {
         errorMessage = this.props.errorMessage;
       },
     });
@@ -103,7 +103,7 @@ describe('Element', () => {
   it('should return true or false when calling isRequired() depending on passed required attribute', () => {
     const isRequireds = [];
     const Input = InputFactory({
-      componentDidMount() {
+      componentDidUpdate() {
         isRequireds.push(this.props.isRequired);
       },
     });
@@ -123,7 +123,7 @@ describe('Element', () => {
   it('should return true or false when calling showRequired() depending on input being empty and required is passed, or not', () => {
     const showRequireds = [];
     const Input = InputFactory({
-      componentDidMount() {
+      componentDidUpdate() {
         showRequireds.push(this.props.showRequired);
       },
     });
