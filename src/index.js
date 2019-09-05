@@ -232,7 +232,7 @@ class Formsy extends React.Component {
 
   // Update model, submit to url prop and send the model
   submit = (event) => {
-    if (event && event.preventDefault) {
+    if (this.props.preventDefaultSubmit && event && event.preventDefault) {
       event.preventDefault();
     }
 
@@ -349,6 +349,7 @@ class Formsy extends React.Component {
       isValidValue,
       mapping,
       onChange,
+      preventDefaultSubmit,
       // onError,
       onInvalidSubmit,
       onInvalid,
@@ -405,6 +406,7 @@ Formsy.defaultProps = {
   onValid: () => {},
   onValidSubmit: () => {},
   preventExternalInvalidation: false,
+  preventDefaultSubmit: true,
   resetValue: () => {},
   setValidations: () => {},
   setValue: () => {},
@@ -435,6 +437,7 @@ Formsy.propTypes = {
   onValid: PropTypes.func,
   onValidSubmit: PropTypes.func,
   preventExternalInvalidation: PropTypes.bool,
+  preventDefaultSubmit: PropTypes.bool,
   resetValue: PropTypes.func,
   setValidations: PropTypes.func,
   setValue: PropTypes.func,
