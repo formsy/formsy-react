@@ -422,6 +422,41 @@ describe('Update a form', () => {
     });
   });
 
+  it('should prevent a default submit', () => {
+    class TestForm extends React.Component {
+      render() {
+        return (
+          <Formsy>
+            <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
+          </Formsy>
+        );
+      }
+    }
+    const form = mount(<TestForm />);
+    const FoundForm = form.find(TestForm);
+    const submitEvent = {preventDefault: sinon.spy()};
+    FoundForm.simulate('submit', submitEvent);
+    expect(submitEvent.preventDefault.called).toEqual(true);
+  });
+
+  it('should not prevent a default submit when preventDefaultSubmit is passed', () => {
+    class TestForm extends React.Component {
+      render() {
+        return (
+          <Formsy preventDefaultSubmit={false}>
+            <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
+          </Formsy>
+        );
+      }
+    }
+    const form = mount(<TestForm />);
+    const FoundForm = form.find(TestForm);
+    const submitEvent = {preventDefault: sinon.spy()};
+    FoundForm.simulate('submit', submitEvent);
+    expect(submitEvent.preventDefault.called).toEqual(false);
+  });
+
+
   it('should trigger an onValidSubmit when submitting a valid form', () => {
     let isCalled = sinon.spy();
     class TestForm extends React.Component {
