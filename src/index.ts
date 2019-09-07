@@ -151,13 +151,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   });
 
   public componentDidMount = () => {
-    this.validateForm();
-  };
-
-  public componentWillUpdate = () => {
-    // Keep a reference to input names before form updates,
-    // to check if inputs has changed after render
     this.prevInputNames = this.inputs.map(component => component.props.name);
+    this.validateForm();
   };
 
   public componentDidUpdate = () => {
@@ -169,6 +164,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
     const newInputNames = this.inputs.map(component => component.props.name);
     if (this.prevInputNames && utils.arraysDiffer(this.prevInputNames, newInputNames)) {
+      this.prevInputNames = newInputNames;
       this.validateForm();
     }
   };
