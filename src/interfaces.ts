@@ -36,7 +36,7 @@ export interface InputComponent extends React.Component<WrapperProps, WrapperSta
 export interface FormsyContextInterface {
   attachToForm: (component: InputComponent) => void;
   detachFromForm: (component: InputComponent) => void;
-  isFormDisabled: () => boolean;
+  isFormDisabled: boolean;
   isValidValue: (component: InputComponent, value: any) => boolean;
   validate: (component: InputComponent) => void;
 }

@@ -10,7 +10,7 @@ const throwNoFormsyProvider = () => {
 const defaultValue = {
   attachToForm: throwNoFormsyProvider,
   detachFromForm: throwNoFormsyProvider,
-  isFormDisabled: () => true,
+  isFormDisabled: true,
   isValidValue: throwNoFormsyProvider,
   validate: throwNoFormsyProvider,
 };

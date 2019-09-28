@@ -241,7 +241,7 @@ export default function<Props, State>(
     public hasValue = () => this.state.value !== '';
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isFormDisabled = () => this.context.isFormDisabled();
+    public isFormDisabled = () => this.context.isFormDisabled;
 
     // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = () => this.state.formSubmitted;

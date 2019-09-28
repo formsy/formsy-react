@@ -12,6 +12,7 @@ import {
   IModel,
   InputComponent,
   IResetModel,
+  ISetInputValue,
   IUpdateInputsWithError,
   ValidationFunction,
   FormsyContextInterface,
@@ -56,14 +57,13 @@ export interface FormsyState {
   isPristine?: boolean;
   isSubmitting: boolean;
   isValid: boolean;
+  contextValue: FormsyContextInterface;
 }
 
 class Formsy extends React.Component<FormsyProps, FormsyState> {
   public inputs: any[];
 
   public emptyArray: any[];
-
-  public contextValue: FormsyContextInterface;
 
   public prevInputNames: any[] | null = null;
 
@@ -134,16 +134,16 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       canChange: false,
       isSubmitting: false,
       isValid: true,
+      contextValue: {
+        attachToForm: this.attachToForm,
+        detachFromForm: this.detachFromForm,
+        isFormDisabled: this.props.disabled,
+        isValidValue: (component, value) => this.runValidation(component, value).isValid,
+        validate: this.validate,
+      },
     };
     this.inputs = [];
     this.emptyArray = [];
-    this.contextValue = {
-      attachToForm: this.attachToForm,
-      detachFromForm: this.detachFromForm,
-      isFormDisabled: this.isFormDisabled,
-      isValidValue: (component, value) => this.runValidation(component, value).isValid,
-      validate: this.validate,
-    };
   }
 
   public componentDidMount = () => {
@@ -151,7 +151,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.validateForm();
   };
 
-  public componentDidUpdate = (nextProps: FormsyProps) => {
+  public componentDidUpdate = (prevProps: FormsyProps) => {
     const { validationErrors } = this.props;
 
     if (validationErrors && typeof validationErrors === 'object' && Object.keys(validationErrors).length > 0) {
@@ -162,6 +162,16 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     if (this.prevInputNames && utils.arraysDiffer(this.prevInputNames, newInputNames)) {
       this.prevInputNames = newInputNames;
       this.validateForm();
+    }
+
+    if (this.props.disabled !== prevProps.disabled) {
+      this.setState({
+        ...this.state,
+        contextValue: {
+          ...this.state.contextValue,
+          isFormDisabled: this.props.disabled,
+        },
+      });
     }
   };
 
@@ -283,6 +293,14 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       }
     });
     this.validateForm();
+  };
+
+  // Set the value of one component
+  public setValue: ISetInputValue = (name, value, validate) => {
+    const input = utils.find(this.inputs, component => component.props.name === name);
+    if (input) {
+      input.setValue(value, validate);
+    }
   };
 
   // Checks validation on current value or a passed value
@@ -508,7 +526,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     } = this.props;
 
     return (
-      <FormsyContext.Provider value={this.contextValue}>
+      <FormsyContext.Provider value={this.state.contextValue}>
         <form onReset={this.resetInternal} onSubmit={this.submit} {...nonFormsyProps}>
           {this.props.children}
         </form>
