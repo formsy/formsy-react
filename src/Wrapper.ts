@@ -107,13 +107,14 @@ export default function<Props, State>(
   WrappedComponent: React.ComponentClass<Props & State>,
 ): React.ComponentClass<Props & State> {
   return class extends React.Component<Props & State & WrapperProps, WrapperState> {
+    public static contextType = FormsyContext;
+
     public validations?: Validations;
 
     public requiredValidations?: Validations;
 
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
-    public static contextType = FormsyContext;
     public context: React.ContextType<typeof FormsyContext>;
 
     public static defaultProps: any = {
@@ -143,12 +144,13 @@ export default function<Props, State>(
 
     public componentDidMount() {
       const { validations, required, name } = this.props;
+      const { attachToForm } = this.context;
 
       const configure = () => {
         this.setValidations(validations, required);
 
         // Pass a function instead?
-        this.context.attachToForm(this);
+        attachToForm(this);
       };
 
       if (!name) {
@@ -174,6 +176,7 @@ export default function<Props, State>(
 
     public componentDidUpdate(prevProps) {
       const { value, validations, required } = this.props;
+      const { validate } = this.context;
 
       // If the value passed has changed, set it. If value is not passed it will
       // internally update, and this will never run
@@ -184,13 +187,14 @@ export default function<Props, State>(
       // If validations or required is changed, run a new validation
       if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
         this.setValidations(validations, required);
-        this.context.validate(this);
+        validate(this);
       }
     }
 
     // Detach it when component unmounts
     public componentWillUnmount() {
-      this.context.detachFromForm(this);
+      const { detachFromForm } = this.context;
+      detachFromForm(this);
     }
 
     public getErrorMessage = () => {
@@ -231,7 +235,7 @@ export default function<Props, State>(
             isPristine: false,
           },
           () => {
-            this.context.validate(this);
+            this.context.validate(this); //eslint-disable-line
           },
         );
       }
@@ -260,6 +264,7 @@ export default function<Props, State>(
 
     public resetValue = () => {
       const { pristineValue } = this.state;
+      const { validate } = this.context;
 
       this.setState(
         {
@@ -267,7 +272,7 @@ export default function<Props, State>(
           isPristine: true,
         },
         () => {
-          this.context.validate(this);
+          validate(this);
         },
       );
     };

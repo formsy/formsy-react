@@ -137,7 +137,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       contextValue: {
         attachToForm: this.attachToForm,
         detachFromForm: this.detachFromForm,
-        isFormDisabled: this.props.disabled,
+        isFormDisabled: props.disabled,
         isValidValue: (component, value) => this.runValidation(component, value).isValid,
         validate: this.validate,
       },
@@ -152,7 +152,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   public componentDidUpdate = (prevProps: FormsyProps) => {
-    const { validationErrors } = this.props;
+    const { validationErrors, disabled } = this.props;
 
     if (validationErrors && typeof validationErrors === 'object' && Object.keys(validationErrors).length > 0) {
       this.setInputValidationErrors(validationErrors);
@@ -164,14 +164,15 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.validateForm();
     }
 
-    if (this.props.disabled !== prevProps.disabled) {
-      this.setState({
-        ...this.state,
+    if (disabled !== prevProps.disabled) {
+      // eslint-disable-next-line
+      this.setState(state => ({
+        ...state,
         contextValue: {
-          ...this.state.contextValue,
-          isFormDisabled: this.props.disabled,
+          ...state.contextValue,
+          isFormDisabled: disabled,
         },
-      });
+      }));
     }
   };
 
@@ -521,14 +522,17 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       showError,
       showRequired,
       validationErrors,
+      children,
       /* eslint-enable @typescript-eslint/no-unused-vars */
       ...nonFormsyProps
     } = this.props;
+    const { contextValue } = this.state;
 
     return (
-      <FormsyContext.Provider value={this.state.contextValue}>
+      // eslint-disable-next-line
+      <FormsyContext.Provider value={contextValue}>
         <form onReset={this.resetInternal} onSubmit={this.submit} {...nonFormsyProps}>
-          {this.props.children}
+          {children}
         </form>
       </FormsyContext.Provider>
     );
