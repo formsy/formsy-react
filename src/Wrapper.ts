@@ -114,7 +114,7 @@ export default function<Props, State>(
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
     public static contextType = FormsyContext;
-    public context!: React.ContextType<typeof FormsyContext>;
+    public context: React.ContextType<typeof FormsyContext>;
 
     public static defaultProps: any = {
       innerRef: null,
@@ -141,8 +141,9 @@ export default function<Props, State>(
       };
     }
 
-    public componentWillMount() {
+    public componentDidMount() {
       const { validations, required, name } = this.props;
+
       const configure = () => {
         this.setValidations(validations, required);
 
@@ -154,25 +155,19 @@ export default function<Props, State>(
         throw new Error('Form Input requires a name property when used');
       }
 
+      this.setValidations(validations, required);
+
+      // Pass a function instead?
       configure();
     }
 
-    // We have to make sure the validate method is kept when new props are added
-    public componentWillReceiveProps(nextProps) {
-      this.setValidations(nextProps.validations, nextProps.required);
-    }
-
     public shouldComponentUpdate(nextProps, nextState, nextContext) {
-      const {
-        props,
-        state,
-        context: { formsy: formsyContext },
-      } = this;
+      const { props, state, context } = this;
       const isPropsChanged = Object.keys(props).some(k => props[k] !== nextProps[k]);
 
       const isStateChanged = Object.keys(state).some(k => state[k] !== nextState[k]);
 
-      const isFormsyContextChanged = Object.keys(formsyContext).some(k => formsyContext[k] !== nextContext.formsy[k]);
+      const isFormsyContextChanged = Object.keys(context).some(k => context[k] !== nextContext[k]);
 
       return isPropsChanged || isStateChanged || isFormsyContextChanged;
     }
@@ -188,6 +183,7 @@ export default function<Props, State>(
 
       // If validations or required is changed, run a new validation
       if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+        this.setValidations(validations, required);
         this.context.validate(this);
       }
     }
@@ -245,7 +241,7 @@ export default function<Props, State>(
     public hasValue = () => this.state.value !== '';
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isFormDisabled = () => this.context.isFormDisabled
+    public isFormDisabled = () => this.context.isFormDisabled();
 
     // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = () => this.state.formSubmitted;

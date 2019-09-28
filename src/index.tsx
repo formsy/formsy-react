@@ -147,16 +147,11 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   }
 
   public componentDidMount = () => {
+    this.prevInputNames = this.inputs.map(component => component.props.name);
     this.validateForm();
   };
 
-  public componentWillUpdate = () => {
-    // Keep a reference to input names before form updates,
-    // to check if inputs has changed after render
-    this.prevInputNames = this.inputs.map(component => component.props.name);
-  };
-
-  public componentDidUpdate = () => {
+  public componentDidUpdate = (nextProps: FormsyProps) => {
     const { validationErrors } = this.props;
 
     if (validationErrors && typeof validationErrors === 'object' && Object.keys(validationErrors).length > 0) {
@@ -165,6 +160,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
     const newInputNames = this.inputs.map(component => component.props.name);
     if (this.prevInputNames && utils.arraysDiffer(this.prevInputNames, newInputNames)) {
+      this.prevInputNames = newInputNames;
       this.validateForm();
     }
   };
@@ -475,9 +471,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     // If there are no inputs, set state where form is ready to trigger
     // change event. New inputs might be added later
     if (!this.inputs.length) {
-      this.setState({
-        canChange: true,
-      });
+      onValidationComplete();
     }
   };
 
@@ -515,17 +509,9 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
     return (
       <FormsyContext.Provider value={this.contextValue}>
-        {React.createElement(
-          'form',
-          {
-            onReset: this.resetInternal,
-            onSubmit: this.submit,
-            ...nonFormsyProps,
-            disabled: false,
-          },
-          // eslint-disable-next-line react/destructuring-assignment
-          this.props.children,
-        )}
+        <form onReset={this.resetInternal} onSubmit={this.submit} {...nonFormsyProps}>
+          {this.props.children}
+        </form>
       </FormsyContext.Provider>
     );
   };
