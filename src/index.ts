@@ -66,6 +66,10 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public static displayName = 'Formsy';
 
+  public static childContextTypes = {
+    formsy: PropTypes.object,
+  };
+
   public static defaultProps: Partial<FormsyProps> = {
     disabled: false,
     getErrorMessage: () => {},
@@ -123,10 +127,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     showError: PropTypes.func,
     showRequired: PropTypes.func,
     validationErrors: PropTypes.object, // eslint-disable-line
-  };
-
-  public static childContextTypes = {
-    formsy: PropTypes.object,
   };
 
   public constructor(props: FormsyProps) {
