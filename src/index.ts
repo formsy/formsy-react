@@ -66,36 +66,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public static displayName = 'Formsy';
 
-  public static defaultProps: Partial<FormsyProps> = {
-    disabled: false,
-    getErrorMessage: () => {},
-    getErrorMessages: () => {},
-    getValue: () => {},
-    hasValue: () => {},
-    isFormDisabled: () => {},
-    isFormSubmitted: () => {},
-    isPristine: () => {},
-    isRequired: () => {},
-    isValid: () => {},
-    isValidValue: () => {},
-    mapping: null,
-    onChange: () => {},
-    onError: () => {},
-    onInvalid: () => {},
-    onInvalidSubmit: () => {},
-    onReset: () => {},
-    onSubmit: () => {},
-    onValid: () => {},
-    onValidSubmit: () => {},
-    preventExternalInvalidation: false,
-    resetValue: () => {},
-    setValidations: () => {},
-    setValue: () => {},
-    showError: () => {},
-    showRequired: () => {},
-    validationErrors: null,
-  };
-
   public static propTypes = {
     disabled: PropTypes.bool,
     getErrorMessage: PropTypes.func,
@@ -127,6 +97,36 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public static childContextTypes = {
     formsy: PropTypes.object,
+  };
+
+  public static defaultProps: Partial<FormsyProps> = {
+    disabled: false,
+    getErrorMessage: () => {},
+    getErrorMessages: () => {},
+    getValue: () => {},
+    hasValue: () => {},
+    isFormDisabled: () => {},
+    isFormSubmitted: () => {},
+    isPristine: () => {},
+    isRequired: () => {},
+    isValid: () => {},
+    isValidValue: () => {},
+    mapping: null,
+    onChange: () => {},
+    onError: () => {},
+    onInvalid: () => {},
+    onInvalidSubmit: () => {},
+    onReset: () => {},
+    onSubmit: () => {},
+    onValid: () => {},
+    onValidSubmit: () => {},
+    preventExternalInvalidation: false,
+    resetValue: () => {},
+    setValidations: () => {},
+    setValue: () => {},
+    showError: () => {},
+    showRequired: () => {},
+    validationErrors: null,
   };
 
   public constructor(props: FormsyProps) {
