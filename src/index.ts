@@ -66,6 +66,35 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public static displayName = 'Formsy';
 
+  public static propTypes = {
+    disabled: PropTypes.bool,
+    getErrorMessage: PropTypes.func,
+    getErrorMessages: PropTypes.func,
+    getValue: PropTypes.func,
+    hasValue: PropTypes.func,
+    isFormDisabled: PropTypes.func,
+    isFormSubmitted: PropTypes.func,
+    isPristine: PropTypes.func,
+    isRequired: PropTypes.func,
+    isValid: PropTypes.func,
+    isValidValue: PropTypes.func,
+    mapping: PropTypes.func,
+    onChange: PropTypes.func,
+    onInvalid: PropTypes.func,
+    onInvalidSubmit: PropTypes.func,
+    onReset: PropTypes.func,
+    onSubmit: PropTypes.func,
+    onValid: PropTypes.func,
+    onValidSubmit: PropTypes.func,
+    preventExternalInvalidation: PropTypes.bool,
+    resetValue: PropTypes.func,
+    setValidations: PropTypes.func,
+    setValue: PropTypes.func,
+    showError: PropTypes.func,
+    showRequired: PropTypes.func,
+    validationErrors: PropTypes.object, // eslint-disable-line
+  };
+
   public static childContextTypes = {
     formsy: PropTypes.object,
   };
@@ -98,35 +127,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     showError: () => {},
     showRequired: () => {},
     validationErrors: null,
-  };
-
-  public static propTypes = {
-    disabled: PropTypes.bool,
-    getErrorMessage: PropTypes.func,
-    getErrorMessages: PropTypes.func,
-    getValue: PropTypes.func,
-    hasValue: PropTypes.func,
-    isFormDisabled: PropTypes.func,
-    isFormSubmitted: PropTypes.func,
-    isPristine: PropTypes.func,
-    isRequired: PropTypes.func,
-    isValid: PropTypes.func,
-    isValidValue: PropTypes.func,
-    mapping: PropTypes.func,
-    onChange: PropTypes.func,
-    onInvalid: PropTypes.func,
-    onInvalidSubmit: PropTypes.func,
-    onReset: PropTypes.func,
-    onSubmit: PropTypes.func,
-    onValid: PropTypes.func,
-    onValidSubmit: PropTypes.func,
-    preventExternalInvalidation: PropTypes.bool,
-    resetValue: PropTypes.func,
-    setValidations: PropTypes.func,
-    setValue: PropTypes.func,
-    showError: PropTypes.func,
-    showRequired: PropTypes.func,
-    validationErrors: PropTypes.object, // eslint-disable-line
   };
 
   public constructor(props: FormsyProps) {
