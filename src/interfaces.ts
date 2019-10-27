@@ -13,7 +13,7 @@ export type IUpdateInputsWithError = (errors: any, invalidate?: boolean) => void
 
 export type ValidationFunction = (values: Values, value: Value, extra?: any) => boolean;
 
-export type Validation = string | true | ValidationFunction;
+export type Validation = string | boolean | ValidationFunction;
 
 export interface Validations {
   [key: string]: Validation;
