@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
-import { IModel, InputComponent, IResetModel, IUpdateInputsWithError, ValidationFunction } from './interfaces';
+import { IModel, InputComponent, IResetModel, ISetInputValue, IUpdateInputsWithError, ValidationFunction } from './interfaces';
 declare type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 export interface FormsyProps extends FormHTMLAttributesCleaned {
     disabled: boolean;
@@ -45,7 +45,6 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     emptyArray: any[];
     prevInputNames: any[] | null;
     static displayName: string;
-    static defaultProps: Partial<FormsyProps>;
     static propTypes: {
         disabled: PropTypes.Requireable<boolean>;
         getErrorMessage: PropTypes.Requireable<(...args: any[]) => any>;
@@ -77,18 +76,18 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     static childContextTypes: {
         formsy: PropTypes.Requireable<object>;
     };
+    static defaultProps: Partial<FormsyProps>;
     constructor(props: FormsyProps);
     getChildContext: () => {
         formsy: {
             attachToForm: (component: any) => void;
             detachFromForm: (component: InputComponent) => void;
-            isFormDisabled: () => boolean;
+            isFormDisabled: boolean;
             isValidValue: (component: any, value: any) => boolean;
             validate: (component: InputComponent) => void;
         };
     };
     componentDidMount: () => void;
-    componentWillUpdate: () => void;
     componentDidUpdate: () => void;
     getCurrentValues: () => any;
     getModel: () => any;
@@ -96,11 +95,13 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     setFormPristine: (isPristine: boolean) => void;
     setInputValidationErrors: (errors: any) => void;
     setFormValidState: (allIsValid: boolean) => void;
+    isValidValue: (component: any, value: any) => boolean;
     isFormDisabled: () => boolean;
     mapModel: (model: any) => any;
     reset: (data?: any) => void;
     resetInternal: (event: any) => void;
     resetModel: IResetModel;
+    setValue: ISetInputValue;
     runValidation: (component: InputComponent, value?: any) => {
         isRequired: boolean;
         isValid: boolean;

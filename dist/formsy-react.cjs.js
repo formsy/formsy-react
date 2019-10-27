@@ -61,12 +61,13 @@ function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
 
   if (Object.getOwnPropertySymbols) {
-    keys.push.apply(keys, Object.getOwnPropertySymbols(object));
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
   }
 
-  if (enumerableOnly) keys = keys.filter(function (sym) {
-    return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-  });
   return keys;
 }
 
@@ -1663,7 +1664,7 @@ function Wrapper (WrappedComponent) {
         // Add validations to the store itself as the props object can not be modified
         _this.validations = convertValidationsToObject(validations) || {};
         _this.requiredValidations = required === true ? {
-          isDefaultRequiredValue: true
+          isDefaultRequiredValue: required
         } : convertValidationsToObject(required);
       };
 
@@ -1690,7 +1691,7 @@ function Wrapper (WrappedComponent) {
       };
 
       _this.isFormDisabled = function () {
-        return _this.context.formsy.isFormDisabled();
+        return _this.context.formsy.isFormDisabled;
       };
 
       _this.isFormSubmitted = function () {
@@ -1747,49 +1748,38 @@ function Wrapper (WrappedComponent) {
     }
 
     _createClass(_class, [{
-      key: "componentWillMount",
-      value: function componentWillMount() {
-        var _this2 = this;
-
+      key: "componentDidMount",
+      value: function componentDidMount() {
         var _this$props = this.props,
             validations = _this$props.validations,
             required = _this$props.required,
             name = _this$props.name;
         var formsy = this.context.formsy;
 
-        var configure = function configure() {
-          _this2.setValidations(validations, required); // Pass a function instead?
-
-
-          formsy.attachToForm(_this2);
-        };
-
         if (!name) {
           throw new Error('Form Input requires a name property when used');
         }
 
-        configure();
-      } // We have to make sure the validate method is kept when new props are added
+        this.setValidations(validations, required); // Pass a function instead?
 
-    }, {
-      key: "componentWillReceiveProps",
-      value: function componentWillReceiveProps(nextProps) {
-        this.setValidations(nextProps.validations, nextProps.required);
+        formsy.attachToForm(this);
       }
     }, {
       key: "shouldComponentUpdate",
-      value: function shouldComponentUpdate(nextProps, nextState) {
-        var _this3 = this;
-
-        // eslint-disable-next-line react/destructuring-assignment
-        var isPropsChanged = Object.keys(this.props).some(function (k) {
-          return _this3.props[k] !== nextProps[k];
-        }); // eslint-disable-next-line react/destructuring-assignment
-
-        var isStateChanged = Object.keys(this.state).some(function (k) {
-          return _this3.state[k] !== nextState[k];
+      value: function shouldComponentUpdate(nextProps, nextState, nextContext) {
+        var props = this.props,
+            state = this.state,
+            formsyContext = this.context.formsy;
+        var isPropsChanged = Object.keys(props).some(function (k) {
+          return props[k] !== nextProps[k];
         });
-        return isPropsChanged || isStateChanged;
+        var isStateChanged = Object.keys(state).some(function (k) {
+          return state[k] !== nextState[k];
+        });
+        var isFormsyContextChanged = Object.keys(formsyContext).some(function (k) {
+          return formsyContext[k] !== nextContext.formsy[k];
+        });
+        return isPropsChanged || isStateChanged || isFormsyContextChanged;
       }
     }, {
       key: "componentDidUpdate",
@@ -1807,13 +1797,15 @@ function Wrapper (WrappedComponent) {
 
 
         if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+          this.setValidations(validations, required);
           formsy.validate(this);
         }
       } // Detach it when component unmounts
+      // eslint-disable-next-line react/sort-comp
 
     }, {
-      key: "componentWillUnmount",
-      value: function componentWillUnmount() {
+      key: "componentDidUnmount",
+      value: function componentDidUnmount() {
         var formsy = this.context.formsy;
         formsy.detachFromForm(this);
       }
@@ -1849,7 +1841,7 @@ function Wrapper (WrappedComponent) {
     }]);
 
     return _class;
-  }(React.Component), _class.displayName = "Formsy(".concat(getDisplayName(WrappedComponent), ")"), _class.contextTypes = {
+  }(React.Component), _class.displayName = "Formsy(".concat(getDisplayName(WrappedComponent), ")"), _class.propTypes = propTypes$1, _class.contextTypes = {
     formsy: propTypes.object // What about required?
 
   }, _class.defaultProps = {
@@ -1859,7 +1851,7 @@ function Wrapper (WrappedComponent) {
     validationErrors: {},
     validations: null,
     value: WrappedComponent.defaultValue
-  }, _class.propTypes = propTypes$1, _temp;
+  }, _temp;
 }
 
 var Formsy =
@@ -1882,25 +1874,19 @@ function (_React$Component) {
         formsy: {
           attachToForm: _this.attachToForm,
           detachFromForm: _this.detachFromForm,
-          isFormDisabled: _this.isFormDisabled,
-          isValidValue: function isValidValue(component, value) {
-            return _this.runValidation(component, value).isValid;
-          },
+          isFormDisabled: _this.isFormDisabled(),
+          isValidValue: _this.isValidValue,
           validate: _this.validate
         }
       };
     };
 
     _this.componentDidMount = function () {
-      _this.validateForm();
-    };
-
-    _this.componentWillUpdate = function () {
-      // Keep a reference to input names before form updates,
-      // to check if inputs has changed after render
       _this.prevInputNames = _this.inputs.map(function (component) {
         return component.props.name;
       });
+
+      _this.validateForm();
     };
 
     _this.componentDidUpdate = function () {
@@ -1915,6 +1901,8 @@ function (_React$Component) {
       });
 
       if (_this.prevInputNames && utils.arraysDiffer(_this.prevInputNames, newInputNames)) {
+        _this.prevInputNames = newInputNames;
+
         _this.validateForm();
       }
     };
@@ -1993,6 +1981,10 @@ function (_React$Component) {
       }
     };
 
+    _this.isValidValue = function (component, value) {
+      return _this.runValidation(component, value).isValid;
+    };
+
     _this.isFormDisabled = function () {
       return _this.props.disabled;
     };
@@ -2047,6 +2039,16 @@ function (_React$Component) {
       });
 
       _this.validateForm();
+    };
+
+    _this.setValue = function (name, value, validate) {
+      var input = utils.find(_this.inputs, function (component) {
+        return component.props.name === name;
+      });
+
+      if (input) {
+        input.setValue(value, validate);
+      }
     };
 
     _this.runValidation = function (component) {
@@ -2280,35 +2282,6 @@ function (_React$Component) {
 }(React.Component);
 
 Formsy.displayName = 'Formsy';
-Formsy.defaultProps = {
-  disabled: false,
-  getErrorMessage: function getErrorMessage() {},
-  getErrorMessages: function getErrorMessages() {},
-  getValue: function getValue() {},
-  hasValue: function hasValue() {},
-  isFormDisabled: function isFormDisabled() {},
-  isFormSubmitted: function isFormSubmitted() {},
-  isPristine: function isPristine() {},
-  isRequired: function isRequired() {},
-  isValid: function isValid() {},
-  isValidValue: function isValidValue() {},
-  mapping: null,
-  onChange: function onChange() {},
-  onError: function onError() {},
-  onInvalid: function onInvalid() {},
-  onInvalidSubmit: function onInvalidSubmit() {},
-  onReset: function onReset() {},
-  onSubmit: function onSubmit() {},
-  onValid: function onValid() {},
-  onValidSubmit: function onValidSubmit() {},
-  preventExternalInvalidation: false,
-  resetValue: function resetValue() {},
-  setValidations: function setValidations() {},
-  setValue: function setValue() {},
-  showError: function showError() {},
-  showRequired: function showRequired() {},
-  validationErrors: null
-};
 Formsy.propTypes = {
   disabled: propTypes.bool,
   getErrorMessage: propTypes.func,
@@ -2340,6 +2313,35 @@ Formsy.propTypes = {
 };
 Formsy.childContextTypes = {
   formsy: propTypes.object
+};
+Formsy.defaultProps = {
+  disabled: false,
+  getErrorMessage: function getErrorMessage() {},
+  getErrorMessages: function getErrorMessages() {},
+  getValue: function getValue() {},
+  hasValue: function hasValue() {},
+  isFormDisabled: function isFormDisabled() {},
+  isFormSubmitted: function isFormSubmitted() {},
+  isPristine: function isPristine() {},
+  isRequired: function isRequired() {},
+  isValid: function isValid() {},
+  isValidValue: function isValidValue() {},
+  mapping: null,
+  onChange: function onChange() {},
+  onError: function onError() {},
+  onInvalid: function onInvalid() {},
+  onInvalidSubmit: function onInvalidSubmit() {},
+  onReset: function onReset() {},
+  onSubmit: function onSubmit() {},
+  onValid: function onValid() {},
+  onValidSubmit: function onValidSubmit() {},
+  preventExternalInvalidation: false,
+  resetValue: function resetValue() {},
+  setValidations: function setValidations() {},
+  setValue: function setValue() {},
+  showError: function showError() {},
+  showRequired: function showRequired() {},
+  validationErrors: null
 };
 
 var addValidationRule = function addValidationRule(name, func) {
