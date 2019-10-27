@@ -6,7 +6,7 @@ import { Validations, WrappedComponentClass, RequiredValidation, Value } from '.
 
 /* eslint-disable react/default-props-match-prop-types */
 
-const convertValidationsToObject = (validations: string | Validations): Validations => {
+const convertValidationsToObject = (validations: string | false | Validations): Validations => {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
       let args = validation.split(':');
@@ -211,7 +211,7 @@ export default function<T>(
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations =
-        typeof required === 'boolean' ? { isDefaultRequiredValue: required } : convertValidationsToObject(required);
+        required === true ? { isDefaultRequiredValue: required } : convertValidationsToObject(required);
     };
 
     // By default, we validate after the value has been set.
