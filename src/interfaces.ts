@@ -19,7 +19,7 @@ export interface Validations {
   [key: string]: Validation;
 }
 
-export type RequiredValidation = string | true | Validations;
+export type RequiredValidation = string | boolean | Validations;
 
 export interface ComponentWithStaticAttributes extends ComponentClass {
   string?: any;
