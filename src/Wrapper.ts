@@ -112,6 +112,8 @@ export default function<Props, State, CompState>(
 
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
+    public static propTypes: any = propTypes;
+
     public static contextTypes = {
       formsy: PropTypes.object, // What about required?
     };
@@ -124,8 +126,6 @@ export default function<Props, State, CompState>(
       validations: null,
       value: (WrappedComponent as any).defaultValue,
     };
-
-    public static propTypes: any = propTypes;
 
     public constructor(props) {
       super(props);
