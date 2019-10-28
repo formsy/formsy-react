@@ -133,7 +133,7 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         noValidate?: boolean;
         target?: string;
         defaultChecked?: boolean;
-        defaultValue?: string | string[];
+        defaultValue?: string | number | string[];
         suppressContentEditableWarning?: boolean;
         suppressHydrationWarning?: boolean;
         accessKey?: string;
@@ -146,8 +146,6 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         placeholder?: string;
         spellCheck?: boolean;
         tabIndex?: number;
-        inputMode?: string;
-        is?: string;
         radioGroup?: string;
         role?: string;
         about?: string;
@@ -169,6 +167,8 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         results?: number;
         security?: string;
         unselectable?: "on" | "off";
+        inputMode?: "search" | "none" | "text" | "decimal" | "numeric" | "tel" | "url" | "email";
+        is?: string;
         'aria-activedescendant'?: string;
         'aria-atomic'?: boolean | "false" | "true";
         'aria-autocomplete'?: "none" | "both" | "inline" | "list";
