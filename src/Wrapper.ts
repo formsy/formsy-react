@@ -185,7 +185,7 @@ export default function<T>(
 
     // Detach it when component unmounts
     // eslint-disable-next-line react/sort-comp
-    public componentDidUnmount() {
+    public componentWillUnmount() {
       const { formsy } = this.context;
       formsy.detachFromForm(this);
     }
