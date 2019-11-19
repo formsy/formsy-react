@@ -1,7 +1,6 @@
 import React from 'react';
 import sinon from 'sinon';
 import { mount } from 'enzyme';
-
 import Formsy, { withFormsy } from '../src';
 import immediate from '../__test_utils__/immediate';
 import TestInput, { InputFactory } from '../__test_utils__/TestInput';
@@ -607,5 +606,18 @@ describe('Element', () => {
         <TestInput ref={onInputRef} name="name" value="foo" />
       </Formsy>,
     );
+  });
+
+  it('unregisters on unmount', () => {
+    const TestComponent = ({ hasInput }) => <Formsy>{hasInput ? <TestInput name="foo" value="foo" /> : null}</Formsy>;
+
+    const wrapper = mount(<TestComponent hasInput />);
+    const formsy = wrapper.find(Formsy).instance();
+
+    expect(formsy.inputs).toHaveLength(1);
+
+    wrapper.setProps({ hasInput: false });
+
+    expect(formsy.inputs).toHaveLength(0);
   });
 });
