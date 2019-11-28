@@ -385,12 +385,14 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     // so validation becomes visible (if based on isPristine)
     this.setFormPristine(false);
     const model = this.getModel();
-    onSubmit(model, this.resetModel, this.updateInputsWithError);
+
     if (isValid) {
       onValidSubmit(model, this.resetModel, this.updateInputsWithError);
     } else {
       onInvalidSubmit(model, this.resetModel, this.updateInputsWithError);
     }
+
+    return onSubmit(model, this.resetModel, this.updateInputsWithError);
   };
 
   // Go through errors from server and grab the components

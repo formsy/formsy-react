@@ -2144,13 +2144,13 @@ function (_React$Component) {
 
       var model = _this.getModel();
 
-      onSubmit(model, _this.resetModel, _this.updateInputsWithError);
-
       if (isValid) {
         onValidSubmit(model, _this.resetModel, _this.updateInputsWithError);
       } else {
         onInvalidSubmit(model, _this.resetModel, _this.updateInputsWithError);
       }
+
+      return onSubmit(model, _this.resetModel, _this.updateInputsWithError);
     };
 
     _this.updateInputsWithError = function (errors, invalidate) {
