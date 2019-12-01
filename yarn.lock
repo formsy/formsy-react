@@ -1627,9 +1627,9 @@ atob@^2.1.1:
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
 auto-changelog@^1.14.1:
-  version "1.16.1"
-  resolved "https://registry.yarnpkg.com/auto-changelog/-/auto-changelog-1.16.1.tgz#8d62a1d3afd72ba848452f9ec9adbb6cb0fd2808"
-  integrity sha512-1OMUN5UWWhKtlEMpGUfbLFcZHDf4IXMNU4SsGs44xTlSBhjgTOx9ukbahoC7hTqIm6+sRAnlAbLY4UjbDZY18A==
+  version "1.16.2"
+  resolved "https://registry.yarnpkg.com/auto-changelog/-/auto-changelog-1.16.2.tgz#4b08b7cbd07fdbd9139c6e06ea0b704db3f5485c"
+  integrity sha512-QL7zKH5FBBHz6tECO8CjZ8LpdevVSJoDskDzzPeoB9Bfe6LyXmRzXUoTIFKJXXdVaX8ydMpDO9Oa8ihZ4Au+CA==
   dependencies:
     commander "^3.0.1"
     core-js "^3.2.1"
