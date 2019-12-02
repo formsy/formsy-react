@@ -52,6 +52,7 @@ export interface WrapperProps {
   innerRef?: (ref: any) => void;
   name: string;
   required?: RequiredValidation;
+  isRequired?: RequiredValidation;
   validationError?: any;
   validationErrors?: any;
   validations?: Validations | string;
@@ -138,7 +139,8 @@ export default function<T>(
     }
 
     public componentDidMount() {
-      const { validations, required, name } = this.props;
+      const { validations, required: _required, isRequired, name } = this.props;
+      const required = isRequired || _required;
       const { formsy } = this.context;
 
       if (!name) {
@@ -167,7 +169,8 @@ export default function<T>(
     }
 
     public componentDidUpdate(prevProps) {
-      const { value, validations, required } = this.props;
+      const { value, validations, required: _required, isRequired } = this.props;
+      const required = isRequired || _required;
       const { formsy } = this.context;
 
       // If the value passed has changed, set it. If value is not passed it will
@@ -249,7 +252,7 @@ export default function<T>(
     public isPristine = () => this.state.isPristine;
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isRequired = () => !!this.props.required;
+    public isRequired = () => !!(this.props.required || this.props.isRequired);
 
     // eslint-disable-next-line react/destructuring-assignment
     public isValid = () => this.state.isValid;

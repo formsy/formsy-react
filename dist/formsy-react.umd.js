@@ -1712,7 +1712,7 @@
         };
 
         _this.isRequired = function () {
-          return !!_this.props.required;
+          return !!(_this.props.required || _this.props.isRequired);
         };
 
         _this.isValid = function () {
@@ -1761,8 +1761,10 @@
         value: function componentDidMount() {
           var _this$props = this.props,
               validations = _this$props.validations,
-              required = _this$props.required,
+              _required = _this$props.required,
+              isRequired = _this$props.isRequired,
               name = _this$props.name;
+          var required = isRequired || _required;
           var formsy = this.context.formsy;
 
           if (!name) {
@@ -1796,7 +1798,9 @@
           var _this$props2 = this.props,
               value = _this$props2.value,
               validations = _this$props2.validations,
-              required = _this$props2.required;
+              _required = _this$props2.required,
+              isRequired = _this$props2.isRequired;
+          var required = isRequired || _required;
           var formsy = this.context.formsy; // If the value passed has changed, set it. If value is not passed it will
           // internally update, and this will never run
 
