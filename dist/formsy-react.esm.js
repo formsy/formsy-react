@@ -1795,6 +1795,7 @@ function Wrapper (WrappedComponent) {
             _required = _this$props2.required,
             isRequired = _this$props2.isRequired;
         var required = isRequired || _required;
+        var prevRequired = prevProps.isRequired || prevProps.required;
         var formsy = this.context.formsy; // If the value passed has changed, set it. If value is not passed it will
         // internally update, and this will never run
 
@@ -1803,7 +1804,7 @@ function Wrapper (WrappedComponent) {
         } // If validations or required is changed, run a new validation
 
 
-        if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+        if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevRequired)) {
           this.setValidations(validations, required);
           formsy.validate(this);
         }

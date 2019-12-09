@@ -171,6 +171,7 @@ export default function<T>(
     public componentDidUpdate(prevProps) {
       const { value, validations, required: _required, isRequired } = this.props;
       const required = isRequired || _required;
+      const prevRequired = prevProps.isRequired || prevProps.required;
       const { formsy } = this.context;
 
       // If the value passed has changed, set it. If value is not passed it will
@@ -180,7 +181,7 @@ export default function<T>(
       }
 
       // If validations or required is changed, run a new validation
-      if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+      if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevRequired)) {
         this.setValidations(validations, required);
         formsy.validate(this);
       }
