@@ -320,11 +320,13 @@ to separate argument passed to the validator. The argument will go through a **J
 JavaScript types. Meaning:
 
 ```jsx
-<MyInput name="fruit" validations="isIn:['apple', 'orange']"/>
-<MyInput name="car" validations="mapsTo:{'bmw': true, 'vw': true}"/>
+<MyInput name='fruit' validations='isIn:["apple", "orange"]'/>
+<MyInput name='car' validations='mapsTo:{"bmw": true, "vw": true}'/>
 ```
 
 Works just fine.
+
+**NOTE**: use double quotes to quote the strings in the array/objects argument. `JSON.parse()` will not parse single quotes.
 
 #### <a id="validationError">validationError</a>
 
@@ -686,8 +688,10 @@ addValidationRule('isIn', function(values, value, array) {
 ```
 
 ```jsx
-<MyInput name="fruit" validations="isIn:['apple', 'orange', 'pear']" />
+<MyInput name='fruit' validations='isIn:["apple", "orange", "pear"]' />
 ```
+
+**NOTE**: use double quotes to quote the strings in the array argument. `JSON.parse()` will not parse single quotes.
 
 Cross input validation:
 
