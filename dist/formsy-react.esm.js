@@ -70,13 +70,13 @@ function _objectSpread2(target) {
     var source = arguments[i] != null ? arguments[i] : {};
 
     if (i % 2) {
-      ownKeys(source, true).forEach(function (key) {
+      ownKeys(Object(source), true).forEach(function (key) {
         _defineProperty(target, key, source[key]);
       });
     } else if (Object.getOwnPropertyDescriptors) {
       Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
     } else {
-      ownKeys(source).forEach(function (key) {
+      ownKeys(Object(source)).forEach(function (key) {
         Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
       });
     }
@@ -1807,8 +1807,8 @@ function Wrapper (WrappedComponent) {
       // eslint-disable-next-line react/sort-comp
 
     }, {
-      key: "componentDidUnmount",
-      value: function componentDidUnmount() {
+      key: "componentWillUnmount",
+      value: function componentWillUnmount() {
         var formsy = this.context.formsy;
         formsy.detachFromForm(this);
       }

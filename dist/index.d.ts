@@ -138,14 +138,15 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         suppressHydrationWarning?: boolean;
         accessKey?: string;
         className?: string;
-        contentEditable?: boolean;
+        contentEditable?: boolean | "inherit" | "false" | "true";
         contextMenu?: string;
-        draggable?: boolean;
+        draggable?: boolean | "false" | "true";
         id?: string;
         lang?: string;
         placeholder?: string;
-        spellCheck?: boolean;
+        spellCheck?: boolean | "false" | "true";
         tabIndex?: number;
+        translate?: "yes" | "no";
         radioGroup?: string;
         role?: string;
         about?: string;
