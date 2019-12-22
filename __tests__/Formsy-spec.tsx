@@ -1,11 +1,12 @@
-import React from 'react';
 import { mount } from 'enzyme';
+import * as React from 'react';
 import sinon from 'sinon';
-
-import Formsy, { addValidationRule } from '../src';
+import DynamicInputForm from '../__test_utils__/DynamicInputForm';
+import immediate from '../__test_utils__/immediate';
 import TestInput from '../__test_utils__/TestInput';
 import TestInputHoc from '../__test_utils__/TestInputHoc';
-import immediate from '../__test_utils__/immediate';
+
+import Formsy, { addValidationRule } from '../src';
 
 describe('Setting up a form', () => {
   it('should expose the users DOM node through an innerRef prop', () => {
@@ -41,6 +42,7 @@ describe('Setting up a form', () => {
 
   it('should allow for null/undefined children', () => {
     let model = null;
+
     class TestForm extends React.Component {
       render() {
         return (
@@ -61,92 +63,63 @@ describe('Setting up a form', () => {
   });
 
   it('should allow for inputs being added dynamically', () => {
-    const inputs = [];
-    let forceUpdate = null;
     let model = null;
-    class TestForm extends React.Component {
-      componentWillMount() {
-        forceUpdate = this.forceUpdate.bind(this);
-      }
-      render() {
-        return <Formsy onSubmit={formModel => (model = formModel)}>{inputs}</Formsy>;
-      }
-    }
-    const form = mount(<TestForm />);
 
-    // Wait before adding the input
-    setTimeout(() => {
-      inputs.push(<TestInput name="test" value="" key={inputs.length} />);
+    const form = mount(<DynamicInputForm onSubmit={formModel => (model = formModel)} inputName="test" />);
+    form.find('button').simulate('click');
+    form.update();
 
-      forceUpdate(() => {
-        // Wait for next event loop, as that does the form
-        immediate(() => {
-          form.simulate('submit');
-          test.ok('test' in model);
-        });
-      });
-    }, 10);
+    form.simulate('submit');
+    expect(model).toHaveProperty('test');
   });
 
   it('should allow dynamically added inputs to update the form-model', () => {
-    const inputs = [];
-    let forceUpdate = null;
     let model = null;
-    class TestForm extends React.Component {
-      componentWillMount() {
-        forceUpdate = this.forceUpdate.bind(this);
-      }
-      render() {
-        return <Formsy onSubmit={formModel => (model = formModel)}>{inputs}</Formsy>;
-      }
-    }
-    const form = mount(<TestForm />);
 
-    // Wait before adding the input
-    immediate(() => {
-      inputs.push(<TestInput name="test" key={inputs.length} />);
+    const form = mount(<DynamicInputForm onSubmit={formModel => (model = formModel)} inputName="test" />);
+    form.find('button').simulate('click');
+    form.update();
 
-      forceUpdate(() => {
-        // Wait for next event loop, as that does the form
-        immediate(() => {
-          form.find('input').simulate({
-            target: { value: 'foo' },
-          });
-          form.simulate('submit');
-          expect(model.test).toEqual('foo');
-        });
-      });
+    form.find('input').simulate('change', {
+      target: { value: 'foo' },
     });
+    form.simulate('submit');
+    expect(model).toHaveProperty('test', 'foo');
   });
 
   it('should allow a dynamically updated input to update the form-model', () => {
-    let forceUpdate = null;
     let model = null;
 
-    class TestForm extends React.Component {
-      componentWillMount() {
-        forceUpdate = this.forceUpdate.bind(this);
-      }
+    class TestForm extends React.Component<any> {
+      public state = {
+        inputValue: this.props.inputValue,
+      };
+
       render() {
-        const input = <TestInput name="test" value={this.props.value} />;
-
-        return <Formsy onSubmit={formModel => (model = formModel)}>{input}</Formsy>;
+        const { inputValue } = this.state;
+        return (
+          <Formsy onSubmit={formModel => (model = formModel)}>
+            <TestInput name="test" value={inputValue} />
+            <button type="button" onClick={this.updateInputValue} />
+          </Formsy>
+        );
       }
+
+      updateInputValue = () => this.setState({ inputValue: 'bar' });
     }
-    let form = mount(<TestForm value="foo" />);
 
-    // Wait before changing the input
-    immediate(() => {
-      form = mount(<TestForm value="bar" />);
+    const form = mount(<TestForm inputValue="foo" />);
 
-      forceUpdate(() => {
-        // Wait for next event loop, as that does the form
-        immediate(() => {
-          form.simulate('submit');
-          expect(model.test).toEqual('bar');
-        });
-      });
-    });
+    form.simulate('submit');
+
+    expect(model).toHaveProperty('test', 'foo');
+
+    form.find('button').simulate('click');
+    form.update();
+    form.simulate('submit');
+    form.update();
+
+    expect(model).toHaveProperty('test', 'bar');
   });
 });
 
@@ -183,11 +156,13 @@ describe('validations', () => {
         super(props);
         this.state = { rule: 'ruleA' };
       }
+
       changeRule = () => {
         this.setState({
           rule: 'ruleB',
         });
       };
+
       render() {
         return (
           <Formsy>
@@ -214,11 +189,13 @@ describe('validations', () => {
         super(props);
         this.state = { showSecondInput: false };
       }
+
       addInput = () => {
         this.setState({
           showSecondInput: true,
         });
       };
+
       render() {
         return (
           <Formsy ref="formsy" onInvalid={isInValidSpy}>
@@ -247,11 +224,13 @@ describe('validations', () => {
         super(props);
         this.state = { showSecondInput: true };
       }
+
       removeInput() {
         this.setState({
           showSecondInput: false,
         });
       }
+
       render() {
         return (
           <Formsy ref="formsy" onValid={isValidSpy}>
@@ -296,11 +275,13 @@ describe('validations', () => {
 describe('onChange', () => {
   it('should not trigger onChange when form is mounted', () => {
     const hasChanged = sinon.spy();
+
     class TestForm extends React.Component {
       render() {
         return <Formsy onChange={hasChanged}></Formsy>;
       }
     }
+
     mount(<TestForm />);
     expect(hasChanged.called).toEqual(false);
   });
@@ -318,15 +299,18 @@ describe('onChange', () => {
 
   it('should trigger onChange once when new input is added to form', () => {
     const hasChanged = sinon.spy();
+
     class TestForm extends React.Component {
       state = {
         showInput: false,
       };
+
       addInput() {
         this.setState({
           showInput: true,
         });
       }
+
       render() {
         return <Formsy onChange={hasChanged}>{this.state.showInput ? <TestInput name="test" /> : null}</Formsy>;
       }
@@ -341,15 +325,18 @@ describe('onChange', () => {
 
   it('onChange should honor dot notation transformations', () => {
     const hasChanged = sinon.spy();
+
     class TestForm extends React.Component {
       state = {
         showInput: false,
       };
+
       addInput() {
         this.setState({
           showInput: true,
         });
       }
+
       render() {
         return (
           <Formsy onChange={hasChanged}>
@@ -371,9 +358,11 @@ describe('Update a form', () => {
   it('should allow elements to check if the form is disabled', () => {
     class TestForm extends React.Component {
       state = { disabled: true };
+
       enableForm() {
         this.setState({ disabled: false });
       }
+
       render() {
         return (
           <Formsy disabled={this.state.disabled}>
@@ -399,6 +388,7 @@ describe('Update a form', () => {
       onChange = values => {
         this.setState(values.foo ? { validationErrors: {} } : { validationErrors: { foo: 'bar' } });
       };
+
       render() {
         return (
           <Formsy onChange={this.onChange} validationErrors={this.state.validationErrors}>
@@ -407,6 +397,7 @@ describe('Update a form', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
 
     // Wait for update
@@ -424,6 +415,7 @@ describe('Update a form', () => {
 
   it('should trigger an onValidSubmit when submitting a valid form', () => {
     let isCalled = sinon.spy();
+
     class TestForm extends React.Component {
       render() {
         return (
@@ -433,6 +425,7 @@ describe('Update a form', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
     const FoundForm = form.find(TestForm);
     FoundForm.simulate('submit');
@@ -441,6 +434,7 @@ describe('Update a form', () => {
 
   it('should trigger an onInvalidSubmit when submitting an invalid form', () => {
     let isCalled = sinon.spy();
+
     class TestForm extends React.Component {
       render() {
         return (
@@ -450,6 +444,7 @@ describe('Update a form', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
 
     const FoundForm = form.find(TestForm);
@@ -461,6 +456,7 @@ describe('Update a form', () => {
 describe('value === false', () => {
   it('should call onSubmit correctly', () => {
     const onSubmit = sinon.spy();
+
     class TestForm extends React.Component {
       render() {
         return (
@@ -479,15 +475,18 @@ describe('value === false', () => {
 
   it('should allow dynamic changes to false', () => {
     const onSubmit = sinon.spy();
+
     class TestForm extends React.Component {
       state = {
         value: true,
       };
+
       changeValue() {
         this.setState({
           value: false,
         });
       }
+
       render() {
         return (
           <Formsy onSubmit={onSubmit}>
@@ -515,6 +514,7 @@ describe('value === false', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
     expect(input.instance().isFormSubmitted()).toEqual(false);
@@ -527,11 +527,13 @@ describe('value === false', () => {
       state = {
         value: true,
       };
+
       changeValue() {
         this.setState({
           value: false,
         });
       }
+
       render() {
         return (
           <Formsy>
@@ -541,6 +543,7 @@ describe('value === false', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
     const formsyForm = form.find(Formsy);
@@ -557,6 +560,7 @@ describe('value === false', () => {
         valueFoo: true,
         valueBar: true,
       };
+
       render() {
         return (
           <Formsy>
@@ -567,6 +571,7 @@ describe('value === false', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
     const inputs = form.find(TestInput);
     const formsyForm = form.find(Formsy);
@@ -602,11 +607,13 @@ describe('value === false', () => {
       state = {
         value: true,
       };
+
       changeValue() {
         this.setState({
           value: false,
         });
       }
+
       render() {
         return (
           <Formsy>
@@ -616,6 +623,7 @@ describe('value === false', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
     const formsyForm = form.find(Formsy);
@@ -642,6 +650,7 @@ describe('.reset()', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
     const formsyForm = form.find(Formsy);
@@ -714,6 +723,7 @@ describe('form valid state', () => {
       onInvalid = () => {
         this.setState({ isValid: false });
       };
+
       render() {
         return (
           <Formsy onInvalid={this.onInvalid} onValid={this.onValid} onValidSubmit={this.onValidSubmit}>
@@ -722,6 +732,7 @@ describe('form valid state', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
 
     // Wait for update
@@ -748,6 +759,7 @@ describe('form valid state', () => {
       onInvalid = () => {
         this.setState({ isValid: false });
       };
+
       render() {
         return (
           <Formsy onInvalid={this.onInvalid} onValid={this.onValid} validationErrors={this.state.validationErrors}>
@@ -756,6 +768,7 @@ describe('form valid state', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
 
     // Wait for update
@@ -782,6 +795,7 @@ describe('form valid state', () => {
       onInvalid = () => {
         this.setState({ isValid: false });
       };
+
       render() {
         return (
           <Formsy
@@ -795,6 +809,7 @@ describe('form valid state', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
 
     // Wait for update
