@@ -171,9 +171,11 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public getCurrentValues = () =>
     this.inputs.reduce((data, component) => {
-      const dataCopy = typeof component.state.value === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
-      dataCopy[component.props.name] = component.state.value;
-      return dataCopy;
+      const dataCopy =
+        typeof component.state.value === 'object' ? Object.assign({}, component.state.value) : component.state.value; // avoid param reassignment
+      // eslint-disable-next-line no-param-reassign
+      data[component.props.name] = dataCopy;
+      return data;
     }, {});
 
   public getModel = () => {
@@ -184,9 +186,11 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public getPristineValues = () =>
     this.inputs.reduce((data, component) => {
       const { name } = component.props;
-      const dataCopy = typeof component.state.value === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
-      dataCopy[name] = component.props.value;
-      return dataCopy;
+      const dataCopy =
+        typeof component.props.value === 'object' ? Object.assign({}, component.props.value) : component.props.value; // avoid param reassignment
+      // eslint-disable-next-line no-param-reassign
+      data[name] = dataCopy;
+      return data;
     }, {});
 
   public setFormPristine = (isPristine: boolean) => {
