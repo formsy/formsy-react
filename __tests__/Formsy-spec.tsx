@@ -1,8 +1,6 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
-import sinon from 'sinon';
 import DynamicInputForm from '../__test_utils__/DynamicInputForm';
-import immediate from '../__test_utils__/immediate';
 import TestInput from '../__test_utils__/TestInput';
 import TestInputHoc from '../__test_utils__/TestInputHoc';
 
@@ -50,16 +48,15 @@ describe('Setting up a form', () => {
             <h1>Test</h1>
             {null}
             {undefined}
-            <TestInput name="name" value={'foo'} />
+            <TestInput name="name" value="foo" />
           </Formsy>
         );
       }
     }
 
     const form = mount(<TestForm />);
-    immediate(() => {
-      expect(model).toEqual({ name: 'foo' });
-    });
+    form.simulate('submit');
+    expect(model).toEqual({ name: 'foo' });
   });
 
   it('should allow for inputs being added dynamically', () => {
@@ -125,8 +122,8 @@ describe('Setting up a form', () => {
 
 describe('validations', () => {
   it('should run when the input changes', () => {
-    const runRule = sinon.spy();
-    const notRunRule = sinon.spy();
+    const runRule = jest.fn();
+    const notRunRule = jest.fn();
 
     addValidationRule('runRule', runRule);
     addValidationRule('notRunRule', notRunRule);
@@ -141,13 +138,14 @@ describe('validations', () => {
     input.simulate('change', {
       target: { value: 'bar' },
     });
-    expect(runRule.calledWith({ one: 'bar' })).toBe(true);
-    expect(notRunRule.called).toEqual(false);
+
+    expect(runRule).toHaveBeenCalledWith({ one: 'bar' }, 'bar', true);
+    expect(notRunRule).not.toHaveBeenCalled();
   });
 
   it('should allow the validation to be changed', () => {
-    const ruleA = sinon.spy();
-    const ruleB = sinon.spy();
+    const ruleA = jest.fn();
+    const ruleB = jest.fn();
     addValidationRule('ruleA', ruleA);
     addValidationRule('ruleB', ruleB);
 
@@ -178,13 +176,15 @@ describe('validations', () => {
     input.simulate('change', {
       target: { value: 'bar' },
     });
-    expect(ruleB.calledWith({ one: 'bar' })).toBe(true);
+    expect(ruleB).toHaveBeenCalledWith({ one: 'bar' }, 'bar', true);
   });
 
   it('should invalidate a form if dynamically inserted input is invalid', () => {
-    const isInValidSpy = sinon.spy();
+    const isInValidSpy = jest.fn();
 
     class TestForm extends React.Component {
+      formRef = React.createRef();
+
       constructor(props) {
         super(props);
         this.state = { showSecondInput: false };
@@ -198,7 +198,7 @@ describe('validations', () => {
 
       render() {
         return (
-          <Formsy ref="formsy" onInvalid={isInValidSpy}>
+          <Formsy ref={this.formRef} onInvalid={isInValidSpy}>
             <TestInput name="one" validations="isEmail" value="foo@bar.com" />
             {this.state.showSecondInput ? <TestInput name="two" validations="isEmail" value="foo@bar" /> : null}
           </Formsy>
@@ -208,18 +208,18 @@ describe('validations', () => {
 
     const form = mount(<TestForm />);
 
-    expect(form.instance().refs.formsy.state.isValid).toEqual(true);
+    expect(form.instance().formRef.current.state.isValid).toEqual(true);
     form.instance().addInput();
 
-    immediate(() => {
-      expect(isInValidSpy.called).toEqual(true);
-    });
+    expect(isInValidSpy).toHaveBeenCalled();
   });
 
   it('should validate a form when removing an invalid input', () => {
-    const isValidSpy = sinon.spy();
+    const isValidSpy = jest.fn();
 
     class TestForm extends React.Component {
+      formRef = React.createRef();
+
       constructor(props) {
         super(props);
         this.state = { showSecondInput: true };
@@ -233,7 +233,7 @@ describe('validations', () => {
 
       render() {
         return (
-          <Formsy ref="formsy" onValid={isValidSpy}>
+          <Formsy ref={this.formRef} onValid={isValidSpy}>
             <TestInput name="one" validations="isEmail" value="foo@bar.com" />
             {this.state.showSecondInput ? <TestInput name="two" validations="isEmail" value="foo@bar" /> : null}
           </Formsy>
@@ -243,17 +243,15 @@ describe('validations', () => {
 
     const form = mount(<TestForm />);
 
-    expect(form.instance().refs.formsy.state.isValid).toEqual(false);
+    expect(form.instance().formRef.current.state.isValid).toEqual(false);
     form.instance().removeInput();
 
-    immediate(() => {
-      expect(isValidSpy.called).toEqual(true);
-    });
+    expect(isValidSpy).toHaveBeenCalled();
   });
 
   it('runs multiple validations', () => {
-    const ruleA = sinon.spy();
-    const ruleB = sinon.spy();
+    const ruleA = jest.fn();
+    const ruleB = jest.fn();
     addValidationRule('ruleA', ruleA);
     addValidationRule('ruleB', ruleB);
 
@@ -267,14 +265,14 @@ describe('validations', () => {
     input.simulate('change', {
       target: { value: 'bar' },
     });
-    expect(ruleA.calledWith({ one: 'bar' })).toBe(true);
-    expect(ruleB.calledWith({ one: 'bar' })).toBe(true);
+    expect(ruleA).toHaveBeenCalledWith({ one: 'bar' }, 'bar', true);
+    expect(ruleB).toHaveBeenCalledWith({ one: 'bar' }, 'bar', true);
   });
 });
 
 describe('onChange', () => {
   it('should not trigger onChange when form is mounted', () => {
-    const hasChanged = sinon.spy();
+    const hasChanged = jest.fn();
 
     class TestForm extends React.Component {
       render() {
@@ -283,22 +281,22 @@ describe('onChange', () => {
     }
 
     mount(<TestForm />);
-    expect(hasChanged.called).toEqual(false);
+    expect(hasChanged).not.toHaveBeenCalled();
   });
 
   it('should trigger onChange once when form element is changed', () => {
-    const hasChanged = sinon.spy();
+    const hasChanged = jest.fn();
     const form = mount(
       <Formsy onChange={hasChanged}>
-        <TestInput name="foo" />
+        <TestInput name="foo" value="" />
       </Formsy>,
     );
     form.find('input').simulate('change', { target: { value: 'bar' } });
-    expect(hasChanged.calledOnce).toEqual(true);
+    expect(hasChanged).toHaveBeenCalledTimes(1);
   });
 
   it('should trigger onChange once when new input is added to form', () => {
-    const hasChanged = sinon.spy();
+    const hasChanged = jest.fn();
 
     class TestForm extends React.Component {
       state = {
@@ -318,13 +316,11 @@ describe('onChange', () => {
 
     const form = mount(<TestForm />);
     form.instance().addInput();
-    immediate(() => {
-      expect(hasChanged.calledOnce).toEqual(true);
-    });
+    expect(hasChanged).toHaveBeenCalledTimes(1);
   });
 
   it('onChange should honor dot notation transformations', () => {
-    const hasChanged = sinon.spy();
+    const hasChanged = jest.fn();
 
     class TestForm extends React.Component {
       state = {
@@ -348,9 +344,9 @@ describe('onChange', () => {
 
     const form = mount(<TestForm />);
     form.instance().addInput();
-    immediate(() => {
-      expect(hasChanged.args[0][0]).toEqual({ parent: { child: 'test' } });
-    });
+    form.update();
+
+    expect(hasChanged).toHaveBeenCalledWith({ parent: { child: 'test' } }, false);
   });
 });
 
@@ -377,9 +373,8 @@ describe('Update a form', () => {
     expect(input.instance().isFormDisabled()).toEqual(true);
 
     form.instance().enableForm();
-    immediate(() => {
-      expect(input.instance().isFormDisabled()).toEqual(false);
-    });
+
+    expect(input.instance().isFormDisabled()).toEqual(false);
   });
 
   it('should be possible to pass error state of elements by changing an errors attribute', () => {
@@ -392,7 +387,7 @@ describe('Update a form', () => {
       render() {
         return (
           <Formsy onChange={this.onChange} validationErrors={this.state.validationErrors}>
-            <TestInput name="foo" />
+            <TestInput name="foo" value="" />
           </Formsy>
         );
       }
@@ -400,21 +395,15 @@ describe('Update a form', () => {
 
     const form = mount(<TestForm />);
 
-    // Wait for update
-    immediate(() => {
-      const input = form.find(TestInput);
-      expect(input.instance().getErrorMessage()).toEqual('bar');
-      input.setValue('gotValue');
+    const input = form.find(TestInput);
+    expect(input.instance().getErrorMessage()).toEqual('bar');
+    input.instance().setValue('gotValue');
 
-      // Wait for update
-      immediate(() => {
-        expect(input.instance().getErrorMessage()).toEqual(null);
-      });
-    });
+    expect(input.instance().getErrorMessage()).toEqual(null);
   });
 
   it('should trigger an onValidSubmit when submitting a valid form', () => {
-    let isCalled = sinon.spy();
+    const isCalled = jest.fn();
 
     class TestForm extends React.Component {
       render() {
@@ -429,11 +418,11 @@ describe('Update a form', () => {
     const form = mount(<TestForm />);
     const FoundForm = form.find(TestForm);
     FoundForm.simulate('submit');
-    expect(isCalled.called).toEqual(true);
+    expect(isCalled).toHaveBeenCalled();
   });
 
   it('should trigger an onInvalidSubmit when submitting an invalid form', () => {
-    let isCalled = sinon.spy();
+    const isCalled = jest.fn();
 
     class TestForm extends React.Component {
       render() {
@@ -449,13 +438,13 @@ describe('Update a form', () => {
 
     const FoundForm = form.find(TestForm);
     FoundForm.simulate('submit');
-    expect(isCalled.called).toEqual(true);
+    expect(isCalled).toHaveBeenCalled();
   });
 });
 
 describe('value === false', () => {
   it('should call onSubmit correctly', () => {
-    const onSubmit = sinon.spy();
+    const onSubmit = jest.fn();
 
     class TestForm extends React.Component {
       render() {
@@ -470,11 +459,11 @@ describe('value === false', () => {
 
     const form = mount(<TestForm />);
     form.simulate('submit');
-    expect(onSubmit.calledWith({ foo: false })).toEqual(true);
+    expect(onSubmit).toHaveBeenCalledWith({ foo: false }, expect.any(Function), expect.any(Function));
   });
 
   it('should allow dynamic changes to false', () => {
-    const onSubmit = sinon.spy();
+    const onSubmit = jest.fn();
 
     class TestForm extends React.Component {
       state = {
@@ -500,7 +489,7 @@ describe('value === false', () => {
     const form = mount(<TestForm />);
     form.instance().changeValue();
     form.simulate('submit');
-    expect(onSubmit.calledWith({ foo: false })).toEqual(true);
+    expect(onSubmit).toHaveBeenCalledWith({ foo: false }, expect.any(Function), expect.any(Function));
   });
 
   it('should say the form is submitted', () => {
@@ -664,18 +653,18 @@ describe('.reset()', () => {
 
 describe('.isChanged()', () => {
   it('initially returns false', () => {
-    const hasOnChanged = sinon.spy();
+    const hasOnChanged = jest.fn();
     const form = mount(
       <Formsy onChange={hasOnChanged}>
         <TestInput name="one" value="foo" />
       </Formsy>,
     );
     expect(form.instance().isChanged()).toEqual(false);
-    expect(hasOnChanged.called).toEqual(false);
+    expect(hasOnChanged).not.toHaveBeenCalled();
   });
 
   it('returns true when changed', () => {
-    const hasOnChanged = sinon.spy();
+    const hasOnChanged = jest.fn();
     const form = mount(
       <Formsy onChange={hasOnChanged}>
         <TestInput name="one" value="foo" />
@@ -686,11 +675,11 @@ describe('.isChanged()', () => {
       target: { value: 'bar' },
     });
     expect(form.instance().isChanged()).toEqual(true);
-    expect(hasOnChanged.calledWith({ one: 'bar' })).toEqual(true);
+    expect(hasOnChanged).toHaveBeenCalledWith({ one: 'bar' }, true);
   });
 
   it('returns false if changes are undone', () => {
-    const hasOnChanged = sinon.spy();
+    const hasOnChanged = jest.fn();
     const form = mount(
       <Formsy onChange={hasOnChanged}>
         <TestInput name="one" value="foo" />
@@ -700,28 +689,30 @@ describe('.isChanged()', () => {
     input.simulate('change', {
       target: { value: 'bar' },
     });
-    expect(hasOnChanged.calledWith({ one: 'bar' })).toBe(true);
+    expect(hasOnChanged).toHaveBeenCalledWith({ one: 'bar' }, true);
 
     input.simulate('change', {
       target: { value: 'foo' },
     });
+
     expect(form.instance().isChanged()).toEqual(false);
-    expect(hasOnChanged.calledWith({ one: 'foo' })).toBe(true);
+    expect(hasOnChanged).toHaveBeenCalledWith({ one: 'foo' }, false);
   });
 });
 
 describe('form valid state', () => {
   it('should allow to be changed with updateInputsWithError', () => {
+    let isValid = true;
+
     class TestForm extends React.Component {
-      state = { isValid: true };
       onValidSubmit = (model, reset, updateInputsWithError) => {
         updateInputsWithError({ foo: 'bar' }, true);
       };
       onValid = () => {
-        this.setState({ isValid: true });
+        isValid = true;
       };
       onInvalid = () => {
-        this.setState({ isValid: false });
+        isValid = false;
       };
 
       render() {
@@ -735,29 +726,25 @@ describe('form valid state', () => {
 
     const form = mount(<TestForm />);
 
-    // Wait for update
-    immediate(() => {
-      expect(form.state.isValid).toEqual(true);
-      form.simulate('submit');
+    expect(isValid).toEqual(true);
+    form.simulate('submit');
 
-      // Wait for update
-      immediate(() => {
-        expect(form.state.isValid).toEqual(false);
-      });
-    });
+    expect(isValid).toEqual(false);
   });
 
   it('should be false when validationErrors is not empty', () => {
+    let isValid = true;
+
     class TestForm extends React.Component {
-      state = { validationErrors: {}, isValid: true };
+      state = { validationErrors: {} };
       setValidationErrors = empty => {
         this.setState(!empty ? { validationErrors: { foo: 'bar' } } : { validationErrors: {} });
       };
       onValid = () => {
-        this.setState({ isValid: true });
+        isValid = true;
       };
       onInvalid = () => {
-        this.setState({ isValid: false });
+        isValid = false;
       };
 
       render() {
@@ -771,29 +758,24 @@ describe('form valid state', () => {
 
     const form = mount(<TestForm />);
 
-    // Wait for update
-    immediate(() => {
-      expect(form.state.isValid).toEqual(true);
-      form.setValidationErrors();
+    expect(isValid).toEqual(true);
+    form.instance().setValidationErrors();
 
-      // Wait for update
-      immediate(() => {
-        expect(form.state.isValid).toEqual(false);
-      });
-    });
+    expect(isValid).toEqual(false);
   });
 
   it('should be true when validationErrors is not empty and preventExternalInvalidation is true', () => {
+    let isValid = true;
     class TestForm extends React.Component {
-      state = { validationErrors: {}, isValid: true };
+      state = { validationErrors: {} };
       setValidationErrors = empty => {
         this.setState(!empty ? { validationErrors: { foo: 'bar' } } : { validationErrors: {} });
       };
       onValid = () => {
-        this.setState({ isValid: true });
+        isValid = true;
       };
       onInvalid = () => {
-        this.setState({ isValid: false });
+        isValid = false;
       };
 
       render() {
@@ -812,15 +794,9 @@ describe('form valid state', () => {
 
     const form = mount(<TestForm />);
 
-    // Wait for update
-    immediate(() => {
-      expect(form.state.isValid).toEqual(true);
-      form.setValidationErrors();
+    expect(isValid).toEqual(true);
+    form.instance().setValidationErrors();
 
-      // Wait for update
-      immediate(() => {
-        expect(form.state.isValid).toEqual(true);
-      });
-    });
+    expect(isValid).toEqual(true);
   });
 });
