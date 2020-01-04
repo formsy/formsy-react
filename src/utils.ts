@@ -120,3 +120,8 @@ export function runRules(value: Value, currentValues: Values, validations: Valid
 export function noop() {
   // do nothing.
 }
+
+export function cloneIfObject(value: unknown) {
+  // Clone objects to avoid accidental param reassignment
+  return typeof value === 'object' ? { ...value } : value;
+}
