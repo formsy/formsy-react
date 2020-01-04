@@ -117,6 +117,7 @@ export function runRules(value: Value, currentValues: Values, validations: Valid
   return results;
 }
 
-export function noop() {
-  // do nothing.
+export function cloneIfObject(value: unknown) {
+  // Clone objects to avoid accidental param reassignment
+  return typeof value === 'object' ? Object.assign({}, value) : value;
 }

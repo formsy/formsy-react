@@ -170,11 +170,14 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   public getCurrentValues = () =>
-    this.inputs.reduce((data, component) => {
-      const dataCopy = typeof component.state.value === 'object' ? { ...component.state.value } : component.state.value; // avoid param reassignment
+    this.inputs.reduce((valueAccumulator, component) => {
+      const {
+        props: { name },
+        state: { value },
+      } = component.props;
       // eslint-disable-next-line no-param-reassign
-      data[component.props.name] = dataCopy;
-      return data;
+      valueAccumulator[name] = utils.cloneIfObject(value);
+      return valueAccumulator;
     }, {});
 
   public getModel = () => {
@@ -183,12 +186,13 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   public getPristineValues = () =>
-    this.inputs.reduce((data, component) => {
-      const { name } = component.props;
-      const dataCopy = typeof component.props.value === 'object' ? { ...component.props.value } : component.props.value; // avoid param reassignment
+    this.inputs.reduce((valueAccumulator, component) => {
+      const {
+        props: { name, value },
+      } = component.props;
       // eslint-disable-next-line no-param-reassign
-      data[name] = dataCopy;
-      return data;
+      valueAccumulator[name] = utils.cloneIfObject(value);
+      return valueAccumulator;
     }, {});
 
   public setFormPristine = (isPristine: boolean) => {
