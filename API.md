@@ -326,7 +326,8 @@ JavaScript types. Meaning:
 
 Works just fine.
 
-**NOTE**: use double quotes to quote the strings in the array/objects argument. `JSON.parse()` will not parse single quotes.
+**NOTE**: use double quotes to quote the strings in the array/objects argument. `JSON.parse()` will not parse single
+quotes.
 
 #### <a id="validationError">validationError</a>
 
@@ -688,7 +689,7 @@ addValidationRule('isIn', function(values, value, array) {
 ```
 
 ```jsx
-<MyInput name='fruit' validations='isIn:["apple", "orange", "pear"]' />
+<MyInput name="fruit" validations='isIn:["apple", "orange", "pear"]' />
 ```
 
 **NOTE**: use double quotes to quote the strings in the array argument. `JSON.parse()` will not parse single quotes.
