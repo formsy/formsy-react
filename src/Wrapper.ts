@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import utils from './utils';
+import * as utils from './utils';
 import { Validations, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
 
 /* eslint-disable react/default-props-match-prop-types */
@@ -31,7 +31,7 @@ const convertValidationsToObject = (validations: string | false | Validations): 
       }
 
       // Avoid parameter reassignment
-      const validationsAccumulatorCopy: Validations = Object.assign({}, validationsAccumulator);
+      const validationsAccumulatorCopy: Validations = { ...validationsAccumulator };
       validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
       return validationsAccumulatorCopy;
     }, {});
