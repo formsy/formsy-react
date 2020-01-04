@@ -174,7 +174,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       const {
         props: { name },
         state: { value },
-      } = component.props;
+      } = component;
       // eslint-disable-next-line no-param-reassign
       valueAccumulator[name] = utils.cloneIfObject(value);
       return valueAccumulator;
@@ -189,7 +189,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.inputs.reduce((valueAccumulator, component) => {
       const {
         props: { name, value },
-      } = component.props;
+      } = component;
       // eslint-disable-next-line no-param-reassign
       valueAccumulator[name] = utils.cloneIfObject(value);
       return valueAccumulator;
