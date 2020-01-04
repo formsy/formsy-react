@@ -123,5 +123,5 @@ export function noop() {
 
 export function cloneIfObject(value: unknown) {
   // Clone objects to avoid accidental param reassignment
-  return typeof value === 'object' ? Object.assign({}, value) : value;
+  return typeof value === 'object' ? { ...value } : value;
 }
