@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import formDataToObject from 'form-data-to-object';
 
-import utils from './utils';
+import * as utils from './utils';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
 
@@ -101,31 +101,31 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public static defaultProps: Partial<FormsyProps> = {
     disabled: false,
-    getErrorMessage: () => {},
-    getErrorMessages: () => {},
-    getValue: () => {},
-    hasValue: () => {},
-    isFormDisabled: () => {},
-    isFormSubmitted: () => {},
-    isPristine: () => {},
-    isRequired: () => {},
-    isValid: () => {},
-    isValidValue: () => {},
+    getErrorMessage: utils.noop,
+    getErrorMessages: utils.noop,
+    getValue: utils.noop,
+    hasValue: utils.noop,
+    isFormDisabled: utils.noop,
+    isFormSubmitted: utils.noop,
+    isPristine: utils.noop,
+    isRequired: utils.noop,
+    isValid: utils.noop,
+    isValidValue: utils.noop,
     mapping: null,
-    onChange: () => {},
-    onError: () => {},
-    onInvalid: () => {},
-    onInvalidSubmit: () => {},
-    onReset: () => {},
-    onSubmit: () => {},
-    onValid: () => {},
-    onValidSubmit: () => {},
+    onChange: utils.noop,
+    onError: utils.noop,
+    onInvalid: utils.noop,
+    onInvalidSubmit: utils.noop,
+    onReset: utils.noop,
+    onSubmit: utils.noop,
+    onValid: utils.noop,
+    onValidSubmit: utils.noop,
     preventExternalInvalidation: false,
-    resetValue: () => {},
-    setValidations: () => {},
-    setValue: () => {},
-    showError: () => {},
-    showRequired: () => {},
+    resetValue: utils.noop,
+    setValidations: utils.noop,
+    setValue: utils.noop,
+    showError: utils.noop,
+    showRequired: utils.noop,
     validationErrors: null,
   };
 
@@ -171,8 +171,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public getCurrentValues = () =>
     this.inputs.reduce((data, component) => {
-      const dataCopy =
-        typeof component.state.value === 'object' ? Object.assign({}, component.state.value) : component.state.value; // avoid param reassignment
+      const dataCopy = typeof component.state.value === 'object' ? { ...component.state.value } : component.state.value; // avoid param reassignment
       // eslint-disable-next-line no-param-reassign
       data[component.props.name] = dataCopy;
       return data;
@@ -186,8 +185,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public getPristineValues = () =>
     this.inputs.reduce((data, component) => {
       const { name } = component.props;
-      const dataCopy =
-        typeof component.props.value === 'object' ? Object.assign({}, component.props.value) : component.props.value; // avoid param reassignment
+      const dataCopy = typeof component.props.value === 'object' ? { ...component.props.value } : component.props.value; // avoid param reassignment
       // eslint-disable-next-line no-param-reassign
       data[name] = dataCopy;
       return data;

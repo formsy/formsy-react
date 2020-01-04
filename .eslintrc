@@ -16,10 +16,11 @@
   "rules": {
     "@typescript-eslint/explicit-function-return-type": 0,
     "@typescript-eslint/no-explicit-any": 0,
+    "import/extensions": 0,
     "import/no-extraneous-dependencies": ["error", {"devDependencies": ["setupTests.ts", "**/*spec.tsx"]}],
     "prettier/prettier": ["error", { "singleQuote": true }],
     "react/forbid-prop-types": 0,
-    "import/extensions": 0
+    "react/static-property-placement": 0
   },
   "settings": {
     "react": {

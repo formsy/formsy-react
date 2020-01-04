@@ -1,4 +1,4 @@
-import utils from '../src/utils';
+import * as utils from '../src/utils';
 
 describe('Utils', () => {
   it('should check equality of objects and arrays', () => {
@@ -24,13 +24,8 @@ describe('Utils', () => {
     expect(utils.isSame(objC, objH)).toBe(false);
     expect(utils.isSame(objG, objA)).toBe(false);
 
-    expect(
-      utils.isSame(
-        () => {},
-        () => {},
-      ),
-    ).toBe(true);
-    expect(utils.isSame(objA, () => {})).toBe(false);
-    expect(utils.isSame(() => {}, objA)).toBe(false);
+    expect(utils.isSame(utils.noop, utils.noop)).toBe(true);
+    expect(utils.isSame(objA, utils.noop)).toBe(false);
+    expect(utils.isSame(utils.noop, objA)).toBe(false);
   });
 });
