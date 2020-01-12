@@ -11,7 +11,7 @@ export type IResetModel = (model?: IModel) => void;
 export type ISetInputValue = (name: string, value: Value, validate?: boolean) => void;
 export type IUpdateInputsWithError = (errors: any, invalidate?: boolean) => void;
 
-export type ValidationFunction = (values: Values, value: Value, extra?: any) => boolean;
+export type ValidationFunction = (values: Values, value: Value, extra?: any) => boolean | string;
 
 export type Validation = string | boolean | ValidationFunction;
 
