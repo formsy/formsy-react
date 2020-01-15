@@ -1457,50 +1457,93 @@ var utils = {
     };
 
     if (Object.keys(validations).length) {
-      Object.keys(validations).forEach(function (validationMethod) {
-        var validationsVal = validations[validationMethod];
-        var validationRulesVal = validationRules[validationMethod];
+      Object.keys(validations).forEach(function _callee(validationMethod) {
+        var validationsVal, validationRulesVal, validation, _validation;
 
-        if (validationRulesVal && typeof validationsVal === 'function') {
-          throw new Error("Formsy does not allow you to override default validations: ".concat(validationMethod));
-        }
+        return regeneratorRuntime.async(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                validationsVal = validations[validationMethod];
+                validationRulesVal = validationRules[validationMethod];
+                debugger;
 
-        if (!validationRulesVal && typeof validationsVal !== 'function') {
-          throw new Error("Formsy does not have the validation rule: ".concat(validationMethod));
-        }
+                if (!(validationRulesVal && typeof validationsVal === 'function')) {
+                  _context.next = 5;
+                  break;
+                }
 
-        if (typeof validationsVal === 'function') {
-          var validation = validationsVal(currentValues, value);
+                throw new Error("Formsy does not allow you to override default validations: ".concat(validationMethod));
 
-          if (typeof validation === 'string') {
-            results.errors.push(validation);
-            results.failed.push(validationMethod);
-          } else if (!validation) {
-            results.failed.push(validationMethod);
+              case 5:
+                if (!(!validationRulesVal && typeof validationsVal !== 'function')) {
+                  _context.next = 7;
+                  break;
+                }
+
+                throw new Error("Formsy does not have the validation rule: ".concat(validationMethod));
+
+              case 7:
+                if (!(typeof validationsVal === 'function')) {
+                  _context.next = 13;
+                  break;
+                }
+
+                _context.next = 10;
+                return regeneratorRuntime.awrap(validationsVal(currentValues, value));
+
+              case 10:
+                validation = _context.sent;
+
+                if (typeof validation === 'string') {
+                  results.errors.push(validation);
+                  results.failed.push(validationMethod);
+                } else if (!validation) {
+                  results.failed.push(validationMethod);
+                }
+
+                return _context.abrupt("return");
+
+              case 13:
+                if (!(typeof validationsVal !== 'function' && typeof validationRulesVal === 'function')) {
+                  _context.next = 21;
+                  break;
+                }
+
+                debugger;
+                _context.next = 17;
+                return regeneratorRuntime.awrap(validationRulesVal(currentValues, value, validationsVal));
+
+              case 17:
+                _validation = _context.sent;
+                debugger;
+
+                if (typeof _validation === 'string') {
+                  results.errors.push(_validation);
+                  results.failed.push(validationMethod);
+                } else if (!_validation) {
+                  results.failed.push(validationMethod);
+                } else {
+                  results.success.push(validationMethod);
+                }
+
+                return _context.abrupt("return");
+
+              case 21:
+                results.success.push(validationMethod);
+
+              case 22:
+              case "end":
+                return _context.stop();
+            }
           }
-
-          return;
-        }
-
-        if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
-          var _validation = validationRulesVal(currentValues, value, validationsVal);
-
-          if (typeof _validation === 'string') {
-            results.errors.push(_validation);
-            results.failed.push(validationMethod);
-          } else if (!_validation) {
-            results.failed.push(validationMethod);
-          } else {
-            results.success.push(validationMethod);
-          }
-
-          return;
-        }
-
-        results.success.push(validationMethod);
+        });
       });
+      debugger;
+      return results;
     }
 
+    debugger;
     return results;
   }
 };
@@ -1690,7 +1733,7 @@ function Wrapper (WrappedComponent) {
             value: value,
             isPristine: false
           }, function () {
-            formsy.validate(_assertThisInitialized(_this));
+            return formsy.validate(_assertThisInitialized(_this));
           });
         }
       };
@@ -1731,7 +1774,7 @@ function Wrapper (WrappedComponent) {
           value: pristineValue,
           isPristine: true
         }, function () {
-          formsy.validate(_assertThisInitialized(_this));
+          return formsy.validate(_assertThisInitialized(_this));
         });
       };
 
@@ -1812,7 +1855,7 @@ function Wrapper (WrappedComponent) {
 
         if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevRequired)) {
           this.setValidations(validations, required);
-          formsy.validate(this);
+          return formsy.validate(this);
         }
       } // Detach it when component unmounts
       // eslint-disable-next-line react/sort-comp
@@ -1995,8 +2038,25 @@ function (_React$Component) {
       }
     };
 
-    _this.isValidValue = function (component, value) {
-      return _this.runValidation(component, value).isValid;
+    _this.isValidValue = function _callee(component, value) {
+      var validation;
+      return regeneratorRuntime.async(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return regeneratorRuntime.awrap(_this.runValidation(component, value));
+
+            case 2:
+              validation = _context.sent;
+              return _context.abrupt("return", validation.isValid);
+
+            case 4:
+            case "end":
+              return _context.stop();
+          }
+        }
+      });
     };
 
     _this.isFormDisabled = function () {
@@ -2065,48 +2125,73 @@ function (_React$Component) {
       }
     };
 
-    _this.runValidation = function (component) {
-      var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : component.state.value;
-      var validationErrors = _this.props.validationErrors;
+    _this.runValidation = function _callee2(component) {
+      var value,
+          validationErrors,
+          currentValues,
+          validationResults,
+          requiredResults,
+          isRequired,
+          isValid,
+          _args2 = arguments;
+      return regeneratorRuntime.async(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              value = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : component.state.value;
+              validationErrors = _this.props.validationErrors;
+              currentValues = _this.getCurrentValues();
+              _context2.next = 5;
+              return regeneratorRuntime.awrap(utils.runRules(value, currentValues, component.validations, validations));
 
-      var currentValues = _this.getCurrentValues();
+            case 5:
+              validationResults = _context2.sent;
+              _context2.next = 8;
+              return regeneratorRuntime.awrap(utils.runRules(value, currentValues, component.requiredValidations, validations));
 
-      var validationResults = utils.runRules(value, currentValues, component.validations, validations);
-      var requiredResults = utils.runRules(value, currentValues, component.requiredValidations, validations);
-      var isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
-      var isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
-      return {
-        isRequired: isRequired,
-        isValid: isRequired ? false : isValid,
-        error: function () {
-          if (isValid && !isRequired) {
-            return _this.emptyArray;
+            case 8:
+              requiredResults = _context2.sent;
+              isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
+              isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
+              return _context2.abrupt("return", {
+                isRequired: isRequired,
+                isValid: isRequired ? false : isValid,
+                error: function () {
+                  if (isValid && !isRequired) {
+                    return _this.emptyArray;
+                  }
+
+                  if (validationResults.errors.length) {
+                    return validationResults.errors;
+                  }
+
+                  if (validationErrors && validationErrors[component.props.name]) {
+                    return typeof validationErrors[component.props.name] === 'string' ? [validationErrors[component.props.name]] : validationErrors[component.props.name];
+                  }
+
+                  if (isRequired) {
+                    var error = component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
+                    return error ? [error] : null;
+                  }
+
+                  if (validationResults.failed.length) {
+                    return validationResults.failed.map(function (failed) {
+                      return component.props.validationErrors[failed] ? component.props.validationErrors[failed] : component.props.validationError;
+                    }).filter(function (x, pos, arr) {
+                      return arr.indexOf(x) === pos;
+                    }); // remove duplicates
+                  }
+
+                  return undefined;
+                }()
+              });
+
+            case 12:
+            case "end":
+              return _context2.stop();
           }
-
-          if (validationResults.errors.length) {
-            return validationResults.errors;
-          }
-
-          if (validationErrors && validationErrors[component.props.name]) {
-            return typeof validationErrors[component.props.name] === 'string' ? [validationErrors[component.props.name]] : validationErrors[component.props.name];
-          }
-
-          if (isRequired) {
-            var error = component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
-            return error ? [error] : null;
-          }
-
-          if (validationResults.failed.length) {
-            return validationResults.failed.map(function (failed) {
-              return component.props.validationErrors[failed] ? component.props.validationErrors[failed] : component.props.validationError;
-            }).filter(function (x, pos, arr) {
-              return arr.indexOf(x) === pos;
-            }); // remove duplicates
-          }
-
-          return undefined;
-        }()
-      };
+        }
+      });
     };
 
     _this.attachToForm = function (component) {
@@ -2114,7 +2199,7 @@ function (_React$Component) {
         _this.inputs.push(component);
       }
 
-      _this.validate(component);
+      return _this.validate(component);
     };
 
     _this.detachFromForm = function (component) {
@@ -2124,7 +2209,7 @@ function (_React$Component) {
         _this.inputs = _this.inputs.slice(0, componentPos).concat(_this.inputs.slice(componentPos + 1));
       }
 
-      _this.validateForm();
+      return _this.validateForm();
     };
 
     _this.isChanged = function () {
@@ -2182,24 +2267,39 @@ function (_React$Component) {
       }
     };
 
-    _this.validate = function (component) {
-      var onChange = _this.props.onChange;
-      var canChange = _this.state.canChange; // Trigger onChange
+    _this.validate = function _callee3(component) {
+      var onChange, canChange, validation;
+      return regeneratorRuntime.async(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              onChange = _this.props.onChange;
+              canChange = _this.state.canChange; // Trigger onChange
 
-      if (canChange) {
-        onChange(_this.getModel(), _this.isChanged());
-      }
+              if (canChange) {
+                onChange(_this.getModel(), _this.isChanged());
+              }
 
-      var validation = _this.runValidation(component); // Run through the validations, split them up and call
-      // the validator IF there is a value or it is required
+              _context3.next = 5;
+              return regeneratorRuntime.awrap(_this.runValidation(component));
 
+            case 5:
+              validation = _context3.sent;
+              // Run through the validations, split them up and call
+              // the validator IF there is a value or it is required
+              component.setState({
+                externalError: null,
+                isRequired: validation.isRequired,
+                isValid: validation.isValid,
+                validationError: validation.error
+              }, _this.validateForm);
 
-      component.setState({
-        externalError: null,
-        isRequired: validation.isRequired,
-        isValid: validation.isValid,
-        validationError: validation.error
-      }, _this.validateForm);
+            case 7:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      });
     };
 
     _this.validateForm = function () {
@@ -2220,19 +2320,35 @@ function (_React$Component) {
       // last component validated will run the onValidationComplete callback
 
 
-      _this.inputs.forEach(function (component, index) {
-        var validation = _this.runValidation(component);
+      _this.inputs.forEach(function _callee4(component, index) {
+        var validation;
+        return regeneratorRuntime.async(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _context4.next = 2;
+                return regeneratorRuntime.awrap(_this.runValidation(component));
 
-        if (validation.isValid && component.state.externalError) {
-          validation.isValid = false;
-        }
+              case 2:
+                validation = _context4.sent;
 
-        component.setState({
-          isValid: validation.isValid,
-          isRequired: validation.isRequired,
-          validationError: validation.error,
-          externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null
-        }, index === _this.inputs.length - 1 ? onValidationComplete : null);
+                if (validation.isValid && component.state.externalError) {
+                  validation.isValid = false;
+                }
+
+                component.setState({
+                  isValid: validation.isValid,
+                  isRequired: validation.isRequired,
+                  validationError: validation.error,
+                  externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null
+                }, index === _this.inputs.length - 1 ? onValidationComplete : null);
+
+              case 5:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        });
       }); // If there are no inputs, set state where form is ready to trigger
       // change event. New inputs might be added later
 
