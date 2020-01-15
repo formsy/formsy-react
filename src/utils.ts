@@ -63,7 +63,7 @@ export default {
     return null;
   },
 
-  runRules(value: Value, currentValues: Values, validations: Validations, validationRules: Validations) {
+  runRules: (value: Value, currentValues: Values, validations: Validations, validationRules: Validations) => {
     const results: {
       errors: string[];
       failed: string[];
@@ -75,10 +75,11 @@ export default {
     };
 
     if (Object.keys(validations).length) {
-      Object.keys(validations).forEach(validationMethod => {
+      Object.keys(validations).forEach(async validationMethod => {
         const validationsVal = validations[validationMethod];
         const validationRulesVal = validationRules[validationMethod];
 
+        debugger;
         if (validationRulesVal && typeof validationsVal === 'function') {
           throw new Error(`Formsy does not allow you to override default validations: ${validationMethod}`);
         }
@@ -88,7 +89,7 @@ export default {
         }
 
         if (typeof validationsVal === 'function') {
-          const validation = validationsVal(currentValues, value);
+          const validation = await validationsVal(currentValues, value);
           if (typeof validation === 'string') {
             results.errors.push(validation);
             results.failed.push(validationMethod);
@@ -98,8 +99,9 @@ export default {
           return;
         }
         if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
-          const validation = validationRulesVal(currentValues, value, validationsVal);
-
+          debugger;
+          const validation = await validationRulesVal(currentValues, value, validationsVal);
+          debugger;
           if (typeof validation === 'string') {
             results.errors.push(validation);
             results.failed.push(validationMethod);
@@ -113,8 +115,10 @@ export default {
 
         results.success.push(validationMethod);
       });
+      debugger;
+      return results;
     }
-
+    debugger;
     return results;
   },
 };

@@ -237,7 +237,10 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     }
   };
 
-  public isValidValue = (component, value) => this.runValidation(component, value).isValid;
+  public isValidValue = async (component, value) => {
+    const validation = await this.runValidation(component, value);
+    return validation.isValid;
+  };
 
   // eslint-disable-next-line react/destructuring-assignment
   public isFormDisabled = () => this.props.disabled;
@@ -300,11 +303,11 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Checks validation on current value or a passed value
-  public runValidation = (component: InputComponent, value = component.state.value) => {
+  public runValidation = async (component: InputComponent, value = component.state.value) => {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
-    const validationResults = utils.runRules(value, currentValues, component.validations, validationRules);
-    const requiredResults = utils.runRules(value, currentValues, component.requiredValidations, validationRules);
+    const validationResults = await utils.runRules(value, currentValues, component.validations, validationRules);
+    const requiredResults = await utils.runRules(value, currentValues, component.requiredValidations, validationRules);
     const isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
     const isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
 
@@ -353,7 +356,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.inputs.push(component);
     }
 
-    this.validate(component);
+    return this.validate(component);
   };
 
   // Method put on each input component to unregister
@@ -365,7 +368,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.inputs = this.inputs.slice(0, componentPos).concat(this.inputs.slice(componentPos + 1));
     }
 
-    this.validateForm();
+    return this.validateForm();
   };
 
   // Checks if the values have changed from their initial value
@@ -427,7 +430,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // Use the binded values and the actual input value to
   // validate the input and set its state. Then check the
   // state of the form itself
-  public validate = (component: InputComponent) => {
+  public validate = async (component: InputComponent) => {
     const { onChange } = this.props;
     const { canChange } = this.state;
 
@@ -436,7 +439,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onChange(this.getModel(), this.isChanged());
     }
 
-    const validation = this.runValidation(component);
+    const validation = await this.runValidation(component);
     // Run through the validations, split them up and call
     // the validator IF there is a value or it is required
     component.setState(
@@ -468,8 +471,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
     // Run validation again in case affected by other inputs. The
     // last component validated will run the onValidationComplete callback
-    this.inputs.forEach((component, index) => {
-      const validation = this.runValidation(component);
+    this.inputs.forEach(async (component, index) => {
+      const validation = await this.runValidation(component);
       if (validation.isValid && component.state.externalError) {
         validation.isValid = false;
       }

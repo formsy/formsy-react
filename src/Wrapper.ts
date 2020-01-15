@@ -183,7 +183,7 @@ export default function<T>(
       // If validations or required is changed, run a new validation
       if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevRequired)) {
         this.setValidations(validations, required);
-        formsy.validate(this);
+        return formsy.validate(this);
       }
     }
 
@@ -233,9 +233,7 @@ export default function<T>(
             value,
             isPristine: false,
           },
-          () => {
-            formsy.validate(this);
-          },
+          () => formsy.validate(this),
         );
       }
     };
@@ -270,9 +268,7 @@ export default function<T>(
           value: pristineValue,
           isPristine: true,
         },
-        () => {
-          formsy.validate(this);
-        },
+        () => formsy.validate(this),
       );
     };
 
