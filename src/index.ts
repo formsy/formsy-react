@@ -301,50 +301,54 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Checks validation on current value or a passed value
-  public runValidation = async (component: InputComponent, value = component.state.value) => {
+  public runValidation = (component: InputComponent, value = component.state.value) => {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
-    const validationResults = await utils.runRules(value, currentValues, component.validations, validationRules);
-    const requiredResults = await utils.runRules(value, currentValues, component.requiredValidations, validationRules);
-    const isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
-    const isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
 
-    return {
-      isRequired,
-      isValid: isRequired ? false : isValid,
-      error: (() => {
-        if (isValid && !isRequired) {
-          return this.emptyArray;
-        }
+    return Promise.all([
+      utils.runRules(value, currentValues, component.validations, validationRules),
+      utils.runRules(value, currentValues, component.requiredValidations, validationRules),
+    ]).then(([validationResults, requiredResults]) => {
+      const isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
+      const isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
+      return {
+        isRequired,
+        isValid: isRequired ? false : isValid,
+        error: (() => {
+          if (isValid && !isRequired) {
+            return this.emptyArray;
+          }
 
-        if (validationResults.errors.length) {
-          return validationResults.errors;
-        }
+          if (validationResults.errors.length) {
+            return validationResults.errors;
+          }
 
-        if (validationErrors && validationErrors[component.props.name]) {
-          return typeof validationErrors[component.props.name] === 'string'
-            ? [validationErrors[component.props.name]]
-            : validationErrors[component.props.name];
-        }
+          if (validationErrors && validationErrors[component.props.name]) {
+            return typeof validationErrors[component.props.name] === 'string'
+              ? [validationErrors[component.props.name]]
+              : validationErrors[component.props.name];
+          }
 
-        if (isRequired) {
-          const error = component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
-          return error ? [error] : null;
-        }
+          if (isRequired) {
+            const error =
+              component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
+            return error ? [error] : null;
+          }
 
-        if (validationResults.failed.length) {
-          return validationResults.failed
-            .map(failed =>
-              component.props.validationErrors[failed]
-                ? component.props.validationErrors[failed]
-                : component.props.validationError,
-            )
-            .filter((x, pos, arr) => arr.indexOf(x) === pos); // remove duplicates
-        }
+          if (validationResults.failed.length) {
+            return validationResults.failed
+              .map(failed =>
+                component.props.validationErrors[failed]
+                  ? component.props.validationErrors[failed]
+                  : component.props.validationError,
+              )
+              .filter((x, pos, arr) => arr.indexOf(x) === pos); // remove duplicates
+          }
 
-        return undefined;
-      })(),
-    };
+          return undefined;
+        })(),
+      };
+    });
   };
 
   // Method put on each input component to register
