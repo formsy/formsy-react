@@ -237,10 +237,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     }
   };
 
-  public isValidValue = async (component, value) => {
-    const validation = await this.runValidation(component, value);
-    return validation.isValid;
-  };
+  public isValidValue = (component, value) =>
+    this.runValidation(component, value).then(validation => validation.isValid);
 
   // eslint-disable-next-line react/destructuring-assignment
   public isFormDisabled = () => this.props.disabled;
@@ -356,7 +354,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.inputs.push(component);
     }
 
-    return this.validate(component);
+    this.validate(component);
   };
 
   // Method put on each input component to unregister
@@ -368,7 +366,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.inputs = this.inputs.slice(0, componentPos).concat(this.inputs.slice(componentPos + 1));
     }
 
-    return this.validateForm();
+    this.validateForm();
   };
 
   // Checks if the values have changed from their initial value
@@ -430,7 +428,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // Use the binded values and the actual input value to
   // validate the input and set its state. Then check the
   // state of the form itself
-  public validate = async (component: InputComponent) => {
+  public validate = (component: InputComponent) => {
     const { onChange } = this.props;
     const { canChange } = this.state;
 
@@ -439,18 +437,19 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onChange(this.getModel(), this.isChanged());
     }
 
-    const validation = await this.runValidation(component);
-    // Run through the validations, split them up and call
-    // the validator IF there is a value or it is required
-    component.setState(
-      {
-        externalError: null,
-        isRequired: validation.isRequired,
-        isValid: validation.isValid,
-        validationError: validation.error,
-      },
-      this.validateForm,
-    );
+    this.runValidation(component).then(validation => {
+      // Run through the validations, split them up and call
+      // the validator IF there is a value or it is required
+      component.setState(
+        {
+          externalError: null,
+          isRequired: validation.isRequired,
+          isValid: validation.isValid,
+          validationError: validation.error,
+        },
+        this.validateForm,
+      );
+    });
   };
 
   // Validate the form by going through all child input components
@@ -471,20 +470,21 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
     // Run validation again in case affected by other inputs. The
     // last component validated will run the onValidationComplete callback
-    this.inputs.forEach(async (component, index) => {
-      const validation = await this.runValidation(component);
-      if (validation.isValid && component.state.externalError) {
-        validation.isValid = false;
-      }
-      component.setState(
-        {
-          isValid: validation.isValid,
-          isRequired: validation.isRequired,
-          validationError: validation.error,
-          externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null,
-        },
-        index === this.inputs.length - 1 ? onValidationComplete : null,
-      );
+    this.inputs.forEach((component, index) => {
+      this.runValidation(component).then(validation => {
+        if (validation.isValid && component.state.externalError) {
+          validation.isValid = false;
+        }
+        component.setState(
+          {
+            isValid: validation.isValid,
+            isRequired: validation.isRequired,
+            validationError: validation.error,
+            externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null,
+          },
+          index === this.inputs.length - 1 ? onValidationComplete : null,
+        );
+      });
     });
 
     // If there are no inputs, set state where form is ready to trigger

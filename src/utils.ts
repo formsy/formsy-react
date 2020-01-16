@@ -75,50 +75,47 @@ export default {
     };
 
     if (Object.keys(validations).length) {
-      Object.keys(validations).forEach(async validationMethod => {
-        const validationsVal = validations[validationMethod];
-        const validationRulesVal = validationRules[validationMethod];
+      return Promise.all(
+        Object.keys(validations).map(validationMethod => {
+          const validationsVal = validations[validationMethod];
+          const validationRulesVal = validationRules[validationMethod];
 
-        debugger;
-        if (validationRulesVal && typeof validationsVal === 'function') {
-          throw new Error(`Formsy does not allow you to override default validations: ${validationMethod}`);
-        }
-
-        if (!validationRulesVal && typeof validationsVal !== 'function') {
-          throw new Error(`Formsy does not have the validation rule: ${validationMethod}`);
-        }
-
-        if (typeof validationsVal === 'function') {
-          const validation = await validationsVal(currentValues, value);
-          if (typeof validation === 'string') {
-            results.errors.push(validation);
-            results.failed.push(validationMethod);
-          } else if (!validation) {
-            results.failed.push(validationMethod);
+          if (validationRulesVal && typeof validationsVal === 'function') {
+            throw new Error(`Formsy does not allow you to override default validations: ${validationMethod}`);
           }
-          return;
-        }
-        if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
-          debugger;
-          const validation = await validationRulesVal(currentValues, value, validationsVal);
-          debugger;
-          if (typeof validation === 'string') {
-            results.errors.push(validation);
-            results.failed.push(validationMethod);
-          } else if (!validation) {
-            results.failed.push(validationMethod);
-          } else {
-            results.success.push(validationMethod);
-          }
-          return;
-        }
 
-        results.success.push(validationMethod);
-      });
-      debugger;
-      return results;
+          if (!validationRulesVal && typeof validationsVal !== 'function') {
+            throw new Error(`Formsy does not have the validation rule: ${validationMethod}`);
+          }
+
+          if (typeof validationsVal === 'function') {
+            return Promise.resolve(validationsVal(currentValues, value)).then(validation => {
+              if (typeof validation === 'string') {
+                results.errors.push(validation);
+                results.failed.push(validationMethod);
+              } else if (!validation) {
+                results.failed.push(validationMethod);
+              }
+            });
+          }
+
+          if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
+            return Promise.resolve(validationRulesVal(currentValues, value, validationsVal)).then(validation => {
+              if (typeof validation === 'string') {
+                results.errors.push(validation);
+                results.failed.push(validationMethod);
+              } else if (!validation) {
+                results.failed.push(validationMethod);
+              } else {
+                results.success.push(validationMethod);
+              }
+            });
+          }
+          results.success.push(validationMethod);
+        }),
+      ).then(() => results);
     }
-    debugger;
-    return results;
+
+    return Promise.resolve(results);
   },
 };

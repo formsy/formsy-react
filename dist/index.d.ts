@@ -80,11 +80,11 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     constructor(props: FormsyProps);
     getChildContext: () => {
         formsy: {
-            attachToForm: (component: any) => Promise<void>;
+            attachToForm: (component: any) => void;
             detachFromForm: (component: InputComponent) => void;
             isFormDisabled: boolean;
             isValidValue: (component: any, value: any) => Promise<boolean>;
-            validate: (component: InputComponent) => Promise<void>;
+            validate: (component: InputComponent) => void;
         };
     };
     componentDidMount: () => void;
@@ -107,12 +107,12 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         isValid: boolean;
         error: any;
     }>;
-    attachToForm: (component: any) => Promise<void>;
+    attachToForm: (component: any) => void;
     detachFromForm: (component: InputComponent) => void;
     isChanged: () => boolean;
     submit: (event: any) => void;
     updateInputsWithError: IUpdateInputsWithError;
-    validate: (component: InputComponent) => Promise<void>;
+    validate: (component: InputComponent) => void;
     validateForm: () => void;
     render: () => React.DetailedReactHTMLElement<{
         disabled: boolean;
