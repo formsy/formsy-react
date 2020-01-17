@@ -24,12 +24,7 @@ describe('Utils', () => {
     expect(utils.isSame(objC, objH)).toBe(false);
     expect(utils.isSame(objG, objA)).toBe(false);
 
-    expect(
-      utils.isSame(
-        () => {},
-        () => {},
-      ),
-    ).toBe(true);
+    expect(utils.isSame(() => {}, () => {})).toBe(true);
     expect(utils.isSame(objA, () => {})).toBe(false);
     expect(utils.isSame(() => {}, objA)).toBe(false);
   });
