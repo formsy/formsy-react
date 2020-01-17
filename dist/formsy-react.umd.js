@@ -174,6 +174,48 @@
     return _assertThisInitialized(self);
   }
 
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+  }
+
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
+  function _iterableToArrayLimit(arr, i) {
+    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+      return;
+    }
+
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+  }
+
   function unwrapExports (x) {
   	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
   }
@@ -1457,7 +1499,7 @@
       };
 
       if (Object.keys(validations).length) {
-        Object.keys(validations).forEach(function (validationMethod) {
+        return Promise.all(Object.keys(validations).map(function (validationMethod) {
           var validationsVal = validations[validationMethod];
           var validationRulesVal = validationRules[validationMethod];
 
@@ -1470,38 +1512,36 @@
           }
 
           if (typeof validationsVal === 'function') {
-            var validation = validationsVal(currentValues, value);
-
-            if (typeof validation === 'string') {
-              results.errors.push(validation);
-              results.failed.push(validationMethod);
-            } else if (!validation) {
-              results.failed.push(validationMethod);
-            }
-
-            return;
+            return Promise.resolve(validationsVal(currentValues, value)).then(function (validation) {
+              if (typeof validation === 'string') {
+                results.errors.push(validation);
+                results.failed.push(validationMethod);
+              } else if (!validation) {
+                results.failed.push(validationMethod);
+              }
+            });
           }
 
           if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
-            var _validation = validationRulesVal(currentValues, value, validationsVal);
-
-            if (typeof _validation === 'string') {
-              results.errors.push(_validation);
-              results.failed.push(validationMethod);
-            } else if (!_validation) {
-              results.failed.push(validationMethod);
-            } else {
-              results.success.push(validationMethod);
-            }
-
-            return;
+            return Promise.resolve(validationRulesVal(currentValues, value, validationsVal)).then(function (validation) {
+              if (typeof validation === 'string') {
+                results.errors.push(validation);
+                results.failed.push(validationMethod);
+              } else if (!validation) {
+                results.failed.push(validationMethod);
+              } else {
+                results.success.push(validationMethod);
+              }
+            });
           }
 
           results.success.push(validationMethod);
+        })).then(function () {
+          return results;
         });
       }
 
-      return results;
+      return Promise.resolve(results);
     }
   };
 
@@ -1996,7 +2036,9 @@
       };
 
       _this.isValidValue = function (component, value) {
-        return _this.runValidation(component, value).isValid;
+        return _this.runValidation(component, value).then(function (validation) {
+          return validation.isValid;
+        });
       };
 
       _this.isFormDisabled = function () {
@@ -2071,42 +2113,46 @@
 
         var currentValues = _this.getCurrentValues();
 
-        var validationResults = utils.runRules(value, currentValues, component.validations, validations);
-        var requiredResults = utils.runRules(value, currentValues, component.requiredValidations, validations);
-        var isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
-        var isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
-        return {
-          isRequired: isRequired,
-          isValid: isRequired ? false : isValid,
-          error: function () {
-            if (isValid && !isRequired) {
-              return _this.emptyArray;
-            }
+        return Promise.all([utils.runRules(value, currentValues, component.validations, validations), utils.runRules(value, currentValues, component.requiredValidations, validations)]).then(function (_ref) {
+          var _ref2 = _slicedToArray(_ref, 2),
+              validationResults = _ref2[0],
+              requiredResults = _ref2[1];
 
-            if (validationResults.errors.length) {
-              return validationResults.errors;
-            }
+          var isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
+          var isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
+          return {
+            isRequired: isRequired,
+            isValid: isRequired ? false : isValid,
+            error: function () {
+              if (isValid && !isRequired) {
+                return _this.emptyArray;
+              }
 
-            if (validationErrors && validationErrors[component.props.name]) {
-              return typeof validationErrors[component.props.name] === 'string' ? [validationErrors[component.props.name]] : validationErrors[component.props.name];
-            }
+              if (validationResults.errors.length) {
+                return validationResults.errors;
+              }
 
-            if (isRequired) {
-              var error = component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
-              return error ? [error] : null;
-            }
+              if (validationErrors && validationErrors[component.props.name]) {
+                return typeof validationErrors[component.props.name] === 'string' ? [validationErrors[component.props.name]] : validationErrors[component.props.name];
+              }
 
-            if (validationResults.failed.length) {
-              return validationResults.failed.map(function (failed) {
-                return component.props.validationErrors[failed] ? component.props.validationErrors[failed] : component.props.validationError;
-              }).filter(function (x, pos, arr) {
-                return arr.indexOf(x) === pos;
-              }); // remove duplicates
-            }
+              if (isRequired) {
+                var error = component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
+                return error ? [error] : null;
+              }
 
-            return undefined;
-          }()
-        };
+              if (validationResults.failed.length) {
+                return validationResults.failed.map(function (failed) {
+                  return component.props.validationErrors[failed] ? component.props.validationErrors[failed] : component.props.validationError;
+                }).filter(function (x, pos, arr) {
+                  return arr.indexOf(x) === pos;
+                }); // remove duplicates
+              }
+
+              return undefined;
+            }()
+          };
+        });
       };
 
       _this.attachToForm = function (component) {
@@ -2190,16 +2236,16 @@
           onChange(_this.getModel(), _this.isChanged());
         }
 
-        var validation = _this.runValidation(component); // Run through the validations, split them up and call
-        // the validator IF there is a value or it is required
-
-
-        component.setState({
-          externalError: null,
-          isRequired: validation.isRequired,
-          isValid: validation.isValid,
-          validationError: validation.error
-        }, _this.validateForm);
+        _this.runValidation(component).then(function (validation) {
+          // Run through the validations, split them up and call
+          // the validator IF there is a value or it is required
+          component.setState({
+            externalError: null,
+            isRequired: validation.isRequired,
+            isValid: validation.isValid,
+            validationError: validation.error
+          }, _this.validateForm);
+        });
       };
 
       _this.validateForm = function () {
@@ -2221,18 +2267,18 @@
 
 
         _this.inputs.forEach(function (component, index) {
-          var validation = _this.runValidation(component);
+          _this.runValidation(component).then(function (validation) {
+            if (validation.isValid && component.state.externalError) {
+              validation.isValid = false;
+            }
 
-          if (validation.isValid && component.state.externalError) {
-            validation.isValid = false;
-          }
-
-          component.setState({
-            isValid: validation.isValid,
-            isRequired: validation.isRequired,
-            validationError: validation.error,
-            externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null
-          }, index === _this.inputs.length - 1 ? onValidationComplete : null);
+            component.setState({
+              isValid: validation.isValid,
+              isRequired: validation.isRequired,
+              validationError: validation.error,
+              externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null
+            }, index === _this.inputs.length - 1 ? onValidationComplete : null);
+          });
         }); // If there are no inputs, set state where form is ready to trigger
         // change event. New inputs might be added later
 

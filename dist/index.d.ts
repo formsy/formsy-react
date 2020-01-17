@@ -83,7 +83,7 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
             attachToForm: (component: any) => void;
             detachFromForm: (component: InputComponent) => void;
             isFormDisabled: boolean;
-            isValidValue: (component: any, value: any) => boolean;
+            isValidValue: (component: any, value: any) => Promise<boolean>;
             validate: (component: InputComponent) => void;
         };
     };
@@ -95,18 +95,18 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     setFormPristine: (isPristine: boolean) => void;
     setInputValidationErrors: (errors: any) => void;
     setFormValidState: (allIsValid: boolean) => void;
-    isValidValue: (component: any, value: any) => boolean;
+    isValidValue: (component: any, value: any) => Promise<boolean>;
     isFormDisabled: () => boolean;
     mapModel: (model: any) => any;
     reset: (data?: any) => void;
     resetInternal: (event: any) => void;
     resetModel: IResetModel;
     setValue: ISetInputValue;
-    runValidation: (component: InputComponent, value?: any) => {
+    runValidation: (component: InputComponent, value?: any) => Promise<{
         isRequired: boolean;
         isValid: boolean;
         error: any;
-    };
+    }>;
     attachToForm: (component: any) => void;
     detachFromForm: (component: InputComponent) => void;
     isChanged: () => boolean;

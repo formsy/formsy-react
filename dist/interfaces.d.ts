@@ -9,7 +9,7 @@ export declare type IData = any;
 export declare type IResetModel = (model?: IModel) => void;
 export declare type ISetInputValue = (name: string, value: Value, validate?: boolean) => void;
 export declare type IUpdateInputsWithError = (errors: any, invalidate?: boolean) => void;
-export declare type ValidationFunction = (values: Values, value: Value, extra?: any) => boolean;
+export declare type ValidationFunction = (values: Values, value: Value, extra?: any) => boolean | Promise<boolean>;
 export declare type Validation = string | boolean | ValidationFunction;
 export interface Validations {
     [key: string]: Validation;

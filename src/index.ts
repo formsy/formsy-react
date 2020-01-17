@@ -237,7 +237,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     }
   };
 
-  public isValidValue = (component, value) => this.runValidation(component, value).isValid;
+  public isValidValue = (component, value) =>
+    this.runValidation(component, value).then(validation => validation.isValid);
 
   // eslint-disable-next-line react/destructuring-assignment
   public isFormDisabled = () => this.props.disabled;
@@ -303,47 +304,51 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public runValidation = (component: InputComponent, value = component.state.value) => {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
-    const validationResults = utils.runRules(value, currentValues, component.validations, validationRules);
-    const requiredResults = utils.runRules(value, currentValues, component.requiredValidations, validationRules);
-    const isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
-    const isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
 
-    return {
-      isRequired,
-      isValid: isRequired ? false : isValid,
-      error: (() => {
-        if (isValid && !isRequired) {
-          return this.emptyArray;
-        }
+    return Promise.all([
+      utils.runRules(value, currentValues, component.validations, validationRules),
+      utils.runRules(value, currentValues, component.requiredValidations, validationRules),
+    ]).then(([validationResults, requiredResults]) => {
+      const isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
+      const isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
+      return {
+        isRequired,
+        isValid: isRequired ? false : isValid,
+        error: (() => {
+          if (isValid && !isRequired) {
+            return this.emptyArray;
+          }
 
-        if (validationResults.errors.length) {
-          return validationResults.errors;
-        }
+          if (validationResults.errors.length) {
+            return validationResults.errors;
+          }
 
-        if (validationErrors && validationErrors[component.props.name]) {
-          return typeof validationErrors[component.props.name] === 'string'
-            ? [validationErrors[component.props.name]]
-            : validationErrors[component.props.name];
-        }
+          if (validationErrors && validationErrors[component.props.name]) {
+            return typeof validationErrors[component.props.name] === 'string'
+              ? [validationErrors[component.props.name]]
+              : validationErrors[component.props.name];
+          }
 
-        if (isRequired) {
-          const error = component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
-          return error ? [error] : null;
-        }
+          if (isRequired) {
+            const error =
+              component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
+            return error ? [error] : null;
+          }
 
-        if (validationResults.failed.length) {
-          return validationResults.failed
-            .map(failed =>
-              component.props.validationErrors[failed]
-                ? component.props.validationErrors[failed]
-                : component.props.validationError,
-            )
-            .filter((x, pos, arr) => arr.indexOf(x) === pos); // remove duplicates
-        }
+          if (validationResults.failed.length) {
+            return validationResults.failed
+              .map(failed =>
+                component.props.validationErrors[failed]
+                  ? component.props.validationErrors[failed]
+                  : component.props.validationError,
+              )
+              .filter((x, pos, arr) => arr.indexOf(x) === pos); // remove duplicates
+          }
 
-        return undefined;
-      })(),
-    };
+          return undefined;
+        })(),
+      };
+    });
   };
 
   // Method put on each input component to register
@@ -436,18 +441,19 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onChange(this.getModel(), this.isChanged());
     }
 
-    const validation = this.runValidation(component);
-    // Run through the validations, split them up and call
-    // the validator IF there is a value or it is required
-    component.setState(
-      {
-        externalError: null,
-        isRequired: validation.isRequired,
-        isValid: validation.isValid,
-        validationError: validation.error,
-      },
-      this.validateForm,
-    );
+    this.runValidation(component).then(validation => {
+      // Run through the validations, split them up and call
+      // the validator IF there is a value or it is required
+      component.setState(
+        {
+          externalError: null,
+          isRequired: validation.isRequired,
+          isValid: validation.isValid,
+          validationError: validation.error,
+        },
+        this.validateForm,
+      );
+    });
   };
 
   // Validate the form by going through all child input components
@@ -469,19 +475,20 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     // Run validation again in case affected by other inputs. The
     // last component validated will run the onValidationComplete callback
     this.inputs.forEach((component, index) => {
-      const validation = this.runValidation(component);
-      if (validation.isValid && component.state.externalError) {
-        validation.isValid = false;
-      }
-      component.setState(
-        {
-          isValid: validation.isValid,
-          isRequired: validation.isRequired,
-          validationError: validation.error,
-          externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null,
-        },
-        index === this.inputs.length - 1 ? onValidationComplete : null,
-      );
+      this.runValidation(component).then(validation => {
+        if (validation.isValid && component.state.externalError) {
+          validation.isValid = false;
+        }
+        component.setState(
+          {
+            isValid: validation.isValid,
+            isRequired: validation.isRequired,
+            validationError: validation.error,
+            externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null,
+          },
+          index === this.inputs.length - 1 ? onValidationComplete : null,
+        );
+      });
     });
 
     // If there are no inputs, set state where form is ready to trigger
