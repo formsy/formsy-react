@@ -63,7 +63,7 @@ export default {
     return null;
   },
 
-  runRules: (value: Value, currentValues: Values, validations: Validations, validationRules: Validations) => {
+  runRules(value: Value, currentValues: Values, validations: Validations, validationRules: Validations) {
     const results: {
       errors: string[];
       failed: string[];
