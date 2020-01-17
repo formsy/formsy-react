@@ -4,7 +4,7 @@ declare const _default: {
     objectsDiffer(a: object, b: object): boolean;
     isSame(a: unknown, b: unknown): boolean;
     find<T>(collection: T[], fn: (item: T) => boolean): T;
-    runRules: (value: any, currentValues: Values, validations: Validations, validationRules: Validations) => Promise<{
+    runRules(value: any, currentValues: Values, validations: Validations, validationRules: Validations): Promise<{
         errors: string[];
         failed: string[];
         success: string[];
