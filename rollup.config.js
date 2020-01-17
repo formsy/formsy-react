@@ -27,10 +27,7 @@ export default [
   // CommonJS (for Node) and ES module (for bundlers) build.
   {
     input,
-    output: [
-      { file: pkg.main, format: 'cjs', ...common },
-      { file: pkg.module, format: 'es', ...common },
-    ],
+    output: [{ file: pkg.main, format: 'cjs', ...common }, { file: pkg.module, format: 'es', ...common }],
     external: ['ms'],
     plugins,
   },
