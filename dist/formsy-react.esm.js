@@ -1375,15 +1375,28 @@ var formDataToObject = {
 };
 
 function arraysDiffer(a, b) {
-  var _this = this;
-
   var isDifferent = false;
 
   if (a.length !== b.length) {
     isDifferent = true;
   } else {
     a.forEach(function (item, index) {
-      if (!_this.isSame(item, b[index])) {
+      if (!isSame(item, b[index])) {
+        isDifferent = true;
+      }
+    }, this);
+  }
+
+  return isDifferent;
+}
+function objectsDiffer(a, b) {
+  var isDifferent = false;
+
+  if (Object.keys(a).length !== Object.keys(b).length) {
+    isDifferent = true;
+  } else {
+    Object.keys(a).forEach(function (key) {
+      if (!isSame(a[key], b[key])) {
         isDifferent = true;
       }
     }, this);
@@ -1397,7 +1410,7 @@ function isSame(a, b) {
   }
 
   if (Array.isArray(a) && Array.isArray(b)) {
-    return !this.arraysDiffer(a, b);
+    return !arraysDiffer(a, b);
   }
 
   if (typeof a === 'function' && typeof b === 'function') {
@@ -1409,7 +1422,7 @@ function isSame(a, b) {
   }
 
   if (_typeof(a) === 'object' && _typeof(b) === 'object' && a !== null && b !== null) {
-    return !this.objectsDiffer(a, b);
+    return !objectsDiffer(a, b);
   }
 
   return a === b;
