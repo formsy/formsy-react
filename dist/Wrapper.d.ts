@@ -28,7 +28,7 @@ export interface WrapperState {
     validationError: any[];
     value: any;
 }
-export interface PassDownProps extends WrapperProps {
+export interface InjectedProps {
     errorMessage: any;
     errorMessages: any;
     hasValue: boolean;
@@ -45,5 +45,6 @@ export interface PassDownProps extends WrapperProps {
     showError: boolean;
     showRequired: boolean;
 }
+export declare type PassDownProps = WrapperProps & InjectedProps;
 export { propTypes };
-export default function <T>(WrappedComponent: React.ComponentType<T & PassDownProps>): React.ComponentType<T & WrapperProps>;
+export default function <T>(WrappedComponent: React.ComponentType<T & PassDownProps>): React.ComponentType<Omit<T & WrapperProps, keyof InjectedProps>>;

@@ -70,7 +70,7 @@ export interface WrapperState {
   value: any;
 }
 
-export interface PassDownProps extends WrapperProps {
+export interface InjectedProps {
   errorMessage: any;
   errorMessages: any;
   hasValue: boolean;
@@ -88,6 +88,8 @@ export interface PassDownProps extends WrapperProps {
   showRequired: boolean;
 }
 
+export type PassDownProps = WrapperProps & InjectedProps;
+
 export { propTypes };
 
 function getDisplayName(component: WrappedComponentClass) {
@@ -100,7 +102,7 @@ function getDisplayName(component: WrappedComponentClass) {
 
 export default function<T>(
   WrappedComponent: React.ComponentType<T & PassDownProps>,
-): React.ComponentType<T & WrapperProps> {
+): React.ComponentType<Omit<T & WrapperProps, keyof InjectedProps>> {
   return class extends React.Component<T & WrapperProps, WrapperState> {
     public validations?: Validations;
 
