@@ -1,27 +1,26 @@
 import React, { ComponentClass } from 'react';
 import { WrapperProps, WrapperState } from './Wrapper';
-export declare type Value = any;
 export interface Values {
-    [key: string]: Value;
+    [key: string]: any;
 }
 export declare type IModel = any;
 export declare type IData = any;
 export declare type IResetModel = (model?: IModel) => void;
-export declare type ISetInputValue = (name: string, value: Value, validate?: boolean) => void;
+export declare type ISetInputValue<V> = (name: string, value: V, validate?: boolean) => void;
 export declare type IUpdateInputsWithError = (errors: any, invalidate?: boolean) => void;
-export declare type ValidationFunction = (values: Values, value: Value, extra?: any) => boolean | string;
-export declare type Validation = string | boolean | ValidationFunction;
-export declare type Validations = ValidationsStructure | string | object;
-export interface ValidationsStructure {
-    [key: string]: Validation;
+export declare type ValidationFunction<V> = (values: Values, value: V, extra?: any) => boolean | string;
+export declare type Validation<V> = string | boolean | ValidationFunction<V>;
+export declare type Validations<V> = ValidationsStructure<V> | string | object;
+export interface ValidationsStructure<V> {
+    [key: string]: Validation<V>;
 }
-export declare type RequiredValidation = boolean | Validations;
+export declare type RequiredValidation<V> = boolean | Validations<V>;
 export interface ComponentWithStaticAttributes extends ComponentClass {
     string?: any;
     defaultValue?: any;
 }
 export declare type WrappedComponentClass = React.FC | ComponentWithStaticAttributes;
-export interface InputComponent extends React.Component<WrapperProps, WrapperState> {
-    validations?: Validations;
-    requiredValidations?: Validations;
+export interface InputComponent<V> extends React.Component<WrapperProps<V>, WrapperState<V>> {
+    validations?: Validations<V>;
+    requiredValidations?: Validations<V>;
 }

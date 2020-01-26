@@ -81,10 +81,10 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     getChildContext: () => {
         formsy: {
             attachToForm: (component: any) => void;
-            detachFromForm: (component: InputComponent) => void;
+            detachFromForm: <V>(component: InputComponent<V>) => void;
             isFormDisabled: boolean;
             isValidValue: (component: any, value: any) => boolean;
-            validate: (component: InputComponent) => void;
+            validate: <V_1>(component: InputComponent<V_1>) => void;
         };
     };
     componentDidMount: () => void;
@@ -101,18 +101,18 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     reset: (data?: any) => void;
     resetInternal: (event: any) => void;
     resetModel: IResetModel;
-    setValue: ISetInputValue;
-    runValidation: (component: InputComponent, value?: any) => {
+    setValue: ISetInputValue<any>;
+    runValidation: <V>(component: InputComponent<V>, value?: V) => {
         isRequired: boolean;
         isValid: boolean;
         error: any;
     };
     attachToForm: (component: any) => void;
-    detachFromForm: (component: InputComponent) => void;
+    detachFromForm: <V>(component: InputComponent<V>) => void;
     isChanged: () => boolean;
     submit: (event: any) => void;
     updateInputsWithError: IUpdateInputsWithError;
-    validate: (component: InputComponent) => void;
+    validate: <V>(component: InputComponent<V>) => void;
     validateForm: () => void;
     render: () => React.DetailedReactHTMLElement<{
         disabled: boolean;
@@ -380,6 +380,6 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         onSubmit: (event: any) => void;
     }, HTMLElement>;
 }
-declare const addValidationRule: (name: string, func: ValidationFunction) => void;
+declare const addValidationRule: <V>(name: string, func: ValidationFunction<V>) => void;
 export { addValidationRule, propTypes, validationRules, Wrapper as withFormsy };
 export default Formsy;

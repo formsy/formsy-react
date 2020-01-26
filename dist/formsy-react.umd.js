@@ -1497,12 +1497,24 @@
   };
 
   var isEmpty = function isEmpty(value) {
-    return value === '';
+    if (typeof value === 'string') {
+      return value === '';
+    }
+
+    if (typeof value === 'undefined') {
+      return false;
+    }
+
+    return value === undefined;
   };
 
   var validations = {
     isDefaultRequiredValue: function isDefaultRequiredValue(_values, value) {
-      return value === undefined || value === null || value === '';
+      if (typeof value === 'string') {
+        return value === '';
+      }
+
+      return value === undefined || value === null;
     },
     isExisty: function isExisty(_values, value) {
       return _isExisty(value);
@@ -1684,7 +1696,13 @@
         };
 
         _this.hasValue = function () {
-          return _this.state.value !== '';
+          var value = _this.state.value;
+
+          if (typeof value === 'string') {
+            return value !== '';
+          }
+
+          return value !== undefined;
         };
 
         _this.isFormDisabled = function () {
