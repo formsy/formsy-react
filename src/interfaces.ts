@@ -15,11 +15,12 @@ export type ValidationFunction = (values: Values, value: Value, extra?: any) => 
 
 export type Validation = string | boolean | ValidationFunction;
 
-export interface Validations {
+export type Validations = ValidationsStructure | string | object;
+export interface ValidationsStructure {
   [key: string]: Validation;
 }
 
-export type RequiredValidation = string | boolean | Validations;
+export type RequiredValidation = boolean | Validations;
 
 export interface ComponentWithStaticAttributes extends ComponentClass {
   string?: any;

@@ -6,7 +6,7 @@ import { Validations, WrappedComponentClass, RequiredValidation, Value } from '.
 
 /* eslint-disable react/default-props-match-prop-types */
 
-const convertValidationsToObject = (validations: string | false | Validations): Validations => {
+const convertValidationsToObject = (validations: false | Validations): Validations => {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
       let args = validation.split(':');
@@ -54,7 +54,7 @@ export interface WrapperProps {
   required?: RequiredValidation;
   validationError?: any;
   validationErrors?: any;
-  validations?: Validations | string;
+  validations?: Validations;
   value?: Value;
 }
 
@@ -207,7 +207,7 @@ export default function<T>(
     // eslint-disable-next-line react/destructuring-assignment
     public getValue = () => this.state.value;
 
-    public setValidations = (validations: string | Validations, required: RequiredValidation) => {
+    public setValidations = (validations: Validations, required: RequiredValidation) => {
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations =

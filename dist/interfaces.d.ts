@@ -9,12 +9,13 @@ export declare type IData = any;
 export declare type IResetModel = (model?: IModel) => void;
 export declare type ISetInputValue = (name: string, value: Value, validate?: boolean) => void;
 export declare type IUpdateInputsWithError = (errors: any, invalidate?: boolean) => void;
-export declare type ValidationFunction = (values: Values, value: Value, extra?: any) => boolean;
+export declare type ValidationFunction = (values: Values, value: Value, extra?: any) => boolean | string;
 export declare type Validation = string | boolean | ValidationFunction;
-export interface Validations {
+export declare type Validations = ValidationsStructure | string | object;
+export interface ValidationsStructure {
     [key: string]: Validation;
 }
-export declare type RequiredValidation = string | boolean | Validations;
+export declare type RequiredValidation = boolean | Validations;
 export interface ComponentWithStaticAttributes extends ComponentClass {
     string?: any;
     defaultValue?: any;

@@ -14,7 +14,7 @@ export interface WrapperProps {
     required?: RequiredValidation;
     validationError?: any;
     validationErrors?: any;
-    validations?: Validations | string;
+    validations?: Validations;
     value?: Value;
 }
 export interface WrapperState {
