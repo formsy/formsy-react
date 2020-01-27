@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { RequiredValidation, Validations } from './interfaces';
+import { Validations, RequiredValidation, Value } from './interfaces';
 declare const propTypes: {
     innerRef: PropTypes.Requireable<(...args: any[]) => any>;
     name: PropTypes.Validator<string>;
@@ -8,16 +8,16 @@ declare const propTypes: {
     validations: PropTypes.Requireable<string | object>;
     value: PropTypes.Requireable<any>;
 };
-export interface WrapperProps<V> {
+export interface WrapperProps {
     innerRef?: (ref: any) => void;
     name: string;
-    required?: RequiredValidation<V>;
+    required?: RequiredValidation;
     validationError?: any;
     validationErrors?: any;
-    validations?: Validations<V>;
-    value?: V;
+    validations?: Validations | string;
+    value?: Value;
 }
-export interface WrapperState<V> {
+export interface WrapperState {
     [key: string]: unknown;
     externalError: null;
     formSubmitted: boolean;
@@ -26,9 +26,9 @@ export interface WrapperState<V> {
     isValid: boolean;
     pristineValue: any;
     validationError: any[];
-    value: V;
+    value: any;
 }
-export interface InjectedProps<V> {
+export interface PassDownProps extends WrapperProps {
     errorMessage: any;
     errorMessages: any;
     hasValue: boolean;
@@ -37,14 +37,13 @@ export interface InjectedProps<V> {
     isPristine: boolean;
     isRequired: boolean;
     isValid: boolean;
-    isValidValue: (value: V) => boolean;
+    isValidValue: (value: Value) => boolean;
     ref?: any;
     resetValue: any;
     setValidations: any;
-    setValue: (value: V) => void;
+    setValue: (value: Value) => void;
     showError: boolean;
     showRequired: boolean;
 }
-export declare type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
 export { propTypes };
-export default function <T, V>(WrappedComponent: React.ComponentType<T & PassDownProps<V>>): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>>;
+export default function <T>(WrappedComponent: React.ComponentType<T & PassDownProps>): React.ComponentType<T & WrapperProps>;
