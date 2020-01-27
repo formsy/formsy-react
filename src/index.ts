@@ -163,7 +163,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     }
 
     const newInputNames = this.inputs.map(component => component.props.name);
-    if (this.prevInputNames && utils.arraysDiffer(this.prevInputNames, newInputNames)) {
+    if (this.prevInputNames && !utils.isSame(this.prevInputNames, newInputNames)) {
       this.prevInputNames = newInputNames;
       this.validateForm();
     }
@@ -299,7 +299,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   // Set the value of one component
   public setValue: ISetInputValue = (name, value, validate) => {
-    const input = utils.find(this.inputs, component => component.props.name === name);
+    const input = this.inputs.find(component => component.props.name === name);
     if (input) {
       input.setValue(value, validate);
     }
@@ -407,7 +407,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     const { isValid } = this.state;
 
     Object.keys(errors).forEach(name => {
-      const component = utils.find(this.inputs, input => input.props.name === name);
+      const component = this.inputs.find(input => input.props.name === name);
       if (!component) {
         throw new Error(
           `You are trying to update an input that does not exist. Verify errors object with input names. ${JSON.stringify(

@@ -1,31 +1,32 @@
 import { Validations, Value, Values } from './interfaces';
 
-export function arraysDiffer(a: unknown[], b: unknown[]) {
-  let isDifferent = false;
-  if (a.length !== b.length) {
-    isDifferent = true;
-  } else {
-    a.forEach((item, index) => {
-      if (!this.isSame(item, b[index])) {
-        isDifferent = true;
-      }
-    }, this);
-  }
-  return isDifferent;
+export function isArray(value: unknown): value is unknown[] {
+  return Array.isArray(value);
 }
 
-export function objectsDiffer(a: object, b: object) {
-  let isDifferent = false;
-  if (Object.keys(a).length !== Object.keys(b).length) {
-    isDifferent = true;
-  } else {
-    Object.keys(a).forEach(key => {
-      if (!this.isSame(a[key], b[key])) {
-        isDifferent = true;
-      }
-    }, this);
-  }
-  return isDifferent;
+export function isObject(value: unknown): value is object {
+  return value !== null && typeof value === 'object';
+}
+
+export function isDate(value: unknown): value is Date {
+  return value instanceof Date;
+}
+
+export function isFunction(value: unknown): value is Function {
+  return value !== null && typeof value === 'function';
+}
+
+export function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+export function noop() {
+  // do nothing.
+}
+
+export function cloneIfObject(value: unknown) {
+  // Clone objects to avoid accidental param reassignment
+  return isObject(value) ? { ...value } : value;
 }
 
 export function isSame(a: unknown, b: unknown) {
@@ -33,33 +34,31 @@ export function isSame(a: unknown, b: unknown) {
     return false;
   }
 
-  if (Array.isArray(a) && Array.isArray(b)) {
-    return !this.arraysDiffer(a, b);
+  if (isArray(a) && isArray(b)) {
+    if (a.length !== b.length) {
+      return false;
+    }
+
+    return a.every((item, index) => isSame(item, b[index]));
   }
 
-  if (typeof a === 'function' && typeof b === 'function') {
+  if (isFunction(a) && isFunction(b)) {
     return a.toString() === b.toString();
   }
 
-  if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
+  if (isDate(a) && isDate(b)) {
     return a.toString() === b.toString();
   }
 
-  if (typeof a === 'object' && typeof b === 'object' && a !== null && b !== null) {
-    return !this.objectsDiffer(a, b);
+  if (isObject(a) && isObject(b)) {
+    if (Object.keys(a).length !== Object.keys(b).length) {
+      return false;
+    }
+
+    return Object.keys(a).every(key => isSame(a[key], b[key]));
   }
 
   return a === b;
-}
-
-export function find<T>(collection: T[], fn: (item: T) => boolean): T {
-  for (let i = 0, l = collection.length; i < l; i += 1) {
-    const item = collection[i];
-    if (fn(item)) {
-      return item;
-    }
-  }
-  return null;
 }
 
 export function runRules(value: Value, currentValues: Values, validations: Validations, validationRules: Validations) {
@@ -78,28 +77,31 @@ export function runRules(value: Value, currentValues: Values, validations: Valid
       const validationsVal = validations[validationMethod];
       const validationRulesVal = validationRules[validationMethod];
 
-      if (validationRulesVal && typeof validationsVal === 'function') {
+      if (validationRulesVal && isFunction(validationsVal)) {
         throw new Error(`Formsy does not allow you to override default validations: ${validationMethod}`);
       }
 
-      if (!validationRulesVal && typeof validationsVal !== 'function') {
+      if (!validationRulesVal && !isFunction(validationsVal)) {
         throw new Error(`Formsy does not have the validation rule: ${validationMethod}`);
       }
 
-      if (typeof validationsVal === 'function') {
+      if (isFunction(validationsVal)) {
         const validation = validationsVal(currentValues, value);
-        if (typeof validation === 'string') {
+
+        if (isString(validation)) {
           results.errors.push(validation);
           results.failed.push(validationMethod);
         } else if (!validation) {
           results.failed.push(validationMethod);
         }
+
         return;
       }
-      if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
+
+      if (!isFunction(validationsVal) && isFunction(validationRulesVal)) {
         const validation = validationRulesVal(currentValues, value, validationsVal);
 
-        if (typeof validation === 'string') {
+        if (isString(validation)) {
           results.errors.push(validation);
           results.failed.push(validationMethod);
         } else if (!validation) {
@@ -115,13 +117,4 @@ export function runRules(value: Value, currentValues: Values, validations: Valid
   }
 
   return results;
-}
-
-export function noop() {
-  // do nothing.
-}
-
-export function cloneIfObject(value: unknown) {
-  // Clone objects to avoid accidental param reassignment
-  return typeof value === 'object' ? { ...value } : value;
 }
