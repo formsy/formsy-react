@@ -1,11 +1,12 @@
 import { ValidationFunction, Values } from './interfaces';
+import { isString, isTypeUndefined } from './utils';
 
 const isExisty = <V>(value: V) => value !== null && value !== undefined;
 const isEmpty = <V>(value: V) => {
-  if (typeof value === 'string') {
+  if (isString(value)) {
     return value === '';
   }
-  if (typeof value === 'undefined') {
+  if (isTypeUndefined(value)) {
     return false;
   }
   return value === undefined;

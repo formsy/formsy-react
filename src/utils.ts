@@ -8,6 +8,10 @@ export function isObject(value: unknown): value is object {
   return value !== null && typeof value === 'object';
 }
 
+export function isTypeUndefined(value: unknown): value is object {
+  return value !== null && typeof value === 'undefined';
+}
+
 export function isDate(value: unknown): value is Date {
   return value instanceof Date;
 }
