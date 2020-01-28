@@ -1,15 +1,22 @@
 import { ValidationFunction, Values } from './interfaces';
-import { isString, isTypeUndefined } from './utils';
+import {
+  isString,
+  isValueStringEmpty,
+  isTypeUndefined,
+  isValueNullOrUndefined,
+  isNumber,
+  isValueUndefined,
+} from './utils';
 
-const isExisty = <V>(value: V) => value !== null && value !== undefined;
+const isExisty = <V>(value: V) => !isValueNullOrUndefined(value);
 const isEmpty = <V>(value: V) => {
   if (isString(value)) {
-    return value === '';
+    return isValueStringEmpty(value);
   }
   if (isTypeUndefined(value)) {
     return false;
   }
-  return value === undefined;
+  return isValueUndefined(value);
 };
 
 interface Validations<V> {
@@ -18,10 +25,10 @@ interface Validations<V> {
 
 const validations: Validations<any> = {
   isDefaultRequiredValue<V>(_values: Values, value: V) {
-    if (typeof value === 'string') {
-      return value === '';
+    if (isString(value)) {
+      return isValueStringEmpty(value);
     }
-    return value === undefined || value === null;
+    return isValueNullOrUndefined(value);
   },
   isExisty<V>(_values: Values, value: V) {
     return isExisty(value);
@@ -30,7 +37,7 @@ const validations: Validations<any> = {
     return !isExisty(value) || isEmpty(value) || regexp.test(value);
   },
   isUndefined<V>(_values: Values, value: V) {
-    return value === undefined;
+    return isValueUndefined(value);
   },
   isEmptyString(_values: Values, value: string) {
     return isEmpty(value);
@@ -53,7 +60,7 @@ const validations: Validations<any> = {
     return value === false;
   },
   isNumeric<V>(values: Values, value: V) {
-    if (typeof value === 'number') {
+    if (isNumber(value)) {
       return true;
     }
     return validations.matchRegexp(values, value, /^[-+]?(?:\d*[.])?\d+$/);

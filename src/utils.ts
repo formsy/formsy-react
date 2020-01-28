@@ -9,7 +9,7 @@ export function isObject(value: unknown): value is object {
 }
 
 export function isTypeUndefined(value: unknown): value is object {
-  return value !== null && typeof value === 'undefined';
+  return typeof value === 'undefined';
 }
 
 export function isDate(value: unknown): value is Date {
@@ -22,6 +22,22 @@ export function isFunction(value: unknown): value is Function {
 
 export function isString(value: unknown): value is string {
   return typeof value === 'string';
+}
+
+export function isNumber(value: unknown): value is number {
+  return typeof value === 'number';
+}
+
+export function isValueStringEmpty(value: string): boolean {
+  return value === '';
+}
+
+export function isValueNullOrUndefined(value: unknown): boolean {
+  return value === null || value === undefined;
+}
+
+export function isValueUndefined(value: unknown): boolean {
+  return value === undefined;
 }
 
 export function noop() {
