@@ -61,7 +61,12 @@ export function isSame(a: unknown, b: unknown) {
   return a === b;
 }
 
-export function runRules<V>(value: V, currentValues: Values, validations: Validations<V>, validationRules: Validations<V>) {
+export function runRules<V>(
+  value: V,
+  currentValues: Values,
+  validations: Validations<V>,
+  validationRules: Validations<V>,
+) {
   const results: {
     errors: string[];
     failed: string[];
