@@ -185,7 +185,7 @@ function createCommonjsModule(fn, module) {
 var reactIs_production_min = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports,"__esModule",{value:!0});
 var b="function"===typeof Symbol&&Symbol.for,c=b?Symbol.for("react.element"):60103,d=b?Symbol.for("react.portal"):60106,e=b?Symbol.for("react.fragment"):60107,f=b?Symbol.for("react.strict_mode"):60108,g=b?Symbol.for("react.profiler"):60114,h=b?Symbol.for("react.provider"):60109,k=b?Symbol.for("react.context"):60110,l=b?Symbol.for("react.async_mode"):60111,m=b?Symbol.for("react.concurrent_mode"):60111,n=b?Symbol.for("react.forward_ref"):60112,p=b?Symbol.for("react.suspense"):60113,q=b?Symbol.for("react.suspense_list"):
-60120,r=b?Symbol.for("react.memo"):60115,t=b?Symbol.for("react.lazy"):60116,v=b?Symbol.for("react.fundamental"):60117,w=b?Symbol.for("react.responder"):60118,x=b?Symbol.for("react.scope"):60119;function y(a){if("object"===typeof a&&null!==a){var u=a.$$typeof;switch(u){case c:switch(a=a.type,a){case l:case m:case e:case g:case f:case p:return a;default:switch(a=a&&a.$$typeof,a){case k:case n:case h:return a;default:return u}}case t:case r:case d:return u}}}function z(a){return y(a)===m}
+60120,r=b?Symbol.for("react.memo"):60115,t=b?Symbol.for("react.lazy"):60116,v=b?Symbol.for("react.fundamental"):60117,w=b?Symbol.for("react.responder"):60118,x=b?Symbol.for("react.scope"):60119;function y(a){if("object"===typeof a&&null!==a){var u=a.$$typeof;switch(u){case c:switch(a=a.type,a){case l:case m:case e:case g:case f:case p:return a;default:switch(a=a&&a.$$typeof,a){case k:case n:case t:case r:case h:return a;default:return u}}case d:return u}}}function z(a){return y(a)===m}
 exports.typeOf=y;exports.AsyncMode=l;exports.ConcurrentMode=m;exports.ContextConsumer=k;exports.ContextProvider=h;exports.Element=c;exports.ForwardRef=n;exports.Fragment=e;exports.Lazy=t;exports.Memo=r;exports.Portal=d;exports.Profiler=g;exports.StrictMode=f;exports.Suspense=p;
 exports.isValidElementType=function(a){return "string"===typeof a||"function"===typeof a||a===e||a===m||a===g||a===f||a===p||a===q||"object"===typeof a&&null!==a&&(a.$$typeof===t||a.$$typeof===r||a.$$typeof===h||a.$$typeof===k||a.$$typeof===n||a.$$typeof===v||a.$$typeof===w||a.$$typeof===x)};exports.isAsyncMode=function(a){return z(a)||y(a)===l};exports.isConcurrentMode=z;exports.isContextConsumer=function(a){return y(a)===k};exports.isContextProvider=function(a){return y(a)===h};
 exports.isElement=function(a){return "object"===typeof a&&null!==a&&a.$$typeof===c};exports.isForwardRef=function(a){return y(a)===n};exports.isFragment=function(a){return y(a)===e};exports.isLazy=function(a){return y(a)===t};exports.isMemo=function(a){return y(a)===r};exports.isPortal=function(a){return y(a)===d};exports.isProfiler=function(a){return y(a)===g};exports.isStrictMode=function(a){return y(a)===f};exports.isSuspense=function(a){return y(a)===p};
@@ -336,6 +336,8 @@ function typeOf(object) {
             switch ($$typeofType) {
               case REACT_CONTEXT_TYPE:
               case REACT_FORWARD_REF_TYPE:
+              case REACT_LAZY_TYPE:
+              case REACT_MEMO_TYPE:
               case REACT_PROVIDER_TYPE:
                 return $$typeofType;
 
@@ -345,8 +347,6 @@ function typeOf(object) {
 
         }
 
-      case REACT_LAZY_TYPE:
-      case REACT_MEMO_TYPE:
       case REACT_PORTAL_TYPE:
         return $$typeof;
     }
@@ -1380,142 +1380,155 @@ var formDataToObject = {
   toObj: toObj
 };
 
-var utils = {
-  arraysDiffer: function arraysDiffer(a, b) {
-    var _this = this;
+function isArray(value) {
+  return Array.isArray(value);
+}
+function isObject(value) {
+  return value !== null && _typeof(value) === 'object';
+}
+function isTypeUndefined(value) {
+  return typeof value === 'undefined';
+}
+function isDate(value) {
+  return value instanceof Date;
+}
+function isFunction(value) {
+  return value !== null && typeof value === 'function';
+}
+function isString(value) {
+  return typeof value === 'string';
+}
+function isNumber(value) {
+  return typeof value === 'number';
+}
+function isValueStringEmpty(value) {
+  return value === '';
+}
+function isValueNullOrUndefined(value) {
+  return value === null || value === undefined;
+}
+function isValueUndefined(value) {
+  return value === undefined;
+}
+function noop() {// do nothing.
+}
+function cloneIfObject(value) {
+  // Clone objects to avoid accidental param reassignment
+  return isObject(value) ? _objectSpread2({}, value) : value;
+}
+function isSame(a, b) {
+  if (_typeof(a) !== _typeof(b)) {
+    return false;
+  }
 
-    var isDifferent = false;
-
+  if (isArray(a) && isArray(b)) {
     if (a.length !== b.length) {
-      isDifferent = true;
-    } else {
-      a.forEach(function (item, index) {
-        if (!_this.isSame(item, b[index])) {
-          isDifferent = true;
-        }
-      }, this);
-    }
-
-    return isDifferent;
-  },
-  objectsDiffer: function objectsDiffer(a, b) {
-    var _this2 = this;
-
-    var isDifferent = false;
-
-    if (Object.keys(a).length !== Object.keys(b).length) {
-      isDifferent = true;
-    } else {
-      Object.keys(a).forEach(function (key) {
-        if (!_this2.isSame(a[key], b[key])) {
-          isDifferent = true;
-        }
-      }, this);
-    }
-
-    return isDifferent;
-  },
-  isSame: function isSame(a, b) {
-    if (_typeof(a) !== _typeof(b)) {
       return false;
     }
 
-    if (Array.isArray(a) && Array.isArray(b)) {
-      return !this.arraysDiffer(a, b);
-    }
-
-    if (typeof a === 'function' && typeof b === 'function') {
-      return a.toString() === b.toString();
-    }
-
-    if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
-      return a.toString() === b.toString();
-    }
-
-    if (_typeof(a) === 'object' && _typeof(b) === 'object' && a !== null && b !== null) {
-      return !this.objectsDiffer(a, b);
-    }
-
-    return a === b;
-  },
-  find: function find(collection, fn) {
-    for (var i = 0, l = collection.length; i < l; i += 1) {
-      var _item = collection[i];
-
-      if (fn(_item)) {
-        return _item;
-      }
-    }
-
-    return null;
-  },
-  runRules: function runRules(value, currentValues, validations, validationRules) {
-    var results = {
-      errors: [],
-      failed: [],
-      success: []
-    };
-
-    if (Object.keys(validations).length) {
-      Object.keys(validations).forEach(function (validationMethod) {
-        var validationsVal = validations[validationMethod];
-        var validationRulesVal = validationRules[validationMethod];
-
-        if (validationRulesVal && typeof validationsVal === 'function') {
-          throw new Error("Formsy does not allow you to override default validations: ".concat(validationMethod));
-        }
-
-        if (!validationRulesVal && typeof validationsVal !== 'function') {
-          throw new Error("Formsy does not have the validation rule: ".concat(validationMethod));
-        }
-
-        if (typeof validationsVal === 'function') {
-          var validation = validationsVal(currentValues, value);
-
-          if (typeof validation === 'string') {
-            results.errors.push(validation);
-            results.failed.push(validationMethod);
-          } else if (!validation) {
-            results.failed.push(validationMethod);
-          }
-
-          return;
-        }
-
-        if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
-          var _validation = validationRulesVal(currentValues, value, validationsVal);
-
-          if (typeof _validation === 'string') {
-            results.errors.push(_validation);
-            results.failed.push(validationMethod);
-          } else if (!_validation) {
-            results.failed.push(validationMethod);
-          } else {
-            results.success.push(validationMethod);
-          }
-
-          return;
-        }
-
-        results.success.push(validationMethod);
-      });
-    }
-
-    return results;
+    return a.every(function (item, index) {
+      return isSame(item, b[index]);
+    });
   }
-};
+
+  if (isFunction(a) && isFunction(b)) {
+    return a.toString() === b.toString();
+  }
+
+  if (isDate(a) && isDate(b)) {
+    return a.toString() === b.toString();
+  }
+
+  if (isObject(a) && isObject(b)) {
+    if (Object.keys(a).length !== Object.keys(b).length) {
+      return false;
+    }
+
+    return Object.keys(a).every(function (key) {
+      return isSame(a[key], b[key]);
+    });
+  }
+
+  return a === b;
+}
+function runRules(value, currentValues, validations, validationRules) {
+  var results = {
+    errors: [],
+    failed: [],
+    success: []
+  };
+
+  if (Object.keys(validations).length) {
+    Object.keys(validations).forEach(function (validationMethod) {
+      var validationsVal = validations[validationMethod];
+      var validationRulesVal = validationRules[validationMethod];
+
+      if (validationRulesVal && isFunction(validationsVal)) {
+        throw new Error("Formsy does not allow you to override default validations: ".concat(validationMethod));
+      }
+
+      if (!validationRulesVal && !isFunction(validationsVal)) {
+        throw new Error("Formsy does not have the validation rule: ".concat(validationMethod));
+      }
+
+      if (isFunction(validationsVal)) {
+        var validation = validationsVal(currentValues, value);
+
+        if (isString(validation)) {
+          results.errors.push(validation);
+          results.failed.push(validationMethod);
+        } else if (!validation) {
+          results.failed.push(validationMethod);
+        }
+
+        return;
+      }
+
+      if (!isFunction(validationsVal) && isFunction(validationRulesVal)) {
+        var _validation = validationRulesVal(currentValues, value, validationsVal);
+
+        if (isString(_validation)) {
+          results.errors.push(_validation);
+          results.failed.push(validationMethod);
+        } else if (!_validation) {
+          results.failed.push(validationMethod);
+        } else {
+          results.success.push(validationMethod);
+        }
+
+        return;
+      }
+
+      results.success.push(validationMethod);
+    });
+  }
+
+  return results;
+}
 
 var _isExisty = function isExisty(value) {
-  return value !== null && value !== undefined;
+  return !isValueNullOrUndefined(value);
 };
 
 var isEmpty = function isEmpty(value) {
-  return value === '';
+  if (isString(value)) {
+    return isValueStringEmpty(value);
+  }
+
+  if (isTypeUndefined(value)) {
+    return false;
+  }
+
+  return isValueUndefined(value);
 };
 
 var validations = {
   isDefaultRequiredValue: function isDefaultRequiredValue(_values, value) {
-    return value === undefined || value === null || value === '';
+    if (isString(value)) {
+      return isValueStringEmpty(value);
+    }
+
+    return isValueNullOrUndefined(value);
   },
   isExisty: function isExisty(_values, value) {
     return _isExisty(value);
@@ -1524,7 +1537,7 @@ var validations = {
     return !_isExisty(value) || isEmpty(value) || regexp.test(value);
   },
   isUndefined: function isUndefined(_values, value) {
-    return value === undefined;
+    return isValueUndefined(value);
   },
   isEmptyString: function isEmptyString(_values, value) {
     return isEmpty(value);
@@ -1543,7 +1556,7 @@ var validations = {
     return value === false;
   },
   isNumeric: function isNumeric(values, value) {
-    if (typeof value === 'number') {
+    if (isNumber(value)) {
       return true;
     }
 
@@ -1608,7 +1621,8 @@ var convertValidationsToObject = function convertValidationsToObject(validations
       } // Avoid parameter reassignment
 
 
-      var validationsAccumulatorCopy = Object.assign({}, validationsAccumulator);
+      var validationsAccumulatorCopy = _objectSpread2({}, validationsAccumulator);
+
       validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
       return validationsAccumulatorCopy;
     }, {});
@@ -1696,7 +1710,13 @@ function Wrapper (WrappedComponent) {
       };
 
       _this.hasValue = function () {
-        return _this.state.value !== '';
+        var value = _this.state.value;
+
+        if (typeof value === 'string') {
+          return value !== '';
+        }
+
+        return value !== undefined;
       };
 
       _this.isFormDisabled = function () {
@@ -1800,12 +1820,12 @@ function Wrapper (WrappedComponent) {
         var formsy = this.context.formsy; // If the value passed has changed, set it. If value is not passed it will
         // internally update, and this will never run
 
-        if (!utils.isSame(value, prevProps.value)) {
+        if (!isSame(value, prevProps.value)) {
           this.setValue(value);
         } // If validations or required is changed, run a new validation
 
 
-        if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+        if (!isSame(validations, prevProps.validations) || !isSame(required, prevProps.required)) {
           this.setValidations(validations, required);
           formsy.validate(this);
         }
@@ -1909,7 +1929,7 @@ function (_React$Component) {
         return component.props.name;
       });
 
-      if (_this.prevInputNames && utils.arraysDiffer(_this.prevInputNames, newInputNames)) {
+      if (_this.prevInputNames && !isSame(_this.prevInputNames, newInputNames)) {
         _this.prevInputNames = newInputNames;
 
         _this.validateForm();
@@ -1917,11 +1937,12 @@ function (_React$Component) {
     };
 
     _this.getCurrentValues = function () {
-      return _this.inputs.reduce(function (data, component) {
-        var dataCopy = _typeof(component.state.value) === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
+      return _this.inputs.reduce(function (valueAccumulator, component) {
+        var name = component.props.name,
+            value = component.state.value; // eslint-disable-next-line no-param-reassign
 
-        dataCopy[component.props.name] = component.state.value;
-        return dataCopy;
+        valueAccumulator[name] = cloneIfObject(value);
+        return valueAccumulator;
       }, {});
     };
 
@@ -1932,12 +1953,13 @@ function (_React$Component) {
     };
 
     _this.getPristineValues = function () {
-      return _this.inputs.reduce(function (data, component) {
-        var name = component.props.name;
-        var dataCopy = _typeof(component.state.value) === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
+      return _this.inputs.reduce(function (valueAccumulator, component) {
+        var _component$props = component.props,
+            name = _component$props.name,
+            value = _component$props.value; // eslint-disable-next-line no-param-reassign
 
-        dataCopy[name] = component.props.value;
-        return dataCopy;
+        valueAccumulator[name] = cloneIfObject(value);
+        return valueAccumulator;
       }, {});
     };
 
@@ -2051,7 +2073,7 @@ function (_React$Component) {
     };
 
     _this.setValue = function (name, value, validate) {
-      var input = utils.find(_this.inputs, function (component) {
+      var input = _this.inputs.find(function (component) {
         return component.props.name === name;
       });
 
@@ -2066,8 +2088,8 @@ function (_React$Component) {
 
       var currentValues = _this.getCurrentValues();
 
-      var validationResults = utils.runRules(value, currentValues, component.validations, validations);
-      var requiredResults = utils.runRules(value, currentValues, component.requiredValidations, validations);
+      var validationResults = runRules(value, currentValues, component.validations, validations);
+      var requiredResults = runRules(value, currentValues, component.requiredValidations, validations);
       var isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
       var isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
       return {
@@ -2123,7 +2145,7 @@ function (_React$Component) {
     };
 
     _this.isChanged = function () {
-      return !utils.isSame(_this.getPristineValues(), _this.getCurrentValues());
+      return !isSame(_this.getPristineValues(), _this.getCurrentValues());
     };
 
     _this.submit = function (event) {
@@ -2157,7 +2179,7 @@ function (_React$Component) {
       var preventExternalInvalidation = _this.props.preventExternalInvalidation;
       var isValid = _this.state.isValid;
       Object.keys(errors).forEach(function (name) {
-        var component = utils.find(_this.inputs, function (input) {
+        var component = _this.inputs.find(function (input) {
           return input.props.name === name;
         });
 
@@ -2325,31 +2347,31 @@ Formsy.childContextTypes = {
 };
 Formsy.defaultProps = {
   disabled: false,
-  getErrorMessage: function getErrorMessage() {},
-  getErrorMessages: function getErrorMessages() {},
-  getValue: function getValue() {},
-  hasValue: function hasValue() {},
-  isFormDisabled: function isFormDisabled() {},
-  isFormSubmitted: function isFormSubmitted() {},
-  isPristine: function isPristine() {},
-  isRequired: function isRequired() {},
-  isValid: function isValid() {},
-  isValidValue: function isValidValue() {},
+  getErrorMessage: noop,
+  getErrorMessages: noop,
+  getValue: noop,
+  hasValue: noop,
+  isFormDisabled: noop,
+  isFormSubmitted: noop,
+  isPristine: noop,
+  isRequired: noop,
+  isValid: noop,
+  isValidValue: noop,
   mapping: null,
-  onChange: function onChange() {},
-  onError: function onError() {},
-  onInvalid: function onInvalid() {},
-  onInvalidSubmit: function onInvalidSubmit() {},
-  onReset: function onReset() {},
-  onSubmit: function onSubmit() {},
-  onValid: function onValid() {},
-  onValidSubmit: function onValidSubmit() {},
+  onChange: noop,
+  onError: noop,
+  onInvalid: noop,
+  onInvalidSubmit: noop,
+  onReset: noop,
+  onSubmit: noop,
+  onValid: noop,
+  onValidSubmit: noop,
   preventExternalInvalidation: false,
-  resetValue: function resetValue() {},
-  setValidations: function setValidations() {},
-  setValue: function setValue() {},
-  showError: function showError() {},
-  showRequired: function showRequired() {},
+  resetValue: noop,
+  setValidations: noop,
+  setValue: noop,
+  showError: noop,
+  showRequired: noop,
   validationErrors: null
 };
 
