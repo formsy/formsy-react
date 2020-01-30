@@ -8,7 +8,7 @@ export function isObject(value: unknown): value is object {
   return value !== null && typeof value === 'object';
 }
 
-export function isTypeUndefined(value: unknown): value is object {
+export function isTypeUndefined(value: unknown): value is undefined {
   return typeof value === 'undefined';
 }
 
