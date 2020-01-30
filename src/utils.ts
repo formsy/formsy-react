@@ -1,4 +1,4 @@
-import { Validations, Value, Values } from './interfaces';
+import { Validations, Values } from './interfaces';
 
 export function isArray(value: unknown): value is unknown[] {
   return Array.isArray(value);
@@ -6,6 +6,10 @@ export function isArray(value: unknown): value is unknown[] {
 
 export function isObject(value: unknown): value is object {
   return value !== null && typeof value === 'object';
+}
+
+export function isTypeUndefined(value: unknown): value is undefined {
+  return typeof value === 'undefined';
 }
 
 export function isDate(value: unknown): value is Date {
@@ -18,6 +22,22 @@ export function isFunction(value: unknown): value is Function {
 
 export function isString(value: unknown): value is string {
   return typeof value === 'string';
+}
+
+export function isNumber(value: unknown): value is number {
+  return typeof value === 'number';
+}
+
+export function isValueStringEmpty(value: string): boolean {
+  return value === '';
+}
+
+export function isValueNullOrUndefined(value: unknown): boolean {
+  return value === null || value === undefined;
+}
+
+export function isValueUndefined(value: unknown): boolean {
+  return value === undefined;
 }
 
 export function noop() {
@@ -61,7 +81,12 @@ export function isSame(a: unknown, b: unknown) {
   return a === b;
 }
 
-export function runRules(value: Value, currentValues: Values, validations: Validations, validationRules: Validations) {
+export function runRules<V>(
+  value: V,
+  currentValues: Values,
+  validations: Validations<V>,
+  validationRules: Validations<V>,
+) {
   const results: {
     errors: string[];
     failed: string[];

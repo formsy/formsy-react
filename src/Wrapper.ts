@@ -2,11 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import * as utils from './utils';
-import { Validations, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
+import { RequiredValidation, Validations, WrappedComponentClass } from './interfaces';
 
 /* eslint-disable react/default-props-match-prop-types */
 
-const convertValidationsToObject = (validations: string | false | Validations): Validations => {
+const convertValidationsToObject = <V>(validations: false | Validations<V>): Validations<V> => {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
       let args = validation.split(':');
@@ -31,7 +31,7 @@ const convertValidationsToObject = (validations: string | false | Validations): 
       }
 
       // Avoid parameter reassignment
-      const validationsAccumulatorCopy: Validations = { ...validationsAccumulator };
+      const validationsAccumulatorCopy: Validations<V> = { ...validationsAccumulator };
       validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
       return validationsAccumulatorCopy;
     }, {});
@@ -48,17 +48,17 @@ const propTypes = {
   value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
 };
 
-export interface WrapperProps {
+export interface WrapperProps<V> {
   innerRef?: (ref: any) => void;
   name: string;
-  required?: RequiredValidation;
+  required?: RequiredValidation<V>;
   validationError?: any;
   validationErrors?: any;
-  validations?: Validations | string;
-  value?: Value;
+  validations?: Validations<V>;
+  value?: V;
 }
 
-export interface WrapperState {
+export interface WrapperState<V> {
   [key: string]: unknown;
   externalError: null;
   formSubmitted: boolean;
@@ -67,10 +67,10 @@ export interface WrapperState {
   isValid: boolean;
   pristineValue: any;
   validationError: any[];
-  value: any;
+  value: V;
 }
 
-export interface PassDownProps extends WrapperProps {
+export interface InjectedProps<V> {
   errorMessage: any;
   errorMessages: any;
   hasValue: boolean;
@@ -79,14 +79,16 @@ export interface PassDownProps extends WrapperProps {
   isPristine: boolean;
   isRequired: boolean;
   isValid: boolean;
-  isValidValue: (value: Value) => boolean;
+  isValidValue: (value: V) => boolean;
   ref?: any;
   resetValue: any;
   setValidations: any;
-  setValue: (value: Value) => void;
+  setValue: (value: V) => void;
   showError: boolean;
   showRequired: boolean;
 }
+
+export type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
 
 export { propTypes };
 
@@ -98,13 +100,13 @@ function getDisplayName(component: WrappedComponentClass) {
   );
 }
 
-export default function<T>(
-  WrappedComponent: React.ComponentType<T & PassDownProps>,
-): React.ComponentType<T & WrapperProps> {
-  return class extends React.Component<T & WrapperProps, WrapperState> {
-    public validations?: Validations;
+export default function<T, V>(
+  WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
+): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
+  return class extends React.Component<T & WrapperProps<V>, WrapperState<V>> {
+    public validations?: Validations<V>;
 
-    public requiredValidations?: Validations;
+    public requiredValidations?: Validations<V>;
 
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
@@ -207,7 +209,7 @@ export default function<T>(
     // eslint-disable-next-line react/destructuring-assignment
     public getValue = () => this.state.value;
 
-    public setValidations = (validations: string | Validations, required: RequiredValidation) => {
+    public setValidations = (validations: Validations<V>, required: RequiredValidation<V>) => {
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations =
@@ -237,7 +239,13 @@ export default function<T>(
     };
 
     // eslint-disable-next-line react/destructuring-assignment
-    public hasValue = () => this.state.value !== '';
+    public hasValue = () => {
+      const { value } = this.state;
+      if (typeof value === 'string') {
+        return value !== '';
+      }
+      return value !== undefined;
+    };
 
     // eslint-disable-next-line react/destructuring-assignment
     public isFormDisabled = () => this.context.formsy.isFormDisabled;
@@ -279,7 +287,7 @@ export default function<T>(
 
     public render() {
       const { innerRef } = this.props;
-      const propsForElement: PassDownProps = {
+      const propsForElement: PassDownProps<V> = {
         ...this.props,
         errorMessage: this.getErrorMessage(),
         errorMessages: this.getErrorMessages(),

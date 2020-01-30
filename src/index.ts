@@ -298,7 +298,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Set the value of one component
-  public setValue: ISetInputValue = (name, value, validate) => {
+  public setValue: ISetInputValue<any> = (name, value, validate) => {
     const input = this.inputs.find(component => component.props.name === name);
     if (input) {
       input.setValue(value, validate);
@@ -306,7 +306,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Checks validation on current value or a passed value
-  public runValidation = (component: InputComponent, value = component.state.value) => {
+  public runValidation = <V>(component: InputComponent<V>, value = component.state.value) => {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
     const validationResults = utils.runRules(value, currentValues, component.validations, validationRules);
@@ -364,7 +364,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   // Method put on each input component to unregister
   // itself from the form
-  public detachFromForm = (component: InputComponent) => {
+  public detachFromForm = <V>(component: InputComponent<V>) => {
     const componentPos = this.inputs.indexOf(component);
 
     if (componentPos !== -1) {
@@ -431,7 +431,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // Use the binded values and the actual input value to
   // validate the input and set its state. Then check the
   // state of the form itself
-  public validate = (component: InputComponent) => {
+  public validate = <V>(component: InputComponent<V>) => {
     const { onChange } = this.props;
     const { canChange } = this.state;
 
@@ -440,7 +440,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onChange(this.getModel(), this.isChanged());
     }
 
-    const validation = this.runValidation(component);
+    const validation = this.runValidation<V>(component);
     // Run through the validations, split them up and call
     // the validator IF there is a value or it is required
     component.setState(
@@ -543,7 +543,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 }
 
-const addValidationRule = (name: string, func: ValidationFunction) => {
+const addValidationRule = <V>(name: string, func: ValidationFunction<V>) => {
   validationRules[name] = func;
 };
 
