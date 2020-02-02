@@ -543,7 +543,7 @@ describe('value === false', () => {
     expect(input.instance().getValue()).toEqual(true);
   });
 
-  it('should be able to set a value to one component with setValue', () => {
+  it('should be able to set a value to components with updateInputsWithValue', () => {
     class TestForm extends React.Component {
       state = {
         valueFoo: true,
@@ -576,7 +576,7 @@ describe('value === false', () => {
         .instance()
         .getValue(),
     ).toEqual(true);
-    formsyForm.instance().setValue('foo', false);
+    formsyForm.instance().updateInputsWithValue({ foo: false });
     expect(
       inputs
         .at(0)

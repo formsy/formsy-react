@@ -11,10 +11,11 @@ import {
   IModel,
   InputComponent,
   IResetModel,
-  ISetInputValue,
+  IUpdateInputsWithValue,
   IUpdateInputsWithError,
   ValidationFunction,
 } from './interfaces';
+import { isString } from './utils';
 
 type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 
@@ -297,14 +298,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.validateForm();
   };
 
-  // Set the value of one component
-  public setValue: ISetInputValue<any> = (name, value, validate) => {
-    const input = this.inputs.find(component => component.props.name === name);
-    if (input) {
-      input.setValue(value, validate);
-    }
-  };
-
   // Checks validation on current value or a passed value
   public runValidation = <V>(component: InputComponent<V>, value = component.state.value) => {
     const { validationErrors } = this.props;
@@ -406,7 +399,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     const { preventExternalInvalidation } = this.props;
     const { isValid } = this.state;
 
-    Object.keys(errors).forEach(name => {
+    Object.entries(errors).forEach(([name, error]) => {
       const component = this.inputs.find(input => input.props.name === name);
       if (!component) {
         throw new Error(
@@ -418,7 +411,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       const args = [
         {
           isValid: preventExternalInvalidation,
-          externalError: typeof errors[name] === 'string' ? [errors[name]] : errors[name],
+          externalError: isString(error) ? [error] : error,
         },
       ];
       component.setState(...args);
@@ -426,6 +419,17 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     if (invalidate && isValid) {
       this.setFormValidState(false);
     }
+  };
+
+  // Set the value of components
+  public updateInputsWithValue: IUpdateInputsWithValue<any> = (values, validate) => {
+    Object.entries(values).forEach(([name, value]) => {
+      const input = this.inputs.find(component => component.props.name === name);
+
+      if (input) {
+        input.setValue(value, validate);
+      }
+    });
   };
 
   // Use the binded values and the actual input value to

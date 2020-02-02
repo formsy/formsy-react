@@ -12,6 +12,7 @@
   - [preventExternalInvalidation](#preventExternalInvalidation)
   - [reset()](#reset)
   - [updateInputsWithError()](#updateInputsWithError)
+  - [updateInputsWithValue()](#setInputsWithValue)
   - [validationErrors](#validationErrors)
 - [withFormsy](#withFormsy)
   - [errorMessage](#errorMessage)
@@ -210,6 +211,25 @@ Manually set the form fields validation errors by taking an object that maps fie
 argument and optionally invalidate the form by passing `true` as the second argument. This is useful for server side
 validation. This is also passed as the third parameter to the [`onSubmit`](#onSubmit), [`onValidSubmit`](#onValid) or
 [`onInvalidSubmit`](#onInvalid).
+
+#### <a id="updateInputsWithValue">updateInputsWithValue(values)</a>
+
+```jsx
+class MyForm extends React.Component {
+  someFunction = () => {
+    this.refs.form.updateInputsWithValue({
+      email: 'value@example.com',
+      'field[10]': 'value!',
+    });
+  };
+  render() {
+    return <Formsy ref="form">...</Formsy>;
+  }
+}
+```
+
+Manually set the form fields values by taking an object that maps field name to value as the first argument and
+optionally validate the inputs by passing `true` as the second argument.
 
 #### <a id="preventExternalInvalidation">preventExternalInvalidation</a>
 
