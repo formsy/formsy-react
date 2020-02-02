@@ -15,7 +15,6 @@ import {
   IUpdateInputsWithError,
   ValidationFunction,
 } from './interfaces';
-import { isString } from './utils';
 
 type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 
@@ -411,7 +410,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       const args = [
         {
           isValid: preventExternalInvalidation,
-          externalError: isString(error) ? [error] : error,
+          externalError: utils.isString(error) ? [error] : error,
         },
       ];
       component.setState(...args);
