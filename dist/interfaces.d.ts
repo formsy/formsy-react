@@ -6,7 +6,7 @@ export interface Values {
 export declare type IModel = any;
 export declare type IData = any;
 export declare type IResetModel = (model?: IModel) => void;
-export declare type ISetInputValue<V> = (name: string, value: V, validate?: boolean) => void;
+export declare type IUpdateInputsWithValue<V> = (values: any, validate?: boolean) => void;
 export declare type IUpdateInputsWithError = (errors: any, invalidate?: boolean) => void;
 export declare type ValidationFunction<V> = (values: Values, value: V, extra?: any) => boolean | string;
 export declare type Validation<V> = string | boolean | ValidationFunction<V>;

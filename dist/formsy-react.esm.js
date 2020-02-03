@@ -168,6 +168,48 @@ function _possibleConstructorReturn(self, call) {
   return _assertThisInitialized(self);
 }
 
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+    return;
+  }
+
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance");
+}
+
 function unwrapExports (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
@@ -2066,16 +2108,6 @@ function (_React$Component) {
       _this.validateForm();
     };
 
-    _this.setValue = function (name, value, validate) {
-      var input = _this.inputs.find(function (component) {
-        return component.props.name === name;
-      });
-
-      if (input) {
-        input.setValue(value, validate);
-      }
-    };
-
     _this.runValidation = function (component) {
       var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : component.state.value;
       var validationErrors = _this.props.validationErrors;
@@ -2172,7 +2204,11 @@ function (_React$Component) {
     _this.updateInputsWithError = function (errors, invalidate) {
       var preventExternalInvalidation = _this.props.preventExternalInvalidation;
       var isValid = _this.state.isValid;
-      Object.keys(errors).forEach(function (name) {
+      Object.entries(errors).forEach(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+            name = _ref2[0],
+            error = _ref2[1];
+
         var component = _this.inputs.find(function (input) {
           return input.props.name === name;
         });
@@ -2183,7 +2219,7 @@ function (_React$Component) {
 
         var args = [{
           isValid: preventExternalInvalidation,
-          externalError: typeof errors[name] === 'string' ? [errors[name]] : errors[name]
+          externalError: isString(error) ? [error] : error
         }];
         component.setState.apply(component, args);
       });
@@ -2191,6 +2227,22 @@ function (_React$Component) {
       if (invalidate && isValid) {
         _this.setFormValidState(false);
       }
+    };
+
+    _this.updateInputsWithValue = function (values, validate) {
+      Object.entries(values).forEach(function (_ref3) {
+        var _ref4 = _slicedToArray(_ref3, 2),
+            name = _ref4[0],
+            value = _ref4[1];
+
+        var input = _this.inputs.find(function (component) {
+          return component.props.name === name;
+        });
+
+        if (input) {
+          input.setValue(value, validate);
+        }
+      });
     };
 
     _this.validate = function (component) {

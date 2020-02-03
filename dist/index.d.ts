@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
-import { IModel, InputComponent, IResetModel, ISetInputValue, IUpdateInputsWithError, ValidationFunction } from './interfaces';
+import { IModel, InputComponent, IResetModel, IUpdateInputsWithValue, IUpdateInputsWithError, ValidationFunction } from './interfaces';
 declare type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 export interface FormsyProps extends FormHTMLAttributesCleaned {
     disabled: boolean;
@@ -101,7 +101,6 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     reset: (data?: any) => void;
     resetInternal: (event: any) => void;
     resetModel: IResetModel;
-    setValue: ISetInputValue<any>;
     runValidation: <V>(component: InputComponent<V>, value?: V) => {
         isRequired: boolean;
         isValid: boolean;
@@ -112,6 +111,7 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     isChanged: () => boolean;
     submit: (event: any) => void;
     updateInputsWithError: IUpdateInputsWithError;
+    updateInputsWithValue: IUpdateInputsWithValue<any>;
     validate: <V>(component: InputComponent<V>) => void;
     validateForm: () => void;
     render: () => React.DetailedReactHTMLElement<{
