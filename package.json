@@ -62,6 +62,7 @@
     "version": "npm run build && git add dist && npm run changelog && git add CHANGELOG.md"
   },
   "dependencies": {
+    "coveralls": "^3.0.9",
     "form-data-to-object": "^0.2.0",
     "prop-types": "^15.7.2"
   },
