@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { withFormsy } from '../src';
 import { PassDownProps } from '../src/Wrapper';
 

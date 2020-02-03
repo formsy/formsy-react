@@ -21,6 +21,11 @@
     }
   },
   "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.tsx",
+      "src/**/*.ts"
+    ],
     "transform": {
       "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
     },
