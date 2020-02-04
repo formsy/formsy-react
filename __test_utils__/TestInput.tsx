@@ -12,7 +12,7 @@ class TestInput extends React.Component<Props> {
   };
 
   render() {
-    return <input type={this.props.type || 'text'} value={this.props.value} onChange={this.updateValue} />;
+    return <input type={this.props.type || 'text'} value={this.props.value || ''} onChange={this.updateValue} />;
   }
 }
 

@@ -6,7 +6,7 @@ import { InputFactory } from '../__test_utils__/TestInput';
 
 const TestInput = InputFactory({
   render() {
-    return <input value={this.props.value} readOnly />;
+    return <input value={this.props.value || ''} readOnly />;
   },
 });
 

@@ -1,4 +1,9 @@
 {
+  "ignorePatterns": [
+    "dist/",
+    "node_modules/",
+    "coverage/"
+  ],
   "extends": [
     "airbnb",
     "eslint:recommended",
@@ -17,7 +22,11 @@
     "@typescript-eslint/explicit-function-return-type": 0,
     "@typescript-eslint/no-explicit-any": 0,
     "import/extensions": 0,
-    "import/no-extraneous-dependencies": ["error", {"devDependencies": ["setupTests.ts", "**/*spec.tsx"]}],
+    "import/no-extraneous-dependencies": [
+      "error", {
+        "devDependencies": ["rollup.config.js", "setupTests.ts", "**/*spec.tsx"]
+      }
+    ],
     "prettier/prettier": ["error", { "singleQuote": true }],
     "react/forbid-prop-types": 0,
     "react/static-property-placement": 0

@@ -14,35 +14,35 @@ class TestForm extends React.Component {
   render() {
     return (
       <Formsy>
-        <TestInput name="foo" validations="isExisty" value={this.props.inputValue} />
+        <TestInput name="foo" validations="isUndefined" value={this.props.inputValue} />
       </Formsy>
     );
   }
 }
 
-describe('isExisty', () => {
+describe('isUndefined', () => {
   it('should pass with a default value', () => {
     const form = mount(<TestForm />);
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().isValid()).toEqual(false);
+    expect(inputComponent.instance().isValid()).toEqual(true);
   });
 
-  it('should pass with a string', () => {
+  it('should fail with a string', () => {
     const form = mount(<TestForm inputValue="abc" />);
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().isValid()).toEqual(true);
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
-  it('should pass with an empty string', () => {
+  it('should fail with an empty string', () => {
     const form = mount(<TestForm inputValue="" />);
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().isValid()).toEqual(true);
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
-  it('should fail with undefined', () => {
+  it('should pass with undefined', () => {
     const form = mount(<TestForm inputValue={undefined} />);
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().isValid()).toEqual(false);
+    expect(inputComponent.instance().isValid()).toEqual(true);
   });
 
   it('should fail with null', () => {
@@ -51,15 +51,15 @@ describe('isExisty', () => {
     expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
-  it('should pass with a number', () => {
+  it('should fail with a number', () => {
     const form = mount(<TestForm inputValue={42} />);
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().isValid()).toEqual(true);
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 
-  it('should pass with a zero', () => {
+  it('should fail with a zero', () => {
     const form = mount(<TestForm inputValue={0} />);
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().isValid()).toEqual(true);
+    expect(inputComponent.instance().isValid()).toEqual(false);
   });
 });

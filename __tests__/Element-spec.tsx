@@ -25,14 +25,15 @@ describe('Element', () => {
         updateValue = event => {
           this.props.setValue(event.target.value, false);
         };
+
         render() {
-          return <input type="text" value={this.props.value} onChange={this.updateValue} />;
+          return <input type="text" value={this.props.value || ''} onChange={this.updateValue} />;
         }
       },
     );
     const form = mount(
       <Formsy>
-        <Input name="foo" value="foo" innerRef="comp" />
+        <Input name="foo" value="foo" />
       </Formsy>,
     );
     const inputComponent = form.find(Input);
@@ -587,25 +588,6 @@ describe('Element', () => {
     input.simulate('change', { target: { value: 'fooz' } });
     expect(input.instance().value).toEqual('fooz');
     expect(renderSpy.calledTwice).toEqual(true);
-  });
-
-  it('binds all necessary methods', () => {
-    const onInputRef = input => {
-      ['isValidValue', 'resetValue', 'setValidations', 'setValue'].forEach(fnName => {
-        const fn = input[fnName];
-        try {
-          fn();
-        } catch (e) {
-          throw new Error(`Method '${fnName}' isn't bound.`);
-        }
-      });
-    };
-
-    mount(
-      <Formsy>
-        <TestInput ref={onInputRef} name="name" value="foo" />
-      </Formsy>,
-    );
   });
 
   it('unregisters on unmount', () => {

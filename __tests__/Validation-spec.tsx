@@ -14,7 +14,7 @@ class MyTest extends React.Component {
   };
 
   render() {
-    return <input type={this.props.type} value={this.props.value} onChange={this.handleChange} />;
+    return <input type={this.props.type} value={this.props.value || ''} onChange={this.handleChange} />;
   }
 }
 const FormsyTest = withFormsy(MyTest);
