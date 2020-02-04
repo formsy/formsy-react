@@ -62,7 +62,6 @@
     "version": "npm run build && git add dist && npm run changelog && git add CHANGELOG.md"
   },
   "dependencies": {
-    "coveralls": "^3.0.9",
     "form-data-to-object": "^0.2.0",
     "prop-types": "^15.7.2"
   },
@@ -86,6 +85,7 @@
     "babel-jest": "^25.1.0",
     "babel-loader": "^8.0.6",
     "babelrc-rollup": "^3.0.0",
+    "coveralls": "^3.0.9",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^6.1.0",
