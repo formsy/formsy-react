@@ -12,7 +12,7 @@
   - [preventExternalInvalidation](#preventExternalInvalidation)
   - [reset()](#reset)
   - [updateInputsWithError()](#updateInputsWithError)
-  - [updateInputsWithValue()](#setInputsWithValue)
+  - [updateInputsWithValue()](#updateInputsWithValue)
   - [validationErrors](#validationErrors)
 - [withFormsy](#withFormsy)
   - [errorMessage](#errorMessage)
