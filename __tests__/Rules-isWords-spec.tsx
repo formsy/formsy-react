@@ -15,6 +15,10 @@ describe('isWords', () => {
     expectIsValid(<ValidationForm validations="isWords" value="sup dude" />).toEqual(true);
   });
 
+  it('should fail with special charachters', () => {
+    expectIsValid(<ValidationForm validations="isWords" value="including special letters à ú ø æ å" />).toEqual(false);
+  });
+
   it('should fail with a string with numbers', () => {
     expectIsValid(<ValidationForm validations="isWords" value="sup 42" />).toEqual(false);
   });
