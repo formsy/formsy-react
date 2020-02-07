@@ -145,13 +145,6 @@ export default function<T, V>(
       const { validations, required, name } = this.props;
       const { attachToForm } = this.context;
 
-      const configure = () => {
-        this.setValidations(validations, required);
-
-        // Pass a function instead?
-        attachToForm(this);
-      };
-
       if (!name) {
         throw new Error('Form Input requires a name property when used');
       }
@@ -159,7 +152,7 @@ export default function<T, V>(
       this.setValidations(validations, required);
 
       // Pass a function instead?
-      configure();
+      attachToForm(this);
     }
 
     public shouldComponentUpdate(nextProps, nextState, nextContext) {

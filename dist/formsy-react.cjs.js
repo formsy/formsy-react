@@ -1639,7 +1639,7 @@ var validations = {
   }
 };
 
-var noFormsyErrorMessage = 'No Context Provider defined';
+var noFormsyErrorMessage = 'Could not find Formsy Context Provider. Did you use withFormsy outside Formsy ?';
 
 var throwNoFormsyProvider = function throwNoFormsyProvider() {
   throw new Error(noFormsyErrorMessage);
@@ -1839,20 +1839,11 @@ function Wrapper (WrappedComponent) {
     _createClass(_class, [{
       key: "componentDidMount",
       value: function componentDidMount() {
-        var _this2 = this;
-
         var _this$props = this.props,
             validations = _this$props.validations,
             required = _this$props.required,
             name = _this$props.name;
         var attachToForm = this.context.attachToForm;
-
-        var configure = function configure() {
-          _this2.setValidations(validations, required); // Pass a function instead?
-
-
-          attachToForm(_this2);
-        };
 
         if (!name) {
           throw new Error('Form Input requires a name property when used');
@@ -1860,7 +1851,7 @@ function Wrapper (WrappedComponent) {
 
         this.setValidations(validations, required); // Pass a function instead?
 
-        configure();
+        attachToForm(this);
       }
     }, {
       key: "shouldComponentUpdate",
