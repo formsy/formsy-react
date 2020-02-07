@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import Formsy from '..';
+import Formsy from '../src';
 import { InputFactory } from '../__test_utils__/TestInput';
 
 const TestInput = InputFactory({
@@ -10,7 +10,7 @@ const TestInput = InputFactory({
   },
 });
 
-class TestForm extends React.Component {
+class TestForm extends React.Component<{ inputValue?: any }> {
   render() {
     return (
       <Formsy>

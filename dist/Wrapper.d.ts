@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Validations, RequiredValidation, Value } from './interfaces';
+import { RequiredValidation, Validations } from './interfaces';
 declare const propTypes: {
     innerRef: PropTypes.Requireable<(...args: any[]) => any>;
     name: PropTypes.Validator<string>;
@@ -8,16 +8,16 @@ declare const propTypes: {
     validations: PropTypes.Requireable<string | object>;
     value: PropTypes.Requireable<any>;
 };
-export interface WrapperProps {
+export interface WrapperProps<V> {
     innerRef?: (ref: any) => void;
     name: string;
-    required: RequiredValidation;
-    validationError: any;
-    validationErrors: any;
-    validations: Validations | string;
-    value: any;
+    required?: RequiredValidation<V>;
+    validationError?: any;
+    validationErrors?: any;
+    validations?: Validations<V>;
+    value?: V;
 }
-export interface WrapperState {
+export interface WrapperState<V> {
     [key: string]: unknown;
     externalError: null;
     formSubmitted: boolean;
@@ -26,9 +26,9 @@ export interface WrapperState {
     isValid: boolean;
     pristineValue: any;
     validationError: any[];
-    value: any;
+    value: V;
 }
-export interface PassDownProps {
+export interface InjectedProps<V> {
     errorMessage: any;
     errorMessages: any;
     hasValue: boolean;
@@ -37,17 +37,14 @@ export interface PassDownProps {
     isPristine: boolean;
     isRequired: boolean;
     isValid: boolean;
-    isValidValue: (value: Value) => boolean;
-    name: string;
+    isValidValue: (value: V) => boolean;
     ref?: any;
     resetValue: any;
     setValidations: any;
-    setValue: (value: Value) => void;
+    setValue: (value: V) => void;
     showError: boolean;
     showRequired: boolean;
-    validationError: any;
-    validationErrors: any;
-    value: Value;
 }
+export declare type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
 export { propTypes };
-export default function <Props, State, CompState>(WrappedComponent: React.ComponentClass<Props & State>): React.ComponentClass<Props & State>;
+export default function <T, V>(WrappedComponent: React.ComponentType<T & PassDownProps<V>>): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>>;

@@ -1,15 +1,18 @@
 import React from 'react';
-import { withFormsy } from './..';
 
-class TestInput extends React.Component {
-  static defaultProps = { type: 'text' };
+import { withFormsy } from '../src';
+import { PassDownProps } from '../src/Wrapper';
 
+type Props = React.HTMLProps<HTMLInputElement>;
+
+class TestInput extends React.Component<Props> {
   updateValue = event => {
-    this.props.setValue(event.target[this.props.type === 'checkbox' ? 'checked' : 'value']);
+    const formsyProps = this.props as PassDownProps<string>;
+    formsyProps.setValue(event.target[this.props.type === 'checkbox' ? 'checked' : 'value']);
   };
 
   render() {
-    return <input type={this.props.type} value={this.props.value} onChange={this.updateValue} />;
+    return <input type={this.props.type || 'text'} value={this.props.value} onChange={this.updateValue} />;
   }
 }
 
@@ -19,7 +22,7 @@ export function InputFactory(methods) {
       TestInput.prototype[method] = methods[method];
     }
   }
-  return withFormsy(TestInput);
+  return withFormsy<Props, string>(TestInput);
 }
 
-export default withFormsy(TestInput);
+export default withFormsy<Props, string>(TestInput);

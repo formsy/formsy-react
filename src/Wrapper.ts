@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import utils from './utils';
-import { Validations, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
+import * as utils from './utils';
+import { RequiredValidation, Validations, WrappedComponentClass } from './interfaces';
 
 /* eslint-disable react/default-props-match-prop-types */
 
-const convertValidationsToObject = (validations: string | Validations): Validations => {
+const convertValidationsToObject = <V>(validations: false | Validations<V>): Validations<V> => {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
       let args = validation.split(':');
@@ -31,7 +31,7 @@ const convertValidationsToObject = (validations: string | Validations): Validati
       }
 
       // Avoid parameter reassignment
-      const validationsAccumulatorCopy: Validations = Object.assign({}, validationsAccumulator);
+      const validationsAccumulatorCopy: Validations<V> = { ...validationsAccumulator };
       validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
       return validationsAccumulatorCopy;
     }, {});
@@ -48,17 +48,17 @@ const propTypes = {
   value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
 };
 
-export interface WrapperProps {
+export interface WrapperProps<V> {
   innerRef?: (ref: any) => void;
   name: string;
-  required: RequiredValidation;
-  validationError: any;
-  validationErrors: any;
-  validations: Validations | string;
-  value: any;
+  required?: RequiredValidation<V>;
+  validationError?: any;
+  validationErrors?: any;
+  validations?: Validations<V>;
+  value?: V;
 }
 
-export interface WrapperState {
+export interface WrapperState<V> {
   [key: string]: unknown;
   externalError: null;
   formSubmitted: boolean;
@@ -67,10 +67,10 @@ export interface WrapperState {
   isValid: boolean;
   pristineValue: any;
   validationError: any[];
-  value: any;
+  value: V;
 }
 
-export interface PassDownProps {
+export interface InjectedProps<V> {
   errorMessage: any;
   errorMessages: any;
   hasValue: boolean;
@@ -79,18 +79,16 @@ export interface PassDownProps {
   isPristine: boolean;
   isRequired: boolean;
   isValid: boolean;
-  isValidValue: (value: Value) => boolean;
-  name: string;
+  isValidValue: (value: V) => boolean;
   ref?: any;
   resetValue: any;
   setValidations: any;
-  setValue: (value: Value) => void;
+  setValue: (value: V) => void;
   showError: boolean;
   showRequired: boolean;
-  validationError: any;
-  validationErrors: any;
-  value: Value;
 }
+
+export type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
 
 export { propTypes };
 
@@ -102,15 +100,17 @@ function getDisplayName(component: WrappedComponentClass) {
   );
 }
 
-export default function<Props, State, CompState>(
-  WrappedComponent: React.ComponentClass<Props & State>,
-): React.ComponentClass<Props & State> {
-  return class extends React.Component<Props & State & WrapperProps, WrapperState> {
-    public validations?: Validations;
+export default function<T, V>(
+  WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
+): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
+  return class extends React.Component<T & WrapperProps<V>, WrapperState<V>> {
+    public validations?: Validations<V>;
 
-    public requiredValidations?: Validations;
+    public requiredValidations?: Validations<V>;
 
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
+
+    public static propTypes: any = propTypes;
 
     public static contextTypes = {
       formsy: PropTypes.object, // What about required?
@@ -124,8 +124,6 @@ export default function<Props, State, CompState>(
       validations: null,
       value: (WrappedComponent as any).defaultValue,
     };
-
-    public static propTypes: any = propTypes;
 
     public constructor(props) {
       super(props);
@@ -141,37 +139,33 @@ export default function<Props, State, CompState>(
       };
     }
 
-    public componentWillMount() {
+    public componentDidMount() {
       const { validations, required, name } = this.props;
       const { formsy } = this.context;
-
-      const configure = () => {
-        this.setValidations(validations, required);
-
-        // Pass a function instead?
-        formsy.attachToForm(this);
-      };
 
       if (!name) {
         throw new Error('Form Input requires a name property when used');
       }
 
-      configure();
+      this.setValidations(validations, required);
+
+      // Pass a function instead?
+      formsy.attachToForm(this);
     }
 
-    // We have to make sure the validate method is kept when new props are added
-    public componentWillReceiveProps(nextProps) {
-      this.setValidations(nextProps.validations, nextProps.required);
-    }
+    public shouldComponentUpdate(nextProps, nextState, nextContext) {
+      const {
+        props,
+        state,
+        context: { formsy: formsyContext },
+      } = this;
+      const isPropsChanged = Object.keys(props).some(k => props[k] !== nextProps[k]);
 
-    public shouldComponentUpdate(nextProps, nextState) {
-      // eslint-disable-next-line react/destructuring-assignment
-      const isPropsChanged = Object.keys(this.props).some(k => this.props[k] !== nextProps[k]);
+      const isStateChanged = Object.keys(state).some(k => state[k] !== nextState[k]);
 
-      // eslint-disable-next-line react/destructuring-assignment
-      const isStateChanged = Object.keys(this.state).some(k => this.state[k] !== nextState[k]);
+      const isFormsyContextChanged = Object.keys(formsyContext).some(k => formsyContext[k] !== nextContext.formsy[k]);
 
-      return isPropsChanged || isStateChanged;
+      return isPropsChanged || isStateChanged || isFormsyContextChanged;
     }
 
     public componentDidUpdate(prevProps) {
@@ -186,11 +180,13 @@ export default function<Props, State, CompState>(
 
       // If validations or required is changed, run a new validation
       if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+        this.setValidations(validations, required);
         formsy.validate(this);
       }
     }
 
     // Detach it when component unmounts
+    // eslint-disable-next-line react/sort-comp
     public componentWillUnmount() {
       const { formsy } = this.context;
       formsy.detachFromForm(this);
@@ -213,11 +209,11 @@ export default function<Props, State, CompState>(
     // eslint-disable-next-line react/destructuring-assignment
     public getValue = () => this.state.value;
 
-    public setValidations = (validations: string | Validations, required: RequiredValidation) => {
+    public setValidations = (validations: Validations<V>, required: RequiredValidation<V>) => {
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations =
-        required === true ? { isDefaultRequiredValue: true } : convertValidationsToObject(required);
+        required === true ? { isDefaultRequiredValue: required } : convertValidationsToObject(required);
     };
 
     // By default, we validate after the value has been set.
@@ -243,10 +239,16 @@ export default function<Props, State, CompState>(
     };
 
     // eslint-disable-next-line react/destructuring-assignment
-    public hasValue = () => this.state.value !== '';
+    public hasValue = () => {
+      const { value } = this.state;
+      if (typeof value === 'string') {
+        return value !== '';
+      }
+      return value !== undefined;
+    };
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isFormDisabled = () => this.context.formsy.isFormDisabled();
+    public isFormDisabled = () => this.context.formsy.isFormDisabled;
 
     // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = () => this.state.formSubmitted;
@@ -285,7 +287,7 @@ export default function<Props, State, CompState>(
 
     public render() {
       const { innerRef } = this.props;
-      const propsForElement: PassDownProps = {
+      const propsForElement: PassDownProps<V> = {
         ...this.props,
         errorMessage: this.getErrorMessage(),
         errorMessages: this.getErrorMessages(),

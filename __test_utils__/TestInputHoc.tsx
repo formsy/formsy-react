@@ -1,11 +1,7 @@
 import React from 'react';
-import { withFormsy } from './..';
+import { withFormsy } from '../src';
 
 class TestComponent extends React.Component {
-  methodOnWrappedInstance = param => {
-    return param;
-  };
-
   render() {
     return <input />;
   }
