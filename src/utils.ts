@@ -1,120 +1,145 @@
-import { Validations, Value, Values } from './interfaces';
+import { Validations, Values } from './interfaces';
 
-export default {
-  arraysDiffer(a: unknown[], b: unknown[]) {
-    let isDifferent = false;
+export function isArray(value: unknown): value is unknown[] {
+  return Array.isArray(value);
+}
+
+export function isObject(value: unknown): value is object {
+  return value !== null && typeof value === 'object';
+}
+
+export function isTypeUndefined(value: unknown): value is undefined {
+  return typeof value === 'undefined';
+}
+
+export function isDate(value: unknown): value is Date {
+  return value instanceof Date;
+}
+
+export function isFunction(value: unknown): value is Function {
+  return value !== null && typeof value === 'function';
+}
+
+export function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+export function isNumber(value: unknown): value is number {
+  return typeof value === 'number';
+}
+
+export function isValueStringEmpty(value: string): boolean {
+  return value === '';
+}
+
+export function isValueNullOrUndefined(value: unknown): boolean {
+  return value === null || value === undefined;
+}
+
+export function isValueUndefined(value: unknown): boolean {
+  return value === undefined;
+}
+
+export function noop() {
+  // do nothing.
+}
+
+export function cloneIfObject(value: unknown) {
+  // Clone objects to avoid accidental param reassignment
+  return isObject(value) ? { ...value } : value;
+}
+
+export function isSame(a: unknown, b: unknown) {
+  if (typeof a !== typeof b) {
+    return false;
+  }
+
+  if (isArray(a) && isArray(b)) {
     if (a.length !== b.length) {
-      isDifferent = true;
-    } else {
-      a.forEach((item, index) => {
-        if (!this.isSame(item, b[index])) {
-          isDifferent = true;
-        }
-      }, this);
-    }
-    return isDifferent;
-  },
-
-  objectsDiffer(a: object, b: object) {
-    let isDifferent = false;
-    if (Object.keys(a).length !== Object.keys(b).length) {
-      isDifferent = true;
-    } else {
-      Object.keys(a).forEach(key => {
-        if (!this.isSame(a[key], b[key])) {
-          isDifferent = true;
-        }
-      }, this);
-    }
-    return isDifferent;
-  },
-
-  isSame(a: unknown, b: unknown) {
-    if (typeof a !== typeof b) {
       return false;
     }
 
-    if (Array.isArray(a) && Array.isArray(b)) {
-      return !this.arraysDiffer(a, b);
+    return a.every((item, index) => isSame(item, b[index]));
+  }
+
+  if (isFunction(a) && isFunction(b)) {
+    return a.toString() === b.toString();
+  }
+
+  if (isDate(a) && isDate(b)) {
+    return a.toString() === b.toString();
+  }
+
+  if (isObject(a) && isObject(b)) {
+    if (Object.keys(a).length !== Object.keys(b).length) {
+      return false;
     }
 
-    if (typeof a === 'function' && typeof b === 'function') {
-      return a.toString() === b.toString();
-    }
+    return Object.keys(a).every(key => isSame(a[key], b[key]));
+  }
 
-    if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
-      return a.toString() === b.toString();
-    }
+  return a === b;
+}
 
-    if (typeof a === 'object' && typeof b === 'object' && a !== null && b !== null) {
-      return !this.objectsDiffer(a, b);
-    }
+export function runRules<V>(
+  value: V,
+  currentValues: Values,
+  validations: Validations<V>,
+  validationRules: Validations<V>,
+) {
+  const results: {
+    errors: string[];
+    failed: string[];
+    success: string[];
+  } = {
+    errors: [],
+    failed: [],
+    success: [],
+  };
 
-    return a === b;
-  },
+  if (Object.keys(validations).length) {
+    Object.keys(validations).forEach(validationMethod => {
+      const validationsVal = validations[validationMethod];
+      const validationRulesVal = validationRules[validationMethod];
 
-  find<T>(collection: T[], fn: (item: T) => boolean): T {
-    for (let i = 0, l = collection.length; i < l; i += 1) {
-      const item = collection[i];
-      if (fn(item)) {
-        return item;
+      if (validationRulesVal && isFunction(validationsVal)) {
+        throw new Error(`Formsy does not allow you to override default validations: ${validationMethod}`);
       }
-    }
-    return null;
-  },
 
-  runRules(value: Value, currentValues: Values, validations: Validations, validationRules: Validations) {
-    const results: {
-      errors: string[];
-      failed: string[];
-      success: string[];
-    } = {
-      errors: [],
-      failed: [],
-      success: [],
-    };
+      if (!validationRulesVal && !isFunction(validationsVal)) {
+        throw new Error(`Formsy does not have the validation rule: ${validationMethod}`);
+      }
 
-    if (Object.keys(validations).length) {
-      Object.keys(validations).forEach(validationMethod => {
-        const validationsVal = validations[validationMethod];
-        const validationRulesVal = validationRules[validationMethod];
+      if (isFunction(validationsVal)) {
+        const validation = validationsVal(currentValues, value);
 
-        if (validationRulesVal && typeof validationsVal === 'function') {
-          throw new Error(`Formsy does not allow you to override default validations: ${validationMethod}`);
+        if (isString(validation)) {
+          results.errors.push(validation);
+          results.failed.push(validationMethod);
+        } else if (!validation) {
+          results.failed.push(validationMethod);
         }
 
-        if (!validationRulesVal && typeof validationsVal !== 'function') {
-          throw new Error(`Formsy does not have the validation rule: ${validationMethod}`);
+        return;
+      }
+
+      if (!isFunction(validationsVal) && isFunction(validationRulesVal)) {
+        const validation = validationRulesVal(currentValues, value, validationsVal);
+
+        if (isString(validation)) {
+          results.errors.push(validation);
+          results.failed.push(validationMethod);
+        } else if (!validation) {
+          results.failed.push(validationMethod);
+        } else {
+          results.success.push(validationMethod);
         }
+        return;
+      }
 
-        if (typeof validationsVal === 'function') {
-          const validation = validationsVal(currentValues, value);
-          if (typeof validation === 'string') {
-            results.errors.push(validation);
-            results.failed.push(validationMethod);
-          } else if (!validation) {
-            results.failed.push(validationMethod);
-          }
-          return;
-        }
-        if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
-          const validation = validationRulesVal(currentValues, value, validationsVal);
+      results.success.push(validationMethod);
+    });
+  }
 
-          if (typeof validation === 'string') {
-            results.errors.push(validation);
-            results.failed.push(validationMethod);
-          } else if (!validation) {
-            results.failed.push(validationMethod);
-          } else {
-            results.success.push(validationMethod);
-          }
-          return;
-        }
-
-        results.success.push(validationMethod);
-      });
-    }
-
-    return results;
-  },
-};
+  return results;
+}

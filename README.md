@@ -2,13 +2,14 @@
 
 [![GitHub release](https://img.shields.io/github/release/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/releases)
 [![Build status](https://travis-ci.org/formsy/formsy-react.svg?branch=master)](https://travis-ci.org/formsy/formsy-react)
+[![Coverage Status](https://coveralls.io/repos/github/formsy/formsy-react/badge.svg?branch=master)](https://coveralls.io/github/formsy/formsy-react?branch=master)
 [![Gzipped size](http://img.badgesize.io/https://unpkg.com/formsy-react?compression=gzip)](https://unpkg.com/formsy-react)
 [![Gitter](https://badges.gitter.im/formsy/Lobby.svg)](https://gitter.im/formsy/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 A form input builder and validator for React.
 
-| [Quick Start](#quick-start) | [API](/API.md) |
-| --------------------------- | -------------- |
+| [Quick Start](#quick-start) | [API](/API.md) | [1.x API](https://github.com/formsy/formsy-react/blob/v1.x/API.md) |
+| --------------------------- | -------------- | ------------------------------------------------------------------ |
 
 
 ## Background
@@ -36,17 +37,10 @@ issues.
 
 `yarn add formsy-react react react-dom` and use with webpack, browserify, etc.
 
-## Join the 2.x beta
+## 1.x to 2.x Upgrade Guide
 
-The 2.0 release is currently in active development on master, but not yet released publicly. The API docs are still
-written for the 1.x branch and will remain that way until release. However, the API changes are minor and listed below.
-If you'd like to upgrade to formsy 2.x you can run:
-
-```
-yarn upgrade formsy-react@2.0.0-beta.3
-```
-
-**Element prop breaking changes:**
+The 2.0 release fixed a number of legacy decisions in the Formsy API, mostly a reliance on function props over value
+props passed down to wrapped components. However, the API changes are minor and listed below.
 
 - `getErrorMessage()` => `errorMessage`
 - `getErrorMessages()` => `errorMessages`
@@ -84,12 +78,12 @@ class MyInput extends React.Component {
   }
 
   render() {
-    // An error message is returned only if the component is invalid
-    const errorMessage = this.props.getErrorMessage();
+    // An error message is passed only if the component is invalid
+    const errorMessage = this.props.errorMessage;
 
     return (
       <div>
-        <input onChange={this.changeValue} type="text" value={this.props.getValue() || ''} />
+        <input onChange={this.changeValue} type="text" value={this.props.value || ''} />
         <span>{errorMessage}</span>
       </div>
     );
@@ -153,9 +147,9 @@ not an email ([isEmail](/API.md#validators)). On validation error it will show t
 ## Formsy component packages
 
 - https://github.com/twisty/formsy-react-components, Bootstrap 3 compatible form fields
-- https://github.com/zabute/formsy-semantic-ui-react, Semantic UI form fields
-- https://github.com/gogoair/react-formsy-combo-select, wrapper for https://github.com/gogoair/react-combo-select
-- https://github.com/rojobuffalo/formsy-material-ui, Material-UI form fields (out of date, for formsy-react 0.x)
+- https://github.com/zabute/formsy-semantic-ui-react, Semantic UI form fields (out of date, for formsy-react 1.x)
+- https://github.com/gogoair/react-formsy-combo-select, wrapper for https://github.com/gogoair/react-combo-select (out
+  of date, for formsy-react 1.x)
 
 ## Contribute
 
@@ -167,7 +161,8 @@ not an email ([isEmail](/API.md#validators)). On validation error it will show t
 
 ## Changelog
 
-[Check out releases](https://github.com/formsy/formsy-react/releases)
+Check out our [Changelog](https://github.com/formsy/formsy-react/blob/master/CHANGELOG.md) and
+[releases](https://github.com/formsy/formsy-react/releases)
 
 ## License
 

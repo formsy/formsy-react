@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormsyContextInterface } from './interfaces';
 
-const noFormsyErrorMessage = 'No Context Provider defined';
+const noFormsyErrorMessage = 'Could not find Formsy Context Provider. Did you use withFormsy outside Formsy ?';
 
 const throwNoFormsyProvider = () => {
   throw new Error(noFormsyErrorMessage);

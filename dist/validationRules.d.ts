@@ -1,5 +1,6 @@
 import { ValidationFunction } from './interfaces';
-declare const validations: {
-    [key: string]: ValidationFunction;
-};
+interface Validations<V> {
+    [key: string]: ValidationFunction<V>;
+}
+declare const validations: Validations<any>;
 export default validations;
