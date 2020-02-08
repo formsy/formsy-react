@@ -378,7 +378,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public isChanged = () => !utils.isSame(this.getPristineValues(), this.getCurrentValues());
 
   // Update model, submit to url prop and send the model
-  public submit = event => {
+  public submit = (event?: any) => {
     const { onSubmit, onValidSubmit, onInvalidSubmit } = this.props;
     const { isValid } = this.state;
 
