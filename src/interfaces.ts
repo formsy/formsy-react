@@ -23,7 +23,6 @@ export interface ValidationsStructure<V> {
 export type RequiredValidation<V> = boolean | Validations<V>;
 
 export interface ComponentWithStaticAttributes extends ComponentClass {
-  string?: any;
   defaultValue?: any;
 }
 

@@ -303,7 +303,7 @@ describe('Element', () => {
     ).toEqual(false);
   });
 
-  it('should not override error messages with error messages passed by form if passed eror messages is an empty object', () => {
+  it('should not override error messages with error messages passed by form if passed error messages is an empty object', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -325,6 +325,40 @@ describe('Element', () => {
 
     const inputComponent = form.find(TestInput);
     expect(inputComponent.instance().getErrorMessage()).toEqual('bar3');
+  });
+
+  it('should handle multiple validation error messages passed from validators', () => {
+    function customValidationA() {
+      return 'error message one';
+    }
+
+    function customValidationB() {
+      return 'error message two';
+    }
+
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput
+            name="A"
+            validations={{
+              customValidationA,
+              customValidationB,
+            }}
+            value="foo"
+          />
+        </Formsy>
+      );
+    }
+
+    const form = mount(<TestForm />);
+    const inputComponent = form.find(TestInput);
+
+    const formEl = form.find('form');
+    formEl.simulate('submit');
+
+    expect(inputComponent.instance().getErrorMessage()).toEqual('error message one');
+    expect(inputComponent.instance().getErrorMessages()).toEqual(['error message one', 'error message two']);
   });
 
   it('should override all error messages with error messages passed by form', () => {
@@ -512,6 +546,7 @@ describe('Element', () => {
     }
     const form = mount(<TestForm />);
 
+    // TODO: Beef up this smoke test
     expect(true).toBe(true);
 
     const formEl = form.find('form');
@@ -534,6 +569,7 @@ describe('Element', () => {
     }
     const form = mount(<TestForm />);
 
+    // TODO: Beef up this smoke test
     expect(true).toBe(true);
 
     const formEl = form.find('form');

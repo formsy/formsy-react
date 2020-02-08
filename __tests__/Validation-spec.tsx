@@ -5,7 +5,7 @@ import { mount } from 'enzyme';
 import Formsy, { withFormsy } from '../src';
 import immediate from '../__test_utils__/immediate';
 import { InputFactory } from '../__test_utils__/TestInput';
-import { WrapperInstanceMethods, PassDownProps } from '../src/Wrapper';
+import { PassDownProps, WrapperInstanceMethods } from '../src/Wrapper';
 
 class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> {
   public static defaultProps = { type: 'text' };
@@ -181,14 +181,12 @@ describe('Validation', () => {
   });
 
   it('should invalidate inputs on external errors without preventExternalInvalidation prop', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
-            <FormsyTest name="foo" value="foo" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+          <FormsyTest name="foo" value="foo" />
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
@@ -196,5 +194,45 @@ describe('Validation', () => {
     const input = form.find(FormsyTest);
     formEl.simulate('submit');
     expect(getInputInstance(input).isValid()).toEqual(false);
+  });
+
+  it('should throw errors on invalid validation string', () => {
+    const mockConsoleError = jest.spyOn(console, 'error');
+    mockConsoleError.mockImplementation(() => {
+      // do nothing
+    });
+
+    function TestForm() {
+      return (
+        <Formsy onInvalidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+          <FormsyTest name="foo" value="foo" validations="isLength:3:7" />
+        </Formsy>
+      );
+    }
+
+    expect(() => mount(<TestForm />)).toThrow(
+      'Formsy does not support multiple args on string validations. Use object format of validations instead.',
+    );
+
+    mockConsoleError.mockRestore();
+  });
+
+  it('should throw errors on missing input name', () => {
+    const mockConsoleError = jest.spyOn(console, 'error');
+    mockConsoleError.mockImplementation(() => {
+      // do nothing
+    });
+
+    function TestForm() {
+      return (
+        <Formsy onInvalidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+          <FormsyTest name="" value="foo" />
+        </Formsy>
+      );
+    }
+
+    expect(() => mount(<TestForm />)).toThrow('Form Input requires a name property when used');
+
+    mockConsoleError.mockRestore();
   });
 });

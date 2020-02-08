@@ -120,6 +120,34 @@ describe('Setting up a form', () => {
   });
 });
 
+describe('mapModel', () => {
+  it('should honor mapModel transformations', () => {
+    const mapping = jest.fn(model => ({
+      ...model,
+      testChange: true,
+    }));
+    const onSubmit = jest.fn();
+
+    function TestForm() {
+      return (
+        <Formsy mapping={mapping} onSubmit={onSubmit}>
+          <TestInput name="parent.child" value="test" />
+        </Formsy>
+      );
+    }
+
+    const form = mount(<TestForm />);
+
+    form.simulate('submit');
+    expect(mapping).toHaveBeenCalledWith({ 'parent.child': 'test' });
+    expect(onSubmit).toHaveBeenCalledWith(
+      { 'parent.child': 'test', testChange: true },
+      expect.any(Function),
+      expect.any(Function),
+    );
+  });
+});
+
 describe('validations', () => {
   it('should run when the input changes', () => {
     const runRule = jest.fn();
@@ -649,6 +677,27 @@ describe('.reset()', () => {
     });
     expect(input.instance().getValue()).toEqual('');
   });
+
+  it('should be able to reset the form using a button', () => {
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput name="foo" value="foo" />
+          <button type="submit">Save</button>
+        </Formsy>
+      );
+    }
+
+    const form = mount(<TestForm />);
+    const input = form.find(TestInput);
+    const formsyForm = form.find(Formsy);
+
+    expect(input.instance().getValue()).toEqual('foo');
+    input.simulate('change', { target: { value: 'foobar' } });
+    expect(input.instance().getValue()).toEqual('foobar');
+    formsyForm.simulate('reset');
+    expect(input.instance().getValue()).toEqual('foo');
+  });
 });
 
 describe('.isChanged()', () => {
@@ -730,6 +779,31 @@ describe('form valid state', () => {
     form.simulate('submit');
 
     expect(isValid).toEqual(false);
+  });
+
+  it('should throw an error when updateInputsWithError is called with a missing input', () => {
+    const mockConsoleError = jest.spyOn(console, 'error');
+    mockConsoleError.mockImplementation(() => {
+      // do nothing
+    });
+
+    class TestForm extends React.Component {
+      onValidSubmit = (model, reset, updateInputsWithError) => {
+        updateInputsWithError({ bar: 'bar' }, true);
+      };
+
+      render() {
+        return (
+          <Formsy onValidSubmit={this.onValidSubmit}>
+            <TestInput name="foo" />
+          </Formsy>
+        );
+      }
+    }
+
+    const form = mount(<TestForm />);
+    expect(() => form.simulate('submit')).toThrow();
+    mockConsoleError.mockRestore();
   });
 
   it('should be false when validationErrors is not empty', () => {
