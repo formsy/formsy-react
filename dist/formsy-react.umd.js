@@ -1753,6 +1753,7 @@
 
         _this.setValue = function (value) {
           var validate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+          var validateForm = _this.context.validate;
 
           if (!validate) {
             _this.setState({
@@ -1763,8 +1764,7 @@
               value: value,
               isPristine: false
             }, function () {
-              _this.context.validate(_assertThisInitialized(_this)); //eslint-disable-line
-
+              validateForm(_assertThisInitialized(_this));
             });
           }
         };
@@ -2068,6 +2068,10 @@
         } else {
           onInvalid();
         }
+      };
+
+      _this.isValidValue = function (component, value) {
+        return _this.runValidation(component, value).isValid;
       };
 
       _this.isFormDisabled = function () {
@@ -2376,9 +2380,7 @@
           attachToForm: _this.attachToForm,
           detachFromForm: _this.detachFromForm,
           isFormDisabled: props.disabled,
-          isValidValue: function isValidValue(component, value) {
-            return _this.runValidation(component, value).isValid;
-          },
+          isValidValue: _this.isValidValue,
           validate: _this.validate
         }
       };

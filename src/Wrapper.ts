@@ -217,6 +217,7 @@ export default function<T, V>(
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
     public setValue = (value: any, validate = true) => {
+      const { validate: validateForm } = this.context;
       if (!validate) {
         this.setState({
           value,
@@ -228,7 +229,7 @@ export default function<T, V>(
             isPristine: false,
           },
           () => {
-            this.context.validate(this); //eslint-disable-line
+            validateForm(this);
           },
         );
       }

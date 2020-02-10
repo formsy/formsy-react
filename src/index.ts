@@ -53,11 +53,11 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
 
 export interface FormsyState {
   canChange: boolean;
+  contextValue: FormsyContextInterface;
   formSubmitted?: boolean;
   isPristine?: boolean;
   isSubmitting: boolean;
   isValid: boolean;
-  contextValue: FormsyContextInterface;
 }
 
 class Formsy extends React.Component<FormsyProps, FormsyState> {
@@ -138,7 +138,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
         attachToForm: this.attachToForm,
         detachFromForm: this.detachFromForm,
         isFormDisabled: props.disabled,
-        isValidValue: (component, value) => this.runValidation(component, value).isValid,
+        isValidValue: this.isValidValue,
         validate: this.validate,
       },
     };
@@ -249,6 +249,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onInvalid();
     }
   };
+
+  public isValidValue = (component, value) => this.runValidation(component, value).isValid;
 
   // eslint-disable-next-line react/destructuring-assignment
   public isFormDisabled = () => this.props.disabled;

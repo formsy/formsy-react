@@ -35,11 +35,11 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
 }
 export interface FormsyState {
     canChange: boolean;
+    contextValue: FormsyContextInterface;
     formSubmitted?: boolean;
     isPristine?: boolean;
     isSubmitting: boolean;
     isValid: boolean;
-    contextValue: FormsyContextInterface;
 }
 declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     inputs: any[];
@@ -84,6 +84,7 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     setFormPristine: (isPristine: boolean) => void;
     setInputValidationErrors: (errors: any) => void;
     setFormValidState: (allIsValid: boolean) => void;
+    isValidValue: (component: any, value: any) => boolean;
     isFormDisabled: () => boolean;
     mapModel: (model: any) => any;
     reset: (data?: any) => void;
