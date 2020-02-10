@@ -564,6 +564,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 const addValidationRule = <V>(name: string, func: ValidationFunction<V>) => {
   validationRules[name] = func;
 };
+
 export { addValidationRule, propTypes, validationRules, Wrapper as withFormsy };
 
 export default Formsy;
