@@ -1633,23 +1633,7 @@ var validations = {
   }
 };
 
-var noFormsyErrorMessage = 'Could not find Formsy Context Provider. Did you use withFormsy outside Formsy ?';
-
-var throwNoFormsyProvider = function throwNoFormsyProvider() {
-  throw new Error(noFormsyErrorMessage);
-};
-
-var defaultValue = {
-  attachToForm: throwNoFormsyProvider,
-  detachFromForm: throwNoFormsyProvider,
-  isFormDisabled: true,
-  isValidValue: throwNoFormsyProvider,
-  validate: throwNoFormsyProvider
-};
-var FormsyContext = React.createContext(defaultValue);
-
 /* eslint-disable react/default-props-match-prop-types */
-
 var convertValidationsToObject = function convertValidationsToObject(validations) {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce(function (validationsAccumulator, validation) {
@@ -1704,7 +1688,6 @@ function Wrapper (WrappedComponent) {
   function (_React$Component) {
     _inherits(_class, _React$Component);
 
-    // eslint-disable-next-line react/sort-comp
     function _class(props) {
       var _this;
 
@@ -1713,7 +1696,6 @@ function Wrapper (WrappedComponent) {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(_class).call(this, props));
       _this.validations = void 0;
       _this.requiredValidations = void 0;
-      _this.context = void 0;
 
       _this.getErrorMessage = function () {
         var messages = _this.getErrorMessages();
@@ -1747,7 +1729,7 @@ function Wrapper (WrappedComponent) {
 
       _this.setValue = function (value) {
         var validate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-        var validateForm = _this.context.validate;
+        var formsy = _this.context.formsy;
 
         if (!validate) {
           _this.setState({
@@ -1758,7 +1740,7 @@ function Wrapper (WrappedComponent) {
             value: value,
             isPristine: false
           }, function () {
-            validateForm(_assertThisInitialized(_this));
+            formsy.validate(_assertThisInitialized(_this));
           });
         }
       };
@@ -1774,7 +1756,7 @@ function Wrapper (WrappedComponent) {
       };
 
       _this.isFormDisabled = function () {
-        return _this.context.isFormDisabled;
+        return _this.context.formsy.isFormDisabled;
       };
 
       _this.isFormSubmitted = function () {
@@ -1794,18 +1776,18 @@ function Wrapper (WrappedComponent) {
       };
 
       _this.isValidValue = function (value) {
-        return _this.context.isValidValue(_assertThisInitialized(_this), value);
+        return _this.context.formsy.isValidValue.call(null, _assertThisInitialized(_this), value);
       };
 
       _this.resetValue = function () {
         var pristineValue = _this.state.pristineValue;
-        var validate = _this.context.validate;
+        var formsy = _this.context.formsy;
 
         _this.setState({
           value: pristineValue,
           isPristine: true
         }, function () {
-          validate(_assertThisInitialized(_this));
+          formsy.validate(_assertThisInitialized(_this));
         });
       };
 
@@ -1837,7 +1819,7 @@ function Wrapper (WrappedComponent) {
             validations = _this$props.validations,
             required = _this$props.required,
             name = _this$props.name;
-        var attachToForm = this.context.attachToForm;
+        var formsy = this.context.formsy;
 
         if (!name) {
           throw new Error('Form Input requires a name property when used');
@@ -1845,22 +1827,22 @@ function Wrapper (WrappedComponent) {
 
         this.setValidations(validations, required); // Pass a function instead?
 
-        attachToForm(this);
+        formsy.attachToForm(this);
       }
     }, {
       key: "shouldComponentUpdate",
       value: function shouldComponentUpdate(nextProps, nextState, nextContext) {
         var props = this.props,
             state = this.state,
-            context = this.context;
+            formsyContext = this.context.formsy;
         var isPropsChanged = Object.keys(props).some(function (k) {
           return props[k] !== nextProps[k];
         });
         var isStateChanged = Object.keys(state).some(function (k) {
           return state[k] !== nextState[k];
         });
-        var isFormsyContextChanged = Object.keys(context).some(function (k) {
-          return context[k] !== nextContext[k];
+        var isFormsyContextChanged = Object.keys(formsyContext).some(function (k) {
+          return formsyContext[k] !== nextContext.formsy[k];
         });
         return isPropsChanged || isStateChanged || isFormsyContextChanged;
       }
@@ -1871,7 +1853,7 @@ function Wrapper (WrappedComponent) {
             value = _this$props2.value,
             validations = _this$props2.validations,
             required = _this$props2.required;
-        var validate = this.context.validate; // If the value passed has changed, set it. If value is not passed it will
+        var formsy = this.context.formsy; // If the value passed has changed, set it. If value is not passed it will
         // internally update, and this will never run
 
         if (!isSame(value, prevProps.value)) {
@@ -1881,7 +1863,7 @@ function Wrapper (WrappedComponent) {
 
         if (!isSame(validations, prevProps.validations) || !isSame(required, prevProps.required)) {
           this.setValidations(validations, required);
-          validate(this);
+          formsy.validate(this);
         }
       } // Detach it when component unmounts
       // eslint-disable-next-line react/sort-comp
@@ -1889,8 +1871,8 @@ function Wrapper (WrappedComponent) {
     }, {
       key: "componentWillUnmount",
       value: function componentWillUnmount() {
-        var detachFromForm = this.context.detachFromForm;
-        detachFromForm(this);
+        var formsy = this.context.formsy;
+        formsy.detachFromForm(this);
       }
     }, {
       key: "render",
@@ -1924,7 +1906,10 @@ function Wrapper (WrappedComponent) {
     }]);
 
     return _class;
-  }(React.Component), _class.contextType = FormsyContext, _class.displayName = "Formsy(".concat(getDisplayName(WrappedComponent), ")"), _class.propTypes = propTypes$1, _class.defaultProps = {
+  }(React.Component), _class.displayName = "Formsy(".concat(getDisplayName(WrappedComponent), ")"), _class.propTypes = propTypes$1, _class.contextTypes = {
+    formsy: propTypes.object // What about required?
+
+  }, _class.defaultProps = {
     innerRef: null,
     required: false,
     validationError: '',
@@ -1949,6 +1934,18 @@ function (_React$Component) {
     _this.emptyArray = void 0;
     _this.prevInputNames = null;
 
+    _this.getChildContext = function () {
+      return {
+        formsy: {
+          attachToForm: _this.attachToForm,
+          detachFromForm: _this.detachFromForm,
+          isFormDisabled: _this.isFormDisabled(),
+          isValidValue: _this.isValidValue,
+          validate: _this.validate
+        }
+      };
+    };
+
     _this.componentDidMount = function () {
       _this.prevInputNames = _this.inputs.map(function (component) {
         return component.props.name;
@@ -1957,10 +1954,8 @@ function (_React$Component) {
       _this.validateForm();
     };
 
-    _this.componentDidUpdate = function (prevProps) {
-      var _this$props = _this.props,
-          validationErrors = _this$props.validationErrors,
-          disabled = _this$props.disabled;
+    _this.componentDidUpdate = function () {
+      var validationErrors = _this.props.validationErrors;
 
       if (validationErrors && _typeof(validationErrors) === 'object' && Object.keys(validationErrors).length > 0) {
         _this.setInputValidationErrors(validationErrors);
@@ -1974,17 +1969,6 @@ function (_React$Component) {
         _this.prevInputNames = newInputNames;
 
         _this.validateForm();
-      }
-
-      if (disabled !== prevProps.disabled) {
-        // eslint-disable-next-line
-        _this.setState(function (state) {
-          return _objectSpread2({}, state, {
-            contextValue: _objectSpread2({}, state.contextValue, {
-              isFormDisabled: disabled
-            })
-          });
-        });
       }
     };
 
@@ -2049,9 +2033,9 @@ function (_React$Component) {
     };
 
     _this.setFormValidState = function (allIsValid) {
-      var _this$props2 = _this.props,
-          onValid = _this$props2.onValid,
-          onInvalid = _this$props2.onInvalid;
+      var _this$props = _this.props,
+          onValid = _this$props.onValid,
+          onInvalid = _this$props.onInvalid;
 
       _this.setState({
         isValid: allIsValid
@@ -2191,10 +2175,10 @@ function (_React$Component) {
     };
 
     _this.submit = function (event) {
-      var _this$props3 = _this.props,
-          onSubmit = _this$props3.onSubmit,
-          onValidSubmit = _this$props3.onValidSubmit,
-          onInvalidSubmit = _this$props3.onInvalidSubmit;
+      var _this$props2 = _this.props,
+          onSubmit = _this$props2.onSubmit,
+          onValidSubmit = _this$props2.onValidSubmit,
+          onInvalidSubmit = _this$props2.onInvalidSubmit;
       var isValid = _this.state.isValid;
 
       if (event && event.preventDefault) {
@@ -2320,63 +2304,51 @@ function (_React$Component) {
         _this.setState({
           canChange: true
         });
-
-        onValidationComplete();
       }
     };
 
     _this.render = function () {
-      var _this$props4 = _this.props,
-          getErrorMessage = _this$props4.getErrorMessage,
-          getErrorMessages = _this$props4.getErrorMessages,
-          getValue = _this$props4.getValue,
-          hasValue = _this$props4.hasValue,
-          isFormDisabled = _this$props4.isFormDisabled,
-          isFormSubmitted = _this$props4.isFormSubmitted,
-          isPristine = _this$props4.isPristine,
-          isRequired = _this$props4.isRequired,
-          isValid = _this$props4.isValid,
-          isValidValue = _this$props4.isValidValue,
-          mapping = _this$props4.mapping,
-          onChange = _this$props4.onChange,
-          onInvalid = _this$props4.onInvalid,
-          onInvalidSubmit = _this$props4.onInvalidSubmit,
-          onReset = _this$props4.onReset,
-          onSubmit = _this$props4.onSubmit,
-          onValid = _this$props4.onValid,
-          onValidSubmit = _this$props4.onValidSubmit,
-          preventExternalInvalidation = _this$props4.preventExternalInvalidation,
-          resetValue = _this$props4.resetValue,
-          setValidations = _this$props4.setValidations,
-          setValue = _this$props4.setValue,
-          showError = _this$props4.showError,
-          showRequired = _this$props4.showRequired,
-          validationErrors = _this$props4.validationErrors,
-          children = _this$props4.children,
-          nonFormsyProps = _objectWithoutProperties(_this$props4, ["getErrorMessage", "getErrorMessages", "getValue", "hasValue", "isFormDisabled", "isFormSubmitted", "isPristine", "isRequired", "isValid", "isValidValue", "mapping", "onChange", "onInvalid", "onInvalidSubmit", "onReset", "onSubmit", "onValid", "onValidSubmit", "preventExternalInvalidation", "resetValue", "setValidations", "setValue", "showError", "showRequired", "validationErrors", "children"]);
+      var _this$props3 = _this.props,
+          getErrorMessage = _this$props3.getErrorMessage,
+          getErrorMessages = _this$props3.getErrorMessages,
+          getValue = _this$props3.getValue,
+          hasValue = _this$props3.hasValue,
+          isFormDisabled = _this$props3.isFormDisabled,
+          isFormSubmitted = _this$props3.isFormSubmitted,
+          isPristine = _this$props3.isPristine,
+          isRequired = _this$props3.isRequired,
+          isValid = _this$props3.isValid,
+          isValidValue = _this$props3.isValidValue,
+          mapping = _this$props3.mapping,
+          onChange = _this$props3.onChange,
+          onInvalid = _this$props3.onInvalid,
+          onInvalidSubmit = _this$props3.onInvalidSubmit,
+          onReset = _this$props3.onReset,
+          onSubmit = _this$props3.onSubmit,
+          onValid = _this$props3.onValid,
+          onValidSubmit = _this$props3.onValidSubmit,
+          preventExternalInvalidation = _this$props3.preventExternalInvalidation,
+          resetValue = _this$props3.resetValue,
+          setValidations = _this$props3.setValidations,
+          setValue = _this$props3.setValue,
+          showError = _this$props3.showError,
+          showRequired = _this$props3.showRequired,
+          validationErrors = _this$props3.validationErrors,
+          nonFormsyProps = _objectWithoutProperties(_this$props3, ["getErrorMessage", "getErrorMessages", "getValue", "hasValue", "isFormDisabled", "isFormSubmitted", "isPristine", "isRequired", "isValid", "isValidValue", "mapping", "onChange", "onInvalid", "onInvalidSubmit", "onReset", "onSubmit", "onValid", "onValidSubmit", "preventExternalInvalidation", "resetValue", "setValidations", "setValue", "showError", "showRequired", "validationErrors"]);
 
-      var contextValue = _this.state.contextValue;
-      return React.createElement(FormsyContext.Provider, {
-        value: contextValue
-      }, React.createElement('form', _objectSpread2({
+      return React.createElement('form', _objectSpread2({
         onReset: _this.resetInternal,
         onSubmit: _this.submit
       }, nonFormsyProps, {
         disabled: false
-      }), children));
+      }), // eslint-disable-next-line react/destructuring-assignment
+      _this.props.children);
     };
 
     _this.state = {
       canChange: false,
       isSubmitting: false,
-      isValid: true,
-      contextValue: {
-        attachToForm: _this.attachToForm,
-        detachFromForm: _this.detachFromForm,
-        isFormDisabled: props.disabled,
-        isValidValue: _this.isValidValue,
-        validate: _this.validate
-      }
+      isValid: true
     };
     _this.inputs = [];
     _this.emptyArray = [];
@@ -2415,6 +2387,9 @@ Formsy.propTypes = {
   showRequired: propTypes.func,
   validationErrors: propTypes.object // eslint-disable-line
 
+};
+Formsy.childContextTypes = {
+  formsy: propTypes.object
 };
 Formsy.defaultProps = {
   disabled: false,
