@@ -164,6 +164,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.validateForm();
     }
 
+    // Keep the disabled value in state/context the same as from props
     if (disabled !== prevProps.disabled) {
       // eslint-disable-next-line
       this.setState(state => ({
