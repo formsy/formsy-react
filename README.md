@@ -11,6 +11,10 @@ A form input builder and validator for React.
 | --------------------------- | -------------- |
 
 
+> **NOTE:** This repository contains separate branch `formsy-react-native` which includes changes making this module
+> compatible with react-native. If you are making any changes to this repository. Rebase `formsy-react-native` branch on
+> top of your code, build and release it (with git tag) following `vX.X.X-react-native` naming convention.
+
 ## Background
 
 [christianalfoni](https://github.com/christianalfoni/) wrote an article on forms and validation with React,
