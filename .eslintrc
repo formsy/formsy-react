@@ -24,7 +24,7 @@
     "import/extensions": 0,
     "import/no-extraneous-dependencies": [
       "error", {
-        "devDependencies": ["rollup.config.js", "setupTests.ts", "**/*spec.tsx"]
+        "devDependencies": ["rollup.config.js", "setupTests.ts", "__tests__/*", "__test_utils__/*"]
       }
     ],
     "prettier/prettier": ["error", { "singleQuote": true }],

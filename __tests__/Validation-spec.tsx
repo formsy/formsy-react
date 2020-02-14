@@ -5,7 +5,8 @@ import { mount } from 'enzyme';
 import Formsy, { withFormsy } from '../src';
 import immediate from '../__test_utils__/immediate';
 import { InputFactory } from '../__test_utils__/TestInput';
-import { PassDownProps, WrapperInstanceMethods } from '../src/Wrapper';
+import { PassDownProps } from '../src/Wrapper';
+import { getFormInstance, getInputInstance } from '../__test_utils__/getInput';
 
 class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> {
   public static defaultProps = { type: 'text' };
@@ -21,14 +22,6 @@ class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> 
   }
 }
 const FormsyTest = withFormsy<{ type?: string }, string>(MyTest);
-
-function getInputInstance(inputComponent) {
-  return inputComponent.instance() as WrapperInstanceMethods;
-}
-
-function getFormInstance(formComponent) {
-  return formComponent.instance() as Formsy;
-}
 
 describe('Validation', () => {
   it('should reset only changed form element when external error is passed', () => {

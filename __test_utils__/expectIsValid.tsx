@@ -3,6 +3,7 @@ import { mount } from 'enzyme';
 
 import Formsy from '../src';
 import { InputFactory } from './TestInput';
+import { getInputInstance } from './getInput';
 
 const TestInput = InputFactory({
   render() {
@@ -23,7 +24,7 @@ function ValidationForm(props: { validations: string; value?: any }) {
 export function expectIsValid(testForm: React.ComponentElement<any, any>) {
   const form = mount(testForm);
   const inputComponent = form.find(TestInput);
-  return expect(inputComponent.instance().isValid());
+  return expect(getInputInstance(inputComponent).isValid());
 }
 
 export default ValidationForm;
