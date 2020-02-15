@@ -457,6 +457,41 @@ describe('Update a form', () => {
     expect(input.instance().getErrorMessage()).toEqual(null);
   });
 
+  it('should prevent a default submit', () => {
+    class TestForm extends React.Component {
+      render() {
+        return (
+          <Formsy>
+            <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
+          </Formsy>
+        );
+      }
+    }
+    const form = mount(<TestForm />);
+    const FoundForm = form.find(TestForm);
+    const submitEvent = {preventDefault: jest.fn()};
+    FoundForm.simulate('submit', submitEvent);
+    expect(submitEvent.preventDefault).toHaveBeenCalled();
+  });
+
+  it('should not prevent a default submit when preventDefaultSubmit is passed', () => {
+    class TestForm extends React.Component {
+      render() {
+        return (
+          <Formsy preventDefaultSubmit={false}>
+            <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
+          </Formsy>
+        );
+      }
+    }
+    const form = mount(<TestForm />);
+    const FoundForm = form.find(TestForm);
+    const submitEvent = {preventDefault: jest.fn()};
+    FoundForm.simulate('submit', submitEvent);
+    expect(submitEvent.preventDefault).not.toHaveBeenCalled();
+  });
+
+
   it('should trigger an onValidSubmit when submitting a valid form', () => {
     const isCalled = jest.fn();
 

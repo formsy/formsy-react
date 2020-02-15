@@ -9,6 +9,7 @@
   - [onSubmit()](#onSubmit)
   - [onValid()](#onValid)
   - [onValidSubmit()](#onValidsubmit)
+  - [preventDefaultSubmit](#preventDefaultSubmit)
   - [preventExternalInvalidation](#preventExternalInvalidation)
   - [reset()](#reset)
   - [updateInputsWithError()](#updateInputsWithError)
@@ -230,6 +231,22 @@ class MyForm extends React.Component {
 
 Manually set the form fields values by taking an object that maps field name to value as the first argument and
 optionally validate the inputs by passing `true` as the second argument.
+
+#### <a id="preventDefaultSubmit">preventDefaultSubmit</a>
+
+```jsx
+class MyForm extends React.Component {
+  render() {
+    return (
+      <Formsy preventDefaultSubmit>
+        ...
+      </Formsy>
+    );
+  }
+}
+```
+
+With the `preventDefaultSubmit` prop the form will issue full HTTP POST by browser means (and render resulting HTML).
 
 #### <a id="preventExternalInvalidation">preventExternalInvalidation</a>
 
