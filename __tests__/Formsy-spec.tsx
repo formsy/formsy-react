@@ -471,7 +471,7 @@ describe('Update a form', () => {
     const FoundForm = form.find(TestForm);
     const submitEvent = {preventDefault: jest.fn()};
     FoundForm.simulate('submit', submitEvent);
-    expect(submitEvent.preventDefault.called).toEqual(true);
+    expect(submitEvent.preventDefault).toHaveBeenCalled();
   });
 
   it('should not prevent a default submit when preventDefaultSubmit is passed', () => {
@@ -488,7 +488,7 @@ describe('Update a form', () => {
     const FoundForm = form.find(TestForm);
     const submitEvent = {preventDefault: jest.fn()};
     FoundForm.simulate('submit', submitEvent);
-    expect(submitEvent.preventDefault.called).toEqual(false);
+    expect(submitEvent.preventDefault).not.toHaveBeenCalled();
   });
 
 
