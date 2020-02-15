@@ -1,10 +1,10 @@
 import { ValidationFunction, Values } from './interfaces';
 import {
+  isNumber,
   isString,
-  isValueStringEmpty,
   isTypeUndefined,
   isValueNullOrUndefined,
-  isNumber,
+  isValueStringEmpty,
   isValueUndefined,
 } from './utils';
 
