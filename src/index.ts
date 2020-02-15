@@ -2,18 +2,20 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import formDataToObject from 'form-data-to-object';
 
-import utils from './utils';
+import * as utils from './utils';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
+import FormsyContext from './FormsyContext';
 
 import {
   IData,
   IModel,
   InputComponent,
   IResetModel,
-  ISetInputValue,
+  IUpdateInputsWithValue,
   IUpdateInputsWithError,
   ValidationFunction,
+  FormsyContextInterface,
 } from './interfaces';
 
 type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
@@ -52,6 +54,7 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
 
 export interface FormsyState {
   canChange: boolean;
+  contextValue: FormsyContextInterface;
   formSubmitted?: boolean;
   isPristine?: boolean;
   isSubmitting: boolean;
@@ -66,6 +69,36 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public prevInputNames: any[] | null = null;
 
   public static displayName = 'Formsy';
+
+  public static propTypes = {
+    disabled: PropTypes.bool,
+    getErrorMessage: PropTypes.func,
+    getErrorMessages: PropTypes.func,
+    getValue: PropTypes.func,
+    hasValue: PropTypes.func,
+    isFormDisabled: PropTypes.func,
+    isFormSubmitted: PropTypes.func,
+    isPristine: PropTypes.func,
+    isRequired: PropTypes.func,
+    isValid: PropTypes.func,
+    isValidValue: PropTypes.func,
+    mapping: PropTypes.func,
+    onChange: PropTypes.func,
+    onInvalid: PropTypes.func,
+    onInvalidSubmit: PropTypes.func,
+    onReset: PropTypes.func,
+    onSubmit: PropTypes.func,
+    onValid: PropTypes.func,
+    onValidSubmit: PropTypes.func,
+    preventExternalInvalidation: PropTypes.bool,
+    preventDefaultSubmit: PropTypes.bool,
+    resetValue: PropTypes.func,
+    setValidations: PropTypes.func,
+    setValue: PropTypes.func,
+    showError: PropTypes.func,
+    showRequired: PropTypes.func,
+    validationErrors: PropTypes.object, // eslint-disable-line
+  };
 
   public static defaultProps: Partial<FormsyProps> = {
     disabled: false,
@@ -98,89 +131,64 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     validationErrors: null,
   };
 
-  public static propTypes = {
-    disabled: PropTypes.bool,
-    getErrorMessage: PropTypes.func,
-    getErrorMessages: PropTypes.func,
-    getValue: PropTypes.func,
-    hasValue: PropTypes.func,
-    isFormDisabled: PropTypes.func,
-    isFormSubmitted: PropTypes.func,
-    isPristine: PropTypes.func,
-    isRequired: PropTypes.func,
-    isValid: PropTypes.func,
-    isValidValue: PropTypes.func,
-    mapping: PropTypes.func,
-    onChange: PropTypes.func,
-    onInvalid: PropTypes.func,
-    onInvalidSubmit: PropTypes.func,
-    onReset: PropTypes.func,
-    onSubmit: PropTypes.func,
-    onValid: PropTypes.func,
-    onValidSubmit: PropTypes.func,
-    preventExternalInvalidation: PropTypes.bool,
-    preventDefaultSubmit: PropTypes.bool,
-    resetValue: PropTypes.func,
-    setValidations: PropTypes.func,
-    setValue: PropTypes.func,
-    showError: PropTypes.func,
-    showRequired: PropTypes.func,
-    validationErrors: PropTypes.object, // eslint-disable-line
-  };
-
-  public static childContextTypes = {
-    formsy: PropTypes.object,
-  };
-
   public constructor(props: FormsyProps) {
     super(props);
     this.state = {
       canChange: false,
       isSubmitting: false,
       isValid: true,
+      contextValue: {
+        attachToForm: this.attachToForm,
+        detachFromForm: this.detachFromForm,
+        isFormDisabled: props.disabled,
+        isValidValue: this.isValidValue,
+        validate: this.validate,
+      },
     };
     this.inputs = [];
     this.emptyArray = [];
   }
 
-  public getChildContext = () => ({
-    formsy: {
-      attachToForm: this.attachToForm,
-      detachFromForm: this.detachFromForm,
-      isFormDisabled: this.isFormDisabled(),
-      isValidValue: this.isValidValue,
-      validate: this.validate,
-    },
-  });
-
   public componentDidMount = () => {
+    this.prevInputNames = this.inputs.map(component => component.props.name);
     this.validateForm();
   };
 
-  public componentWillUpdate = () => {
-    // Keep a reference to input names before form updates,
-    // to check if inputs has changed after render
-    this.prevInputNames = this.inputs.map(component => component.props.name);
-  };
-
-  public componentDidUpdate = () => {
-    const { validationErrors } = this.props;
+  public componentDidUpdate = (prevProps: FormsyProps) => {
+    const { validationErrors, disabled } = this.props;
 
     if (validationErrors && typeof validationErrors === 'object' && Object.keys(validationErrors).length > 0) {
       this.setInputValidationErrors(validationErrors);
     }
 
     const newInputNames = this.inputs.map(component => component.props.name);
-    if (this.prevInputNames && utils.arraysDiffer(this.prevInputNames, newInputNames)) {
+    if (this.prevInputNames && !utils.isSame(this.prevInputNames, newInputNames)) {
+      this.prevInputNames = newInputNames;
       this.validateForm();
+    }
+
+    // Keep the disabled value in state/context the same as from props
+    if (disabled !== prevProps.disabled) {
+      // eslint-disable-next-line
+      this.setState(state => ({
+        ...state,
+        contextValue: {
+          ...state.contextValue,
+          isFormDisabled: disabled,
+        },
+      }));
     }
   };
 
   public getCurrentValues = () =>
-    this.inputs.reduce((data, component) => {
-      const dataCopy = typeof component.state.value === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
-      dataCopy[component.props.name] = component.state.value;
-      return dataCopy;
+    this.inputs.reduce((valueAccumulator, component) => {
+      const {
+        props: { name },
+        state: { value },
+      } = component;
+      // eslint-disable-next-line no-param-reassign
+      valueAccumulator[name] = utils.cloneIfObject(value);
+      return valueAccumulator;
     }, {});
 
   public getModel = () => {
@@ -189,11 +197,13 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   public getPristineValues = () =>
-    this.inputs.reduce((data, component) => {
-      const { name } = component.props;
-      const dataCopy = typeof component.state.value === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
-      dataCopy[name] = component.props.value;
-      return dataCopy;
+    this.inputs.reduce((valueAccumulator, component) => {
+      const {
+        props: { name, value },
+      } = component;
+      // eslint-disable-next-line no-param-reassign
+      valueAccumulator[name] = utils.cloneIfObject(value);
+      return valueAccumulator;
     }, {});
 
   public setFormPristine = (isPristine: boolean) => {
@@ -249,7 +259,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // eslint-disable-next-line react/destructuring-assignment
   public isFormDisabled = () => this.props.disabled;
 
-  public mapModel = (model: IModel) => {
+  public mapModel = (model: IModel): IModel => {
     const { mapping } = this.props;
 
     if (mapping) {
@@ -275,7 +285,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.resetModel(data);
   };
 
-  public resetInternal = event => {
+  private resetInternal = event => {
     const { onReset } = this.props;
 
     event.preventDefault();
@@ -298,16 +308,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.validateForm();
   };
 
-  // Set the value of one component
-  public setValue: ISetInputValue = (name, value, validate) => {
-    const input = utils.find(this.inputs, component => component.props.name === name);
-    if (input) {
-      input.setValue(value, validate);
-    }
-  };
-
   // Checks validation on current value or a passed value
-  public runValidation = (component: InputComponent, value = component.state.value) => {
+  public runValidation = <V>(component: InputComponent<V>, value = component.state.value) => {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
     const validationResults = utils.runRules(value, currentValues, component.validations, validationRules);
@@ -348,6 +350,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
             .filter((x, pos, arr) => arr.indexOf(x) === pos); // remove duplicates
         }
 
+        // This line is not reachable
+        // istanbul ignore next
         return undefined;
       })(),
     };
@@ -365,7 +369,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   // Method put on each input component to unregister
   // itself from the form
-  public detachFromForm = (component: InputComponent) => {
+  public detachFromForm = <V>(component: InputComponent<V>) => {
     const componentPos = this.inputs.indexOf(component);
 
     if (componentPos !== -1) {
@@ -379,7 +383,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public isChanged = () => !utils.isSame(this.getPristineValues(), this.getCurrentValues());
 
   // Update model, submit to url prop and send the model
-  public submit = event => {
+  public submit = (event?: any) => {
     const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit } = this.props;
     const { isValid } = this.state;
 
@@ -407,8 +411,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     const { preventExternalInvalidation } = this.props;
     const { isValid } = this.state;
 
-    Object.keys(errors).forEach(name => {
-      const component = utils.find(this.inputs, input => input.props.name === name);
+    Object.entries(errors).forEach(([name, error]) => {
+      const component = this.inputs.find(input => input.props.name === name);
       if (!component) {
         throw new Error(
           `You are trying to update an input that does not exist. Verify errors object with input names. ${JSON.stringify(
@@ -419,7 +423,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       const args = [
         {
           isValid: preventExternalInvalidation,
-          externalError: typeof errors[name] === 'string' ? [errors[name]] : errors[name],
+          externalError: utils.isString(error) ? [error] : error,
         },
       ];
       component.setState(...args);
@@ -429,10 +433,21 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     }
   };
 
+  // Set the value of components
+  public updateInputsWithValue: IUpdateInputsWithValue<any> = (values, validate) => {
+    Object.entries(values).forEach(([name, value]) => {
+      const input = this.inputs.find(component => component.props.name === name);
+
+      if (input) {
+        input.setValue(value, validate);
+      }
+    });
+  };
+
   // Use the binded values and the actual input value to
   // validate the input and set its state. Then check the
   // state of the form itself
-  public validate = (component: InputComponent) => {
+  public validate = <V>(component: InputComponent<V>) => {
     const { onChange } = this.props;
     const { canChange } = this.state;
 
@@ -441,7 +456,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onChange(this.getModel(), this.isChanged());
     }
 
-    const validation = this.runValidation(component);
+    const validation = this.runValidation<V>(component);
     // Run through the validations, split them up and call
     // the validator IF there is a value or it is required
     component.setState(
@@ -495,6 +510,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.setState({
         canChange: true,
       });
+      onValidationComplete();
     }
   };
 
@@ -527,25 +543,32 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       showError,
       showRequired,
       validationErrors,
+      children,
       /* eslint-enable @typescript-eslint/no-unused-vars */
       ...nonFormsyProps
     } = this.props;
+    const { contextValue } = this.state;
 
     return React.createElement(
-      'form',
+      FormsyContext.Provider,
       {
-        onReset: this.resetInternal,
-        onSubmit: this.submit,
-        ...nonFormsyProps,
-        disabled: false,
+        value: contextValue,
       },
-      // eslint-disable-next-line react/destructuring-assignment
-      this.props.children,
+      React.createElement(
+        'form',
+        {
+          onReset: this.resetInternal,
+          onSubmit: this.submit,
+          ...nonFormsyProps,
+          disabled: false,
+        },
+        children,
+      ),
     );
   };
 }
 
-const addValidationRule = (name: string, func: ValidationFunction) => {
+const addValidationRule = <V>(name: string, func: ValidationFunction<V>) => {
   validationRules[name] = func;
 };
 

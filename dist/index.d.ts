@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import validationRules from './validationRules';
 import Wrapper, { propTypes } from './Wrapper';
-import { IModel, InputComponent, IResetModel, IUpdateInputsWithError, ValidationFunction } from './interfaces';
+import { IModel, InputComponent, IResetModel, IUpdateInputsWithValue, IUpdateInputsWithError, ValidationFunction } from './interfaces';
 declare type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 export interface FormsyProps extends FormHTMLAttributesCleaned {
     disabled: boolean;
@@ -45,7 +45,6 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     emptyArray: any[];
     prevInputNames: any[] | null;
     static displayName: string;
-    static defaultProps: Partial<FormsyProps>;
     static propTypes: {
         disabled: PropTypes.Requireable<boolean>;
         getErrorMessage: PropTypes.Requireable<(...args: any[]) => any>;
@@ -77,18 +76,18 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     static childContextTypes: {
         formsy: PropTypes.Requireable<object>;
     };
+    static defaultProps: Partial<FormsyProps>;
     constructor(props: FormsyProps);
     getChildContext: () => {
         formsy: {
             attachToForm: (component: any) => void;
-            detachFromForm: (component: InputComponent) => void;
-            isFormDisabled: () => boolean;
+            detachFromForm: <V>(component: InputComponent<V>) => void;
+            isFormDisabled: boolean;
             isValidValue: (component: any, value: any) => boolean;
-            validate: (component: InputComponent) => void;
+            validate: <V_1>(component: InputComponent<V_1>) => void;
         };
     };
     componentDidMount: () => void;
-    componentWillUpdate: () => void;
     componentDidUpdate: () => void;
     getCurrentValues: () => any;
     getModel: () => any;
@@ -96,22 +95,24 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     setFormPristine: (isPristine: boolean) => void;
     setInputValidationErrors: (errors: any) => void;
     setFormValidState: (allIsValid: boolean) => void;
+    isValidValue: (component: any, value: any) => boolean;
     isFormDisabled: () => boolean;
     mapModel: (model: any) => any;
     reset: (data?: any) => void;
     resetInternal: (event: any) => void;
     resetModel: IResetModel;
-    runValidation: (component: InputComponent, value?: any) => {
+    runValidation: <V>(component: InputComponent<V>, value?: V) => {
         isRequired: boolean;
         isValid: boolean;
         error: any;
     };
     attachToForm: (component: any) => void;
-    detachFromForm: (component: InputComponent) => void;
+    detachFromForm: <V>(component: InputComponent<V>) => void;
     isChanged: () => boolean;
     submit: (event: any) => void;
     updateInputsWithError: IUpdateInputsWithError;
-    validate: (component: InputComponent) => void;
+    updateInputsWithValue: IUpdateInputsWithValue<any>;
+    validate: <V>(component: InputComponent<V>) => void;
     validateForm: () => void;
     render: () => React.DetailedReactHTMLElement<{
         disabled: boolean;
@@ -132,21 +133,20 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         noValidate?: boolean;
         target?: string;
         defaultChecked?: boolean;
-        defaultValue?: string | string[];
+        defaultValue?: string | number | string[];
         suppressContentEditableWarning?: boolean;
         suppressHydrationWarning?: boolean;
         accessKey?: string;
         className?: string;
-        contentEditable?: boolean;
+        contentEditable?: boolean | "inherit" | "false" | "true";
         contextMenu?: string;
-        draggable?: boolean;
+        draggable?: boolean | "false" | "true";
         id?: string;
         lang?: string;
         placeholder?: string;
-        spellCheck?: boolean;
+        spellCheck?: boolean | "false" | "true";
         tabIndex?: number;
-        inputMode?: string;
-        is?: string;
+        translate?: "yes" | "no";
         radioGroup?: string;
         role?: string;
         about?: string;
@@ -168,6 +168,8 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         results?: number;
         security?: string;
         unselectable?: "on" | "off";
+        inputMode?: "search" | "none" | "text" | "decimal" | "numeric" | "tel" | "url" | "email";
+        is?: string;
         'aria-activedescendant'?: string;
         'aria-atomic'?: boolean | "false" | "true";
         'aria-autocomplete'?: "none" | "both" | "inline" | "list";
@@ -378,6 +380,6 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         onSubmit: (event: any) => void;
     }, HTMLElement>;
 }
-declare const addValidationRule: (name: string, func: ValidationFunction) => void;
+declare const addValidationRule: <V>(name: string, func: ValidationFunction<V>) => void;
 export { addValidationRule, propTypes, validationRules, Wrapper as withFormsy };
 export default Formsy;

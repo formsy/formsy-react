@@ -1,40 +1,41 @@
 # API
 
 - [Formsy](#formsy)
+  - [getModel()](#getModel)
   - [mapping](#mapping)
-  - [validationErrors](#validationErrors)
+  - [onChange()](#onChange)
+  - [onInvalid()](#onInvalid)
+  - [onInvalidSubmit()](#onInvalidsubmit)
   - [onSubmit()](#onSubmit)
   - [onValid()](#onValid)
-  - [onInvalid()](#onInvalid)
   - [onValidSubmit()](#onValidsubmit)
-  - [onInvalidSubmit()](#onInvalidsubmit)
-  - [onChange()](#onChange)
-  - [reset()](#reset)
-  - [getModel()](#getModel)
-  - [updateInputsWithError()](#updateInputsWithError)
   - [preventExternalInvalidation](#preventExternalInvalidation)
+  - [reset()](#reset)
+  - [updateInputsWithError()](#updateInputsWithError)
+  - [updateInputsWithValue()](#updateInputsWithValue)
+  - [validationErrors](#validationErrors)
 - [withFormsy](#withFormsy)
-  - [name](#name)
+  - [errorMessage](#errorMessage)
+  - [errorMessages](#errorMessages)
+  - [formNoValidate](#formNoValidate)
+  - [hasValue](#hasValue)
   - [innerRef](#innerRef)
-  - [value](#value)
-  - [validations](#validations)
+  - [isFormDisabled](#isFormDisabled)
+  - [isFormSubmitted](#isFormSubmitted)
+  - [isPristine](#isPristine)
+  - [isRequired](#isRequired)
+  - [isValid](#isValid)
+  - [isValidValue()](#isValidValue)
+  - [name](#name)
+  - [required](#required)
+  - [resetValue()](#resetValue)
+  - [setValue()](#setValue)
+  - [showError](#showError)
+  - [showRequired](#showRequired)
   - [validationError](#validationError)
   - [validationErrors](#validationErrors)
-  - [required](#required)
-  - [getValue()](#getvalue)
-  - [setValue()](#setValue)
-  - [resetValue()](#resetValue)
-  - [getErrorMessage()](#getErrorMessage)
-  - [getErrorMessages()](#getErrorMessages)
-  - [isValid()](#isValid)
-  - [isValidValue()](#isValidValue)
-  - [isRequired()](#isRequired)
-  - [showRequired()](#showRequired)
-  - [showError()](#showError)
-  - [isPristine()](#isPristine)
-  - [isFormDisabled()](#isFormDisabled)
-  - [isFormSubmitted()](#isFormSubmitted)
-  - [formNoValidate](#formNoValidate)
+  - [validations](#validations)
+  - [value](#value)
 - [propTypes](#propTypes)
 - [addValidationRule](#addValidationRule)
 - [Validators](#validators)
@@ -211,6 +212,25 @@ argument and optionally invalidate the form by passing `true` as the second argu
 validation. This is also passed as the third parameter to the [`onSubmit`](#onSubmit), [`onValidSubmit`](#onValid) or
 [`onInvalidSubmit`](#onInvalid).
 
+#### <a id="updateInputsWithValue">updateInputsWithValue(values)</a>
+
+```jsx
+class MyForm extends React.Component {
+  someFunction = () => {
+    this.refs.form.updateInputsWithValue({
+      email: 'value@example.com',
+      'field[10]': 'value!',
+    });
+  };
+  render() {
+    return <Formsy ref="form">...</Formsy>;
+  }
+}
+```
+
+Manually set the form fields values by taking an object that maps field name to value as the first argument and
+optionally validate the inputs by passing `true` as the second argument.
+
 #### <a id="preventExternalInvalidation">preventExternalInvalidation</a>
 
 ```jsx
@@ -245,7 +265,7 @@ class MyInput extends React.Component {
   render() {
     return (
       <div>
-        <input value={this.props.getValue()} onChange={e => this.props.setValue(e.target.value)} />
+        <input value={this.props.value} onChange={e => this.props.setValue(e.target.value)} />
       </div>
     );
   }
@@ -293,9 +313,8 @@ class MyForm extends React.Component {
 <MyInput name="email" value="My initial value" />
 ```
 
-You should always use the [**getValue()**](#getvalue) method inside your formsy form element. To pass an initial value,
-use the value attribute. This value will become the "pristine" value and any reset of the form will bring back this
-value.
+To pass an initial value, use the value attribute. This value will become the "pristine" value and any reset of the form
+will bring back this value.
 
 #### <a id="validations">validations</a>
 
@@ -320,11 +339,14 @@ to separate argument passed to the validator. The argument will go through a **J
 JavaScript types. Meaning:
 
 ```jsx
-<MyInput name="fruit" validations="isIn:['apple', 'orange']"/>
-<MyInput name="car" validations="mapsTo:{'bmw': true, 'vw': true}"/>
+<MyInput name='fruit' validations='isIn:["apple", "orange"]'/>
+<MyInput name='car' validations='mapsTo:{"bmw": true, "vw": true}'/>
 ```
 
 Works just fine.
+
+**NOTE**: use double quotes to quote the strings in the array/objects argument. `JSON.parse()` will not parse single
+quotes.
 
 #### <a id="validationError">validationError</a>
 
@@ -368,12 +390,12 @@ A property that tells the form that the form input component value is required. 
 
 Would be typical for a checkbox type of form element that must be checked, e.g. agreeing to Terms of Service.
 
-#### <a id="getvalue">getValue()</a>
+#### <a id="value">value</a>
 
 ```jsx
 class MyInput extends React.Component {
   render() {
-    return <input type="text" onChange={this.changeValue} value={this.props.getValue()} />;
+    return <input type="text" onChange={this.changeValue} value={this.props.value} />;
   }
 }
 ```
@@ -388,7 +410,7 @@ class MyInput extends React.Component {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
-    return <input type="text" onChange={this.changeValue} value={this.props.getValue()} />;
+    return <input type="text" onChange={this.changeValue} value={this.props.value} />;
   }
 }
 ```
@@ -410,8 +432,8 @@ class MyInput extends React.Component {
   render() {
     return (
       <div>
-        <input type="text" onChange={this.changeValue} value={this.props.getValue()} />
-        <button onClick={this.props.resetValue()}>Reset</button>
+        <input type="text" onChange={this.changeValue} value={this.props.value} />
+        <button onClick={this.props.resetValue}>Reset</button>
       </div>
     );
   }
@@ -420,7 +442,7 @@ class MyInput extends React.Component {
 
 Resets to empty value. This will run a **setState()** on the component and do a render.
 
-#### <a id="getErrorMessage">getErrorMessage()</a>
+#### <a id="errorMessage">errorMessage</a>
 
 ```jsx
 class MyInput extends React.Component {
@@ -430,23 +452,23 @@ class MyInput extends React.Component {
   render() {
     return (
       <div>
-        <input type="text" onChange={this.changeValue} value={this.props.getValue()} />
-        <span>{this.props.getErrorMessage()}</span>
+        <input type="text" onChange={this.changeValue} value={this.props.value} />
+        <span>{this.props.errorMessage}</span>
       </div>
     );
   }
 }
 ```
 
-Will return the validation message set if the form input component is invalid. If form input component is valid it
-returns **null**.
+Will contain the validation message set if the form input component is invalid. If form input component is valid it will
+be **null**.
 
-#### <a id="getErrorMessages">getErrorMessages()</a>
+#### <a id="errorMessages">errorMessages</a>
 
-Will return the validation messages set if the form input component is invalid. If form input component is valid it
-returns empty array.
+Will contain the validation messages set if the form input component is invalid. If form input component is valid it
+will be an empty array.
 
-#### <a id="isValid">isValid()</a>
+#### <a id="isValid">isValid</a>
 
 ```jsx
 class MyInput extends React.Component {
@@ -454,19 +476,19 @@ class MyInput extends React.Component {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
-    var face = this.props.isValid() ? ':-)' : ':-(';
+    var face = this.props.isValid ? ':-)' : ':-(';
     return (
       <div>
         <span>{face}</span>
-        <input type="text" onChange={this.changeValue} value={this.props.getValue()} />
-        <span>{this.props.getErrorMessage()}</span>
+        <input type="text" onChange={this.changeValue} value={this.props.value} />
+        <span>{this.props.errorMessage}</span>
       </div>
     );
   }
 }
 ```
 
-Returns the valid state of the form input component.
+The valid state of the form input component.
 
 #### <a id="isValidValue">isValidValue()</a>
 
@@ -480,7 +502,7 @@ class MyInput extends React.Component {
     }
   }
   render() {
-    return <input type="text" onChange={this.changeValue} value={this.props.getValue()}/>;
+    return <input type="text" onChange={this.changeValue} value={this.props.value}/>;
   }
 });
 
@@ -495,7 +517,7 @@ class MyForm extends React.Component {
 }
 ```
 
-#### <a id="isRequired">isRequired()</a>
+#### <a id="isRequired">isRequired</a>
 
 ```jsx
 class MyInput extends React.Component {
@@ -506,19 +528,19 @@ class MyInput extends React.Component {
     return (
       <div>
         <span>
-          {this.props.label} {this.props.isRequired() ? '*' : null}
+          {this.props.label} {this.props.isRequired ? '*' : null}
         </span>
-        <input type="text" onChange={this.changeValue} value={this.props.getValue()} />
-        <span>{this.props.getErrorMessage()}</span>
+        <input type="text" onChange={this.changeValue} value={this.props.value} />
+        <span>{this.props.errorMessage}</span>
       </div>
     );
   }
 }
 ```
 
-Returns true if the required property has been passed.
+True if the required property has been passed.
 
-#### <a id="showRequired">showRequired()</a>
+#### <a id="showRequired">showRequired</a>
 
 ```jsx
 class MyInput extends React.Component {
@@ -526,21 +548,21 @@ class MyInput extends React.Component {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
-    var className = this.props.showRequired() ? 'required' : '';
+    var className = this.props.showRequired ? 'required' : '';
     return (
       <div className={className}>
-        <input type="text" onChange={this.changeValue} value={this.props.getValue()} />
-        <span>{this.props.getErrorMessage()}</span>
+        <input type="text" onChange={this.changeValue} value={this.props.value} />
+        <span>{this.props.errorMessage}</span>
       </div>
     );
   }
 }
 ```
 
-Lets you check if the form input component should indicate if it is a required field. This happens when the form input
-component value is empty and the required prop has been passed.
+True if the form input component should indicate if it is a required field. This happens when the form input component
+value is empty and the required prop has been passed.
 
-#### <a id="showError">showError()</a>
+#### <a id="showError">showError</a>
 
 ```jsx
 class MyInput extends React.Component {
@@ -548,11 +570,11 @@ class MyInput extends React.Component {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
-    var className = this.props.showRequired() ? 'required' : this.props.showError() ? 'error' : '';
+    var className = this.props.showRequired ? 'required' : this.props.showError ? 'error' : '';
     return (
       <div className={className}>
-        <input type="text" onChange={this.changeValue} value={this.props.getValue()} />
-        <span>{this.props.getErrorMessage()}</span>
+        <input type="text" onChange={this.changeValue} value={this.props.value} />
+        <span>{this.props.errorMessage}</span>
       </div>
     );
   }
@@ -562,7 +584,7 @@ class MyInput extends React.Component {
 Lets you check if the form input component should indicate if there is an error. This happens if there is a form input
 component value and it is invalid or if a server error is received.
 
-#### <a id="isPristine">isPristine()</a>
+#### <a id="isPristine">isPristine</a>
 
 ```jsx
 class MyInput extends React.Component {
@@ -572,8 +594,8 @@ class MyInput extends React.Component {
   render() {
     return (
       <div>
-        <input type="text" onChange={this.changeValue} value={this.props.getValue()} />
-        <span>{this.props.isPristine() ? 'You have not touched this yet' : ''}</span>
+        <input type="text" onChange={this.changeValue} value={this.props.value} />
+        <span>{this.props.isPristine ? 'You have not touched this yet' : ''}</span>
       </div>
     );
   }
@@ -585,14 +607,14 @@ By default all Formsy input elements are pristine, which means they are not "tou
 
 **note!** When the form is reset (using `reset(...)`) the inputs are reset to their pristine state.
 
-#### <a id="isFormDisabled">isFormDisabled()</a>
+#### <a id="isFormDisabled">isFormDisabled</a>
 
 ```jsx
 class MyInput extends React.Component {
   render() {
     return (
       <div>
-        <input type="text" value={this.props.getValue()} disabled={this.props.isFormDisabled()} />
+        <input type="text" value={this.props.value} disabled={this.props.isFormDisabled} />
       </div>
     );
   }
@@ -601,17 +623,17 @@ class MyInput extends React.Component {
 React.render(<Formsy disabled={true} />);
 ```
 
-You can now disable the form itself with a prop and use **isFormDisabled()** inside form elements to verify this prop.
+You can disable the form itself with a prop and use **isFormDisabled** inside form elements to verify this prop.
 
-#### <a id="isFormSubmitted">isFormSubmitted()</a>
+#### <a id="isFormSubmitted">isFormSubmitted</a>
 
 ```jsx
 class MyInput extends React.Component {
   render() {
-    var error = this.props.isFormSubmitted() ? this.props.getErrorMessage() : null;
+    var error = this.props.isFormSubmitted ? this.props.errorMessage : null;
     return (
       <div>
-        <input type="text" value={this.props.getValue()} />
+        <input type="text" value={this.props.value} />
         {error}
       </div>
     );
@@ -619,7 +641,7 @@ class MyInput extends React.Component {
 }
 ```
 
-You can check if the form has been submitted.
+True if the form has been submitted.
 
 #### <a id="formNoValidate">formNoValidate</a>
 
@@ -686,8 +708,10 @@ addValidationRule('isIn', function(values, value, array) {
 ```
 
 ```jsx
-<MyInput name="fruit" validations="isIn:['apple', 'orange', 'pear']" />
+<MyInput name="fruit" validations='isIn:["apple", "orange", "pear"]' />
 ```
+
+**NOTE**: use double quotes to quote the strings in the array argument. `JSON.parse()` will not parse single quotes.
 
 Cross input validation:
 
@@ -754,7 +778,7 @@ Returns true if the value is not undefined or null
 <MyInput name="foo" validations="isUndefined" />
 ```
 
-Returns true if the value is the undefined
+Returns true if the value is undefined
 
 **isEmptyString**
 
@@ -851,7 +875,7 @@ Return true if the value from input component matches value passed (==).
 <MyInput name="repeated_password" validations="equalsField:password"/>
 ```
 
-Return true if the value from input component matches value passed (==).
+Return true if the value from input component matches value of field passed (==).
 
 **isLength:length**
 

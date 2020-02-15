@@ -55,12 +55,13 @@ function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
 
   if (Object.getOwnPropertySymbols) {
-    keys.push.apply(keys, Object.getOwnPropertySymbols(object));
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
   }
 
-  if (enumerableOnly) keys = keys.filter(function (sym) {
-    return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-  });
   return keys;
 }
 
@@ -69,13 +70,13 @@ function _objectSpread2(target) {
     var source = arguments[i] != null ? arguments[i] : {};
 
     if (i % 2) {
-      ownKeys(source, true).forEach(function (key) {
+      ownKeys(Object(source), true).forEach(function (key) {
         _defineProperty(target, key, source[key]);
       });
     } else if (Object.getOwnPropertyDescriptors) {
       Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
     } else {
-      ownKeys(source).forEach(function (key) {
+      ownKeys(Object(source)).forEach(function (key) {
         Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
       });
     }
@@ -167,6 +168,48 @@ function _possibleConstructorReturn(self, call) {
   return _assertThisInitialized(self);
 }
 
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+    return;
+  }
+
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance");
+}
+
 function unwrapExports (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
@@ -177,11 +220,11 @@ function createCommonjsModule(fn, module) {
 
 var reactIs_production_min = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports,"__esModule",{value:!0});
-var b="function"===typeof Symbol&&Symbol.for,c=b?Symbol.for("react.element"):60103,d=b?Symbol.for("react.portal"):60106,e=b?Symbol.for("react.fragment"):60107,f=b?Symbol.for("react.strict_mode"):60108,g=b?Symbol.for("react.profiler"):60114,h=b?Symbol.for("react.provider"):60109,k=b?Symbol.for("react.context"):60110,l=b?Symbol.for("react.async_mode"):60111,m=b?Symbol.for("react.concurrent_mode"):60111,n=b?Symbol.for("react.forward_ref"):60112,p=b?Symbol.for("react.suspense"):60113,q=b?Symbol.for("react.memo"):
-60115,r=b?Symbol.for("react.lazy"):60116;function t(a){if("object"===typeof a&&null!==a){var u=a.$$typeof;switch(u){case c:switch(a=a.type,a){case l:case m:case e:case g:case f:case p:return a;default:switch(a=a&&a.$$typeof,a){case k:case n:case h:return a;default:return u}}case r:case q:case d:return u}}}function v(a){return t(a)===m}exports.typeOf=t;exports.AsyncMode=l;exports.ConcurrentMode=m;exports.ContextConsumer=k;exports.ContextProvider=h;exports.Element=c;exports.ForwardRef=n;
-exports.Fragment=e;exports.Lazy=r;exports.Memo=q;exports.Portal=d;exports.Profiler=g;exports.StrictMode=f;exports.Suspense=p;exports.isValidElementType=function(a){return "string"===typeof a||"function"===typeof a||a===e||a===m||a===g||a===f||a===p||"object"===typeof a&&null!==a&&(a.$$typeof===r||a.$$typeof===q||a.$$typeof===h||a.$$typeof===k||a.$$typeof===n)};exports.isAsyncMode=function(a){return v(a)||t(a)===l};exports.isConcurrentMode=v;exports.isContextConsumer=function(a){return t(a)===k};
-exports.isContextProvider=function(a){return t(a)===h};exports.isElement=function(a){return "object"===typeof a&&null!==a&&a.$$typeof===c};exports.isForwardRef=function(a){return t(a)===n};exports.isFragment=function(a){return t(a)===e};exports.isLazy=function(a){return t(a)===r};exports.isMemo=function(a){return t(a)===q};exports.isPortal=function(a){return t(a)===d};exports.isProfiler=function(a){return t(a)===g};exports.isStrictMode=function(a){return t(a)===f};
-exports.isSuspense=function(a){return t(a)===p};
+var b="function"===typeof Symbol&&Symbol.for,c=b?Symbol.for("react.element"):60103,d=b?Symbol.for("react.portal"):60106,e=b?Symbol.for("react.fragment"):60107,f=b?Symbol.for("react.strict_mode"):60108,g=b?Symbol.for("react.profiler"):60114,h=b?Symbol.for("react.provider"):60109,k=b?Symbol.for("react.context"):60110,l=b?Symbol.for("react.async_mode"):60111,m=b?Symbol.for("react.concurrent_mode"):60111,n=b?Symbol.for("react.forward_ref"):60112,p=b?Symbol.for("react.suspense"):60113,q=b?Symbol.for("react.suspense_list"):
+60120,r=b?Symbol.for("react.memo"):60115,t=b?Symbol.for("react.lazy"):60116,v=b?Symbol.for("react.fundamental"):60117,w=b?Symbol.for("react.responder"):60118,x=b?Symbol.for("react.scope"):60119;function y(a){if("object"===typeof a&&null!==a){var u=a.$$typeof;switch(u){case c:switch(a=a.type,a){case l:case m:case e:case g:case f:case p:return a;default:switch(a=a&&a.$$typeof,a){case k:case n:case t:case r:case h:return a;default:return u}}case d:return u}}}function z(a){return y(a)===m}
+exports.typeOf=y;exports.AsyncMode=l;exports.ConcurrentMode=m;exports.ContextConsumer=k;exports.ContextProvider=h;exports.Element=c;exports.ForwardRef=n;exports.Fragment=e;exports.Lazy=t;exports.Memo=r;exports.Portal=d;exports.Profiler=g;exports.StrictMode=f;exports.Suspense=p;
+exports.isValidElementType=function(a){return "string"===typeof a||"function"===typeof a||a===e||a===m||a===g||a===f||a===p||a===q||"object"===typeof a&&null!==a&&(a.$$typeof===t||a.$$typeof===r||a.$$typeof===h||a.$$typeof===k||a.$$typeof===n||a.$$typeof===v||a.$$typeof===w||a.$$typeof===x)};exports.isAsyncMode=function(a){return z(a)||y(a)===l};exports.isConcurrentMode=z;exports.isContextConsumer=function(a){return y(a)===k};exports.isContextProvider=function(a){return y(a)===h};
+exports.isElement=function(a){return "object"===typeof a&&null!==a&&a.$$typeof===c};exports.isForwardRef=function(a){return y(a)===n};exports.isFragment=function(a){return y(a)===e};exports.isLazy=function(a){return y(a)===t};exports.isMemo=function(a){return y(a)===r};exports.isPortal=function(a){return y(a)===d};exports.isProfiler=function(a){return y(a)===g};exports.isStrictMode=function(a){return y(a)===f};exports.isSuspense=function(a){return y(a)===p};
 });
 
 unwrapExports(reactIs_production_min);
@@ -226,25 +269,29 @@ Object.defineProperty(exports, '__esModule', { value: true });
 // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
 var hasSymbol = typeof Symbol === 'function' && Symbol.for;
-
 var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
 var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
 var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
 var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
 var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
 var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
-var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace;
+var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace; // TODO: We don't use AsyncMode or ConcurrentMode anymore. They were temporary
+// (unstable) APIs that have been removed. Can we remove the symbols?
+
 var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
 var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
 var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
 var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
+var REACT_SUSPENSE_LIST_TYPE = hasSymbol ? Symbol.for('react.suspense_list') : 0xead8;
 var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
 var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
+var REACT_FUNDAMENTAL_TYPE = hasSymbol ? Symbol.for('react.fundamental') : 0xead5;
+var REACT_RESPONDER_TYPE = hasSymbol ? Symbol.for('react.responder') : 0xead6;
+var REACT_SCOPE_TYPE = hasSymbol ? Symbol.for('react.scope') : 0xead7;
 
 function isValidElementType(type) {
-  return typeof type === 'string' || typeof type === 'function' ||
-  // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
-  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE);
+  return typeof type === 'string' || typeof type === 'function' || // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
+  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || type === REACT_SUSPENSE_LIST_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE || type.$$typeof === REACT_FUNDAMENTAL_TYPE || type.$$typeof === REACT_RESPONDER_TYPE || type.$$typeof === REACT_SCOPE_TYPE);
 }
 
 /**
@@ -260,12 +307,11 @@ function isValidElementType(type) {
  * paths. Removing the logging code for production environments will keep the
  * same logic and follow the same code paths.
  */
-
-var lowPriorityWarning = function () {};
+var lowPriorityWarningWithoutStack = function () {};
 
 {
   var printWarning = function (format) {
-    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       args[_key - 1] = arguments[_key];
     }
 
@@ -273,9 +319,11 @@ var lowPriorityWarning = function () {};
     var message = 'Warning: ' + format.replace(/%s/g, function () {
       return args[argIndex++];
     });
+
     if (typeof console !== 'undefined') {
       console.warn(message);
     }
+
     try {
       // --- Welcome to debugging React ---
       // This error was thrown as a convenience so that you can use this stack
@@ -284,25 +332,27 @@ var lowPriorityWarning = function () {};
     } catch (x) {}
   };
 
-  lowPriorityWarning = function (condition, format) {
+  lowPriorityWarningWithoutStack = function (condition, format) {
     if (format === undefined) {
-      throw new Error('`lowPriorityWarning(condition, format, ...args)` requires a warning ' + 'message argument');
+      throw new Error('`lowPriorityWarningWithoutStack(condition, format, ...args)` requires a warning ' + 'message argument');
     }
+
     if (!condition) {
-      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+      for (var _len2 = arguments.length, args = new Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
         args[_key2 - 2] = arguments[_key2];
       }
 
-      printWarning.apply(undefined, [format].concat(args));
+      printWarning.apply(void 0, [format].concat(args));
     }
   };
 }
 
-var lowPriorityWarning$1 = lowPriorityWarning;
+var lowPriorityWarningWithoutStack$1 = lowPriorityWarningWithoutStack;
 
 function typeOf(object) {
   if (typeof object === 'object' && object !== null) {
     var $$typeof = object.$$typeof;
+
     switch ($$typeof) {
       case REACT_ELEMENT_TYPE:
         var type = object.type;
@@ -315,29 +365,32 @@ function typeOf(object) {
           case REACT_STRICT_MODE_TYPE:
           case REACT_SUSPENSE_TYPE:
             return type;
+
           default:
             var $$typeofType = type && type.$$typeof;
 
             switch ($$typeofType) {
               case REACT_CONTEXT_TYPE:
               case REACT_FORWARD_REF_TYPE:
+              case REACT_LAZY_TYPE:
+              case REACT_MEMO_TYPE:
               case REACT_PROVIDER_TYPE:
                 return $$typeofType;
+
               default:
                 return $$typeof;
             }
+
         }
-      case REACT_LAZY_TYPE:
-      case REACT_MEMO_TYPE:
+
       case REACT_PORTAL_TYPE:
         return $$typeof;
     }
   }
 
   return undefined;
-}
+} // AsyncMode is deprecated along with isAsyncMode
 
-// AsyncMode is deprecated along with isAsyncMode
 var AsyncMode = REACT_ASYNC_MODE_TYPE;
 var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
 var ContextConsumer = REACT_CONTEXT_TYPE;
@@ -351,17 +404,16 @@ var Portal = REACT_PORTAL_TYPE;
 var Profiler = REACT_PROFILER_TYPE;
 var StrictMode = REACT_STRICT_MODE_TYPE;
 var Suspense = REACT_SUSPENSE_TYPE;
+var hasWarnedAboutDeprecatedIsAsyncMode = false; // AsyncMode should be deprecated
 
-var hasWarnedAboutDeprecatedIsAsyncMode = false;
-
-// AsyncMode should be deprecated
 function isAsyncMode(object) {
   {
     if (!hasWarnedAboutDeprecatedIsAsyncMode) {
       hasWarnedAboutDeprecatedIsAsyncMode = true;
-      lowPriorityWarning$1(false, 'The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
+      lowPriorityWarningWithoutStack$1(false, 'The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
     }
   }
+
   return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
 }
 function isConcurrentMode(object) {
@@ -1364,142 +1416,155 @@ var formDataToObject = {
   toObj: toObj
 };
 
-var utils = {
-  arraysDiffer: function arraysDiffer(a, b) {
-    var _this = this;
+function isArray(value) {
+  return Array.isArray(value);
+}
+function isObject(value) {
+  return value !== null && _typeof(value) === 'object';
+}
+function isTypeUndefined(value) {
+  return typeof value === 'undefined';
+}
+function isDate(value) {
+  return value instanceof Date;
+}
+function isFunction(value) {
+  return value !== null && typeof value === 'function';
+}
+function isString(value) {
+  return typeof value === 'string';
+}
+function isNumber(value) {
+  return typeof value === 'number';
+}
+function isValueStringEmpty(value) {
+  return value === '';
+}
+function isValueNullOrUndefined(value) {
+  return value === null || value === undefined;
+}
+function isValueUndefined(value) {
+  return value === undefined;
+}
+function noop() {// do nothing.
+}
+function cloneIfObject(value) {
+  // Clone objects to avoid accidental param reassignment
+  return isObject(value) ? _objectSpread2({}, value) : value;
+}
+function isSame(a, b) {
+  if (_typeof(a) !== _typeof(b)) {
+    return false;
+  }
 
-    var isDifferent = false;
-
+  if (isArray(a) && isArray(b)) {
     if (a.length !== b.length) {
-      isDifferent = true;
-    } else {
-      a.forEach(function (item, index) {
-        if (!_this.isSame(item, b[index])) {
-          isDifferent = true;
-        }
-      }, this);
-    }
-
-    return isDifferent;
-  },
-  objectsDiffer: function objectsDiffer(a, b) {
-    var _this2 = this;
-
-    var isDifferent = false;
-
-    if (Object.keys(a).length !== Object.keys(b).length) {
-      isDifferent = true;
-    } else {
-      Object.keys(a).forEach(function (key) {
-        if (!_this2.isSame(a[key], b[key])) {
-          isDifferent = true;
-        }
-      }, this);
-    }
-
-    return isDifferent;
-  },
-  isSame: function isSame(a, b) {
-    if (_typeof(a) !== _typeof(b)) {
       return false;
     }
 
-    if (Array.isArray(a) && Array.isArray(b)) {
-      return !this.arraysDiffer(a, b);
-    }
-
-    if (typeof a === 'function' && typeof b === 'function') {
-      return a.toString() === b.toString();
-    }
-
-    if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
-      return a.toString() === b.toString();
-    }
-
-    if (_typeof(a) === 'object' && _typeof(b) === 'object' && a !== null && b !== null) {
-      return !this.objectsDiffer(a, b);
-    }
-
-    return a === b;
-  },
-  find: function find(collection, fn) {
-    for (var i = 0, l = collection.length; i < l; i += 1) {
-      var _item = collection[i];
-
-      if (fn(_item)) {
-        return _item;
-      }
-    }
-
-    return null;
-  },
-  runRules: function runRules(value, currentValues, validations, validationRules) {
-    var results = {
-      errors: [],
-      failed: [],
-      success: []
-    };
-
-    if (Object.keys(validations).length) {
-      Object.keys(validations).forEach(function (validationMethod) {
-        var validationsVal = validations[validationMethod];
-        var validationRulesVal = validationRules[validationMethod];
-
-        if (validationRulesVal && typeof validationsVal === 'function') {
-          throw new Error("Formsy does not allow you to override default validations: ".concat(validationMethod));
-        }
-
-        if (!validationRulesVal && typeof validationsVal !== 'function') {
-          throw new Error("Formsy does not have the validation rule: ".concat(validationMethod));
-        }
-
-        if (typeof validationsVal === 'function') {
-          var validation = validationsVal(currentValues, value);
-
-          if (typeof validation === 'string') {
-            results.errors.push(validation);
-            results.failed.push(validationMethod);
-          } else if (!validation) {
-            results.failed.push(validationMethod);
-          }
-
-          return;
-        }
-
-        if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
-          var _validation = validationRulesVal(currentValues, value, validationsVal);
-
-          if (typeof _validation === 'string') {
-            results.errors.push(_validation);
-            results.failed.push(validationMethod);
-          } else if (!_validation) {
-            results.failed.push(validationMethod);
-          } else {
-            results.success.push(validationMethod);
-          }
-
-          return;
-        }
-
-        results.success.push(validationMethod);
-      });
-    }
-
-    return results;
+    return a.every(function (item, index) {
+      return isSame(item, b[index]);
+    });
   }
-};
+
+  if (isFunction(a) && isFunction(b)) {
+    return a.toString() === b.toString();
+  }
+
+  if (isDate(a) && isDate(b)) {
+    return a.toString() === b.toString();
+  }
+
+  if (isObject(a) && isObject(b)) {
+    if (Object.keys(a).length !== Object.keys(b).length) {
+      return false;
+    }
+
+    return Object.keys(a).every(function (key) {
+      return isSame(a[key], b[key]);
+    });
+  }
+
+  return a === b;
+}
+function runRules(value, currentValues, validations, validationRules) {
+  var results = {
+    errors: [],
+    failed: [],
+    success: []
+  };
+
+  if (Object.keys(validations).length) {
+    Object.keys(validations).forEach(function (validationMethod) {
+      var validationsVal = validations[validationMethod];
+      var validationRulesVal = validationRules[validationMethod];
+
+      if (validationRulesVal && isFunction(validationsVal)) {
+        throw new Error("Formsy does not allow you to override default validations: ".concat(validationMethod));
+      }
+
+      if (!validationRulesVal && !isFunction(validationsVal)) {
+        throw new Error("Formsy does not have the validation rule: ".concat(validationMethod));
+      }
+
+      if (isFunction(validationsVal)) {
+        var validation = validationsVal(currentValues, value);
+
+        if (isString(validation)) {
+          results.errors.push(validation);
+          results.failed.push(validationMethod);
+        } else if (!validation) {
+          results.failed.push(validationMethod);
+        }
+
+        return;
+      }
+
+      if (!isFunction(validationsVal) && isFunction(validationRulesVal)) {
+        var _validation = validationRulesVal(currentValues, value, validationsVal);
+
+        if (isString(_validation)) {
+          results.errors.push(_validation);
+          results.failed.push(validationMethod);
+        } else if (!_validation) {
+          results.failed.push(validationMethod);
+        } else {
+          results.success.push(validationMethod);
+        }
+
+        return;
+      }
+
+      results.success.push(validationMethod);
+    });
+  }
+
+  return results;
+}
 
 var _isExisty = function isExisty(value) {
-  return value !== null && value !== undefined;
+  return !isValueNullOrUndefined(value);
 };
 
 var isEmpty = function isEmpty(value) {
-  return value === '';
+  if (isString(value)) {
+    return isValueStringEmpty(value);
+  }
+
+  if (isTypeUndefined(value)) {
+    return false;
+  }
+
+  return isValueUndefined(value);
 };
 
 var validations = {
   isDefaultRequiredValue: function isDefaultRequiredValue(_values, value) {
-    return value === undefined || value === null || value === '';
+    if (isString(value)) {
+      return isValueStringEmpty(value);
+    }
+
+    return isValueNullOrUndefined(value);
   },
   isExisty: function isExisty(_values, value) {
     return _isExisty(value);
@@ -1508,7 +1573,7 @@ var validations = {
     return !_isExisty(value) || isEmpty(value) || regexp.test(value);
   },
   isUndefined: function isUndefined(_values, value) {
-    return value === undefined;
+    return isValueUndefined(value);
   },
   isEmptyString: function isEmptyString(_values, value) {
     return isEmpty(value);
@@ -1527,7 +1592,7 @@ var validations = {
     return value === false;
   },
   isNumeric: function isNumeric(values, value) {
-    if (typeof value === 'number') {
+    if (isNumber(value)) {
       return true;
     }
 
@@ -1592,7 +1657,8 @@ var convertValidationsToObject = function convertValidationsToObject(validations
       } // Avoid parameter reassignment
 
 
-      var validationsAccumulatorCopy = Object.assign({}, validationsAccumulator);
+      var validationsAccumulatorCopy = _objectSpread2({}, validationsAccumulator);
+
       validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
       return validationsAccumulatorCopy;
     }, {});
@@ -1657,7 +1723,7 @@ function Wrapper (WrappedComponent) {
         // Add validations to the store itself as the props object can not be modified
         _this.validations = convertValidationsToObject(validations) || {};
         _this.requiredValidations = required === true ? {
-          isDefaultRequiredValue: true
+          isDefaultRequiredValue: required
         } : convertValidationsToObject(required);
       };
 
@@ -1680,11 +1746,17 @@ function Wrapper (WrappedComponent) {
       };
 
       _this.hasValue = function () {
-        return _this.state.value !== '';
+        var value = _this.state.value;
+
+        if (typeof value === 'string') {
+          return value !== '';
+        }
+
+        return value !== undefined;
       };
 
       _this.isFormDisabled = function () {
-        return _this.context.formsy.isFormDisabled();
+        return _this.context.formsy.isFormDisabled;
       };
 
       _this.isFormSubmitted = function () {
@@ -1741,49 +1813,38 @@ function Wrapper (WrappedComponent) {
     }
 
     _createClass(_class, [{
-      key: "componentWillMount",
-      value: function componentWillMount() {
-        var _this2 = this;
-
+      key: "componentDidMount",
+      value: function componentDidMount() {
         var _this$props = this.props,
             validations = _this$props.validations,
             required = _this$props.required,
             name = _this$props.name;
         var formsy = this.context.formsy;
 
-        var configure = function configure() {
-          _this2.setValidations(validations, required); // Pass a function instead?
-
-
-          formsy.attachToForm(_this2);
-        };
-
         if (!name) {
           throw new Error('Form Input requires a name property when used');
         }
 
-        configure();
-      } // We have to make sure the validate method is kept when new props are added
+        this.setValidations(validations, required); // Pass a function instead?
 
-    }, {
-      key: "componentWillReceiveProps",
-      value: function componentWillReceiveProps(nextProps) {
-        this.setValidations(nextProps.validations, nextProps.required);
+        formsy.attachToForm(this);
       }
     }, {
       key: "shouldComponentUpdate",
-      value: function shouldComponentUpdate(nextProps, nextState) {
-        var _this3 = this;
-
-        // eslint-disable-next-line react/destructuring-assignment
-        var isPropsChanged = Object.keys(this.props).some(function (k) {
-          return _this3.props[k] !== nextProps[k];
-        }); // eslint-disable-next-line react/destructuring-assignment
-
-        var isStateChanged = Object.keys(this.state).some(function (k) {
-          return _this3.state[k] !== nextState[k];
+      value: function shouldComponentUpdate(nextProps, nextState, nextContext) {
+        var props = this.props,
+            state = this.state,
+            formsyContext = this.context.formsy;
+        var isPropsChanged = Object.keys(props).some(function (k) {
+          return props[k] !== nextProps[k];
         });
-        return isPropsChanged || isStateChanged;
+        var isStateChanged = Object.keys(state).some(function (k) {
+          return state[k] !== nextState[k];
+        });
+        var isFormsyContextChanged = Object.keys(formsyContext).some(function (k) {
+          return formsyContext[k] !== nextContext.formsy[k];
+        });
+        return isPropsChanged || isStateChanged || isFormsyContextChanged;
       }
     }, {
       key: "componentDidUpdate",
@@ -1795,15 +1856,17 @@ function Wrapper (WrappedComponent) {
         var formsy = this.context.formsy; // If the value passed has changed, set it. If value is not passed it will
         // internally update, and this will never run
 
-        if (!utils.isSame(value, prevProps.value)) {
+        if (!isSame(value, prevProps.value)) {
           this.setValue(value);
         } // If validations or required is changed, run a new validation
 
 
-        if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
+        if (!isSame(validations, prevProps.validations) || !isSame(required, prevProps.required)) {
+          this.setValidations(validations, required);
           formsy.validate(this);
         }
       } // Detach it when component unmounts
+      // eslint-disable-next-line react/sort-comp
 
     }, {
       key: "componentWillUnmount",
@@ -1843,7 +1906,7 @@ function Wrapper (WrappedComponent) {
     }]);
 
     return _class;
-  }(React.Component), _class.displayName = "Formsy(".concat(getDisplayName(WrappedComponent), ")"), _class.contextTypes = {
+  }(React.Component), _class.displayName = "Formsy(".concat(getDisplayName(WrappedComponent), ")"), _class.propTypes = propTypes$1, _class.contextTypes = {
     formsy: propTypes.object // What about required?
 
   }, _class.defaultProps = {
@@ -1853,7 +1916,7 @@ function Wrapper (WrappedComponent) {
     validationErrors: {},
     validations: null,
     value: WrappedComponent.defaultValue
-  }, _class.propTypes = propTypes$1, _temp;
+  }, _temp;
 }
 
 var Formsy =
@@ -1876,25 +1939,19 @@ function (_React$Component) {
         formsy: {
           attachToForm: _this.attachToForm,
           detachFromForm: _this.detachFromForm,
-          isFormDisabled: _this.isFormDisabled,
-          isValidValue: function isValidValue(component, value) {
-            return _this.runValidation(component, value).isValid;
-          },
+          isFormDisabled: _this.isFormDisabled(),
+          isValidValue: _this.isValidValue,
           validate: _this.validate
         }
       };
     };
 
     _this.componentDidMount = function () {
-      _this.validateForm();
-    };
-
-    _this.componentWillUpdate = function () {
-      // Keep a reference to input names before form updates,
-      // to check if inputs has changed after render
       _this.prevInputNames = _this.inputs.map(function (component) {
         return component.props.name;
       });
+
+      _this.validateForm();
     };
 
     _this.componentDidUpdate = function () {
@@ -1908,17 +1965,20 @@ function (_React$Component) {
         return component.props.name;
       });
 
-      if (_this.prevInputNames && utils.arraysDiffer(_this.prevInputNames, newInputNames)) {
+      if (_this.prevInputNames && !isSame(_this.prevInputNames, newInputNames)) {
+        _this.prevInputNames = newInputNames;
+
         _this.validateForm();
       }
     };
 
     _this.getCurrentValues = function () {
-      return _this.inputs.reduce(function (data, component) {
-        var dataCopy = _typeof(component.state.value) === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
+      return _this.inputs.reduce(function (valueAccumulator, component) {
+        var name = component.props.name,
+            value = component.state.value; // eslint-disable-next-line no-param-reassign
 
-        dataCopy[component.props.name] = component.state.value;
-        return dataCopy;
+        valueAccumulator[name] = cloneIfObject(value);
+        return valueAccumulator;
       }, {});
     };
 
@@ -1929,12 +1989,13 @@ function (_React$Component) {
     };
 
     _this.getPristineValues = function () {
-      return _this.inputs.reduce(function (data, component) {
-        var name = component.props.name;
-        var dataCopy = _typeof(component.state.value) === 'object' ? Object.assign({}, data) : data; // avoid param reassignment
+      return _this.inputs.reduce(function (valueAccumulator, component) {
+        var _component$props = component.props,
+            name = _component$props.name,
+            value = _component$props.value; // eslint-disable-next-line no-param-reassign
 
-        dataCopy[name] = component.props.value;
-        return dataCopy;
+        valueAccumulator[name] = cloneIfObject(value);
+        return valueAccumulator;
       }, {});
     };
 
@@ -1985,6 +2046,10 @@ function (_React$Component) {
       } else {
         onInvalid();
       }
+    };
+
+    _this.isValidValue = function (component, value) {
+      return _this.runValidation(component, value).isValid;
     };
 
     _this.isFormDisabled = function () {
@@ -2049,8 +2114,8 @@ function (_React$Component) {
 
       var currentValues = _this.getCurrentValues();
 
-      var validationResults = utils.runRules(value, currentValues, component.validations, validations);
-      var requiredResults = utils.runRules(value, currentValues, component.requiredValidations, validations);
+      var validationResults = runRules(value, currentValues, component.validations, validations);
+      var requiredResults = runRules(value, currentValues, component.requiredValidations, validations);
       var isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
       var isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
       return {
@@ -2106,7 +2171,7 @@ function (_React$Component) {
     };
 
     _this.isChanged = function () {
-      return !utils.isSame(_this.getPristineValues(), _this.getCurrentValues());
+      return !isSame(_this.getPristineValues(), _this.getCurrentValues());
     };
 
     _this.submit = function (event) {
@@ -2139,8 +2204,12 @@ function (_React$Component) {
     _this.updateInputsWithError = function (errors, invalidate) {
       var preventExternalInvalidation = _this.props.preventExternalInvalidation;
       var isValid = _this.state.isValid;
-      Object.keys(errors).forEach(function (name) {
-        var component = utils.find(_this.inputs, function (input) {
+      Object.entries(errors).forEach(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+            name = _ref2[0],
+            error = _ref2[1];
+
+        var component = _this.inputs.find(function (input) {
           return input.props.name === name;
         });
 
@@ -2150,7 +2219,7 @@ function (_React$Component) {
 
         var args = [{
           isValid: preventExternalInvalidation,
-          externalError: typeof errors[name] === 'string' ? [errors[name]] : errors[name]
+          externalError: isString(error) ? [error] : error
         }];
         component.setState.apply(component, args);
       });
@@ -2158,6 +2227,22 @@ function (_React$Component) {
       if (invalidate && isValid) {
         _this.setFormValidState(false);
       }
+    };
+
+    _this.updateInputsWithValue = function (values, validate) {
+      Object.entries(values).forEach(function (_ref3) {
+        var _ref4 = _slicedToArray(_ref3, 2),
+            name = _ref4[0],
+            value = _ref4[1];
+
+        var input = _this.inputs.find(function (component) {
+          return component.props.name === name;
+        });
+
+        if (input) {
+          input.setValue(value, validate);
+        }
+      });
     };
 
     _this.validate = function (component) {
@@ -2274,35 +2359,6 @@ function (_React$Component) {
 }(React.Component);
 
 Formsy.displayName = 'Formsy';
-Formsy.defaultProps = {
-  disabled: false,
-  getErrorMessage: function getErrorMessage() {},
-  getErrorMessages: function getErrorMessages() {},
-  getValue: function getValue() {},
-  hasValue: function hasValue() {},
-  isFormDisabled: function isFormDisabled() {},
-  isFormSubmitted: function isFormSubmitted() {},
-  isPristine: function isPristine() {},
-  isRequired: function isRequired() {},
-  isValid: function isValid() {},
-  isValidValue: function isValidValue() {},
-  mapping: null,
-  onChange: function onChange() {},
-  onError: function onError() {},
-  onInvalid: function onInvalid() {},
-  onInvalidSubmit: function onInvalidSubmit() {},
-  onReset: function onReset() {},
-  onSubmit: function onSubmit() {},
-  onValid: function onValid() {},
-  onValidSubmit: function onValidSubmit() {},
-  preventExternalInvalidation: false,
-  resetValue: function resetValue() {},
-  setValidations: function setValidations() {},
-  setValue: function setValue() {},
-  showError: function showError() {},
-  showRequired: function showRequired() {},
-  validationErrors: null
-};
 Formsy.propTypes = {
   disabled: propTypes.bool,
   getErrorMessage: propTypes.func,
@@ -2334,6 +2390,35 @@ Formsy.propTypes = {
 };
 Formsy.childContextTypes = {
   formsy: propTypes.object
+};
+Formsy.defaultProps = {
+  disabled: false,
+  getErrorMessage: noop,
+  getErrorMessages: noop,
+  getValue: noop,
+  hasValue: noop,
+  isFormDisabled: noop,
+  isFormSubmitted: noop,
+  isPristine: noop,
+  isRequired: noop,
+  isValid: noop,
+  isValidValue: noop,
+  mapping: null,
+  onChange: noop,
+  onError: noop,
+  onInvalid: noop,
+  onInvalidSubmit: noop,
+  onReset: noop,
+  onSubmit: noop,
+  onValid: noop,
+  onValidSubmit: noop,
+  preventExternalInvalidation: false,
+  resetValue: noop,
+  setValidations: noop,
+  setValue: noop,
+  showError: noop,
+  showRequired: noop,
+  validationErrors: null
 };
 
 var addValidationRule = function addValidationRule(name, func) {

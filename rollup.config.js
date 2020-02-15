@@ -6,16 +6,17 @@ import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 
 import pkg from './package.json';
 
-const name = 'formsy-react',
-  input = 'src/index.ts',
-  extensions = ['.js', '.ts'],
-  babelConfig = {
-    ...babelrc({ addExternalHelpersPlugin: false }),
-    exclude: 'node_modules/**',
-    extensions,
-  },
-  common = { exports: 'named', sourcemap: true },
-  plugins = [peerDepsExternal(), resolve({ extensions }), babel(babelConfig), commonjs()];
+const name = 'formsy-react';
+const input = 'src/index.ts';
+const extensions = ['.js', '.ts'];
+const babelConfig = {
+  ...babelrc({ addExternalHelpersPlugin: false }),
+  exclude: 'node_modules/**',
+  extensions,
+};
+const common = { exports: 'named', sourcemap: true };
+const plugins = [peerDepsExternal(), resolve({ extensions }), babel(babelConfig), commonjs()];
+
 export default [
   // browser-friendly UMD build
   {
@@ -27,7 +28,10 @@ export default [
   // CommonJS (for Node) and ES module (for bundlers) build.
   {
     input,
-    output: [{ file: pkg.main, format: 'cjs', ...common }, { file: pkg.module, format: 'es', ...common }],
+    output: [
+      { file: pkg.main, format: 'cjs', ...common },
+      { file: pkg.module, format: 'es', ...common },
+    ],
     external: ['ms'],
     plugins,
   },
