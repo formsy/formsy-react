@@ -1614,7 +1614,7 @@ var validations = {
     return validations.matchRegexp(values, value, /^[A-Z\s]+$/i);
   },
   isSpecialWords: function isSpecialWords(values, value) {
-    return validations.matchRegexp(values, value, /^[\sA-ZÀ-ÖØ-öø-ÿ]+$/i);
+    return validations.matchRegexp(values, value, /^[A-Z\s\u00C0-\u017F]+$/i);
   },
   isLength: function isLength(_values, value, length) {
     return !_isExisty(value) || isEmpty(value) || value.length === length;
@@ -1639,6 +1639,11 @@ var convertValidationsToObject = function convertValidationsToObject(validations
     return validations.split(/,(?![^{[]*[}\]])/g).reduce(function (validationsAccumulator, validation) {
       var args = validation.split(':');
       var validateMethod = args.shift();
+
+      if (typeof validateMethod !== 'string') {
+        throw new Error('Formsy encountered unexpected problem parsing validation string');
+      }
+
       args = args.map(function (arg) {
         try {
           return JSON.parse(arg);
@@ -1672,7 +1677,7 @@ var propTypes$1 = {
 };
 
 function getDisplayName(component) {
-  return component.displayName || component.name || (isString(component) ? component : 'Component');
+  return component.displayName || component.name || (typeof component === 'string' ? component : 'Component');
 }
 
 function Wrapper (WrappedComponent) {
