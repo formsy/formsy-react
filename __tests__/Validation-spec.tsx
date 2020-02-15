@@ -3,21 +3,25 @@ import sinon from 'sinon';
 import { mount } from 'enzyme';
 
 import Formsy, { withFormsy } from '../src';
-import { InputFactory } from '../__test_utils__/TestInput';
 import immediate from '../__test_utils__/immediate';
+import { InputFactory } from '../__test_utils__/TestInput';
+import { PassDownProps } from '../src/Wrapper';
+import { getFormInstance, getInputInstance } from '../__test_utils__/getInput';
 
-class MyTest extends React.Component {
-  static defaultProps = { type: 'text' };
+class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> {
+  public static defaultProps = { type: 'text' };
 
   handleChange = event => {
-    this.props.setValue(event.target.value);
+    const { setValue } = this.props;
+    setValue(event.target.value);
   };
 
   render() {
-    return <input type={this.props.type} value={this.props.value} onChange={this.handleChange} />;
+    const { type, value } = this.props;
+    return <input type={type} value={value || ''} onChange={this.handleChange} />;
   }
 }
-const FormsyTest = withFormsy(MyTest);
+const FormsyTest = withFormsy<{ type?: string }, string>(MyTest);
 
 describe('Validation', () => {
   it('should reset only changed form element when external error is passed', () => {
@@ -31,34 +35,14 @@ describe('Validation', () => {
     const input = form.find('input').at(0);
     const inputComponents = form.find(FormsyTest);
 
-    form.instance().submit();
-    expect(
-      inputComponents
-        .at(0)
-        .instance()
-        .isValid(),
-    ).toEqual(false);
-    expect(
-      inputComponents
-        .at(1)
-        .instance()
-        .isValid(),
-    ).toEqual(false);
+    getFormInstance(form).submit();
+    expect(getInputInstance(inputComponents.at(0)).isValid()).toEqual(false);
+    expect(getInputInstance(inputComponents.at(1)).isValid()).toEqual(false);
 
     input.simulate('change', { target: { value: 'bar' } });
     immediate(() => {
-      expect(
-        inputComponents
-          .at(0)
-          .instance()
-          .isValid(),
-      ).toEqual(true);
-      expect(
-        inputComponents
-          .at(1)
-          .instance()
-          .isValid(),
-      ).toEqual(false);
+      expect(getInputInstance(inputComponents.at(0)).isValid()).toEqual(true);
+      expect(getInputInstance(inputComponents).isValid()).toEqual(false);
     });
   });
 
@@ -72,13 +56,13 @@ describe('Validation', () => {
     const input = form.find('input');
     const inputComponent = form.find(FormsyTest);
 
-    form.instance().submit();
-    expect(inputComponent.instance().isValid()).toEqual(false);
+    getFormInstance(form).submit();
+    expect(getInputInstance(inputComponent).isValid()).toEqual(false);
 
     input.simulate('change', { target: { value: 'bar' } });
     immediate(() => {
-      expect(inputComponent.getValue()).toEqual('bar');
-      expect(inputComponent.instance().isValid()).toEqual(false);
+      expect(getInputInstance(inputComponent).getValue()).toEqual('bar');
+      expect(getInputInstance(inputComponent).isValid()).toEqual(false);
     });
   });
 
@@ -141,14 +125,12 @@ describe('Validation', () => {
   });
 
   it('should provide invalidate callback on onValidSubmit', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy onValidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
-            <FormsyTest name="foo" value="foo" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy onValidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+          <FormsyTest name="foo" value="foo" />
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
@@ -156,60 +138,94 @@ describe('Validation', () => {
     const formEl = form.find('form');
     const input = form.find(FormsyTest);
     formEl.simulate('submit');
-    expect(input.instance().isValid()).toEqual(false);
+    expect(getInputInstance(input).isValid()).toEqual(false);
   });
 
   it('should provide invalidate callback on onInvalidSubmit', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy onInvalidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
-            <FormsyTest name="foo" value="foo" validations="isEmail" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy onInvalidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+          <FormsyTest name="foo" value="foo" validations="isEmail" />
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
     const formEl = form.find('form');
     const input = form.find(FormsyTest);
     formEl.simulate('submit');
-    expect(input.instance().getErrorMessage()).toEqual('bar');
+    expect(getInputInstance(input).getErrorMessage()).toEqual('bar');
   });
 
   it('should not invalidate inputs on external errors with preventExternalInvalidation prop', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy preventExternalInvalidation onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
-            <FormsyTest name="foo" value="foo" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy preventExternalInvalidation onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+          <FormsyTest name="foo" value="foo" />
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
     const formEl = form.find('form');
     const input = form.find(FormsyTest);
     formEl.simulate('submit');
-    expect(input.instance().isValid()).toEqual(true);
+    expect(getInputInstance(input).isValid()).toEqual(true);
   });
 
   it('should invalidate inputs on external errors without preventExternalInvalidation prop', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
-            <FormsyTest name="foo" value="foo" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+          <FormsyTest name="foo" value="foo" />
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
     const formEl = form.find('form');
     const input = form.find(FormsyTest);
     formEl.simulate('submit');
-    expect(input.instance().isValid()).toEqual(false);
+    expect(getInputInstance(input).isValid()).toEqual(false);
+  });
+
+  it('should throw errors on invalid validation string', () => {
+    const mockConsoleError = jest.spyOn(console, 'error');
+    mockConsoleError.mockImplementation(() => {
+      // do nothing
+    });
+
+    function TestForm() {
+      return (
+        <Formsy onInvalidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+          <FormsyTest name="foo" value="foo" validations="isLength:3:7" />
+        </Formsy>
+      );
+    }
+
+    expect(() => mount(<TestForm />)).toThrow(
+      'Formsy does not support multiple args on string validations. Use object format of validations instead.',
+    );
+
+    mockConsoleError.mockRestore();
+  });
+
+  it('should throw errors on missing input name', () => {
+    const mockConsoleError = jest.spyOn(console, 'error');
+    mockConsoleError.mockImplementation(() => {
+      // do nothing
+    });
+
+    function TestForm() {
+      return (
+        <Formsy onInvalidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+          <FormsyTest name="" value="foo" />
+        </Formsy>
+      );
+    }
+
+    expect(() => mount(<TestForm />)).toThrow('Form Input requires a name property when used');
+
+    mockConsoleError.mockRestore();
   });
 });

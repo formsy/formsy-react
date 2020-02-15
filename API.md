@@ -778,7 +778,7 @@ Returns true if the value is not undefined or null
 <MyInput name="foo" validations="isUndefined" />
 ```
 
-Returns true if the value is the undefined
+Returns true if the value is undefined
 
 **isEmptyString**
 

@@ -256,7 +256,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // eslint-disable-next-line react/destructuring-assignment
   public isFormDisabled = () => this.props.disabled;
 
-  public mapModel = (model: IModel) => {
+  public mapModel = (model: IModel): IModel => {
     const { mapping } = this.props;
 
     if (mapping) {
@@ -282,7 +282,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.resetModel(data);
   };
 
-  public resetInternal = event => {
+  private resetInternal = event => {
     const { onReset } = this.props;
 
     event.preventDefault();
@@ -347,6 +347,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
             .filter((x, pos, arr) => arr.indexOf(x) === pos); // remove duplicates
         }
 
+        // This line is not reachable
+        // istanbul ignore next
         return undefined;
       })(),
     };
@@ -378,7 +380,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public isChanged = () => !utils.isSame(this.getPristineValues(), this.getCurrentValues());
 
   // Update model, submit to url prop and send the model
-  public submit = event => {
+  public submit = (event?: any) => {
     const { onSubmit, onValidSubmit, onInvalidSubmit } = this.props;
     const { isValid } = this.state;
 

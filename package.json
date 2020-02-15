@@ -56,7 +56,7 @@
     "changelog": "auto-changelog",
     "deploy": "np",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md}\"",
-    "lint": "eslint src/**/*",
+    "lint": "eslint .",
     "preversion": "npm run lint",
     "test": "jest",
     "version": "npm run build && git add dist && npm run changelog && git add CHANGELOG.md"

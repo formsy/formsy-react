@@ -25,14 +25,15 @@ describe('Element', () => {
         updateValue = event => {
           this.props.setValue(event.target.value, false);
         };
+
         render() {
-          return <input type="text" value={this.props.value} onChange={this.updateValue} />;
+          return <input type="text" value={this.props.value || ''} onChange={this.updateValue} />;
         }
       },
     );
     const form = mount(
       <Formsy>
-        <Input name="foo" value="foo" innerRef="comp" />
+        <Input name="foo" value="foo" />
       </Formsy>,
     );
     const inputComponent = form.find(Input);
@@ -302,7 +303,7 @@ describe('Element', () => {
     ).toEqual(false);
   });
 
-  it('should not override error messages with error messages passed by form if passed eror messages is an empty object', () => {
+  it('should not override error messages with error messages passed by form if passed error messages is an empty object', () => {
     class TestForm extends React.Component {
       render() {
         return (
@@ -324,6 +325,40 @@ describe('Element', () => {
 
     const inputComponent = form.find(TestInput);
     expect(inputComponent.instance().getErrorMessage()).toEqual('bar3');
+  });
+
+  it('should handle multiple validation error messages passed from validators', () => {
+    function customValidationA() {
+      return 'error message one';
+    }
+
+    function customValidationB() {
+      return 'error message two';
+    }
+
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput
+            name="A"
+            validations={{
+              customValidationA,
+              customValidationB,
+            }}
+            value="foo"
+          />
+        </Formsy>
+      );
+    }
+
+    const form = mount(<TestForm />);
+    const inputComponent = form.find(TestInput);
+
+    const formEl = form.find('form');
+    formEl.simulate('submit');
+
+    expect(inputComponent.instance().getErrorMessage()).toEqual('error message one');
+    expect(inputComponent.instance().getErrorMessages()).toEqual(['error message one', 'error message two']);
   });
 
   it('should override all error messages with error messages passed by form', () => {
@@ -511,6 +546,7 @@ describe('Element', () => {
     }
     const form = mount(<TestForm />);
 
+    // TODO: Beef up this smoke test
     expect(true).toBe(true);
 
     const formEl = form.find('form');
@@ -533,6 +569,7 @@ describe('Element', () => {
     }
     const form = mount(<TestForm />);
 
+    // TODO: Beef up this smoke test
     expect(true).toBe(true);
 
     const formEl = form.find('form');
@@ -587,25 +624,6 @@ describe('Element', () => {
     input.simulate('change', { target: { value: 'fooz' } });
     expect(input.instance().value).toEqual('fooz');
     expect(renderSpy.calledTwice).toEqual(true);
-  });
-
-  it('binds all necessary methods', () => {
-    const onInputRef = input => {
-      ['isValidValue', 'resetValue', 'setValidations', 'setValue'].forEach(fnName => {
-        const fn = input[fnName];
-        try {
-          fn();
-        } catch (e) {
-          throw new Error(`Method '${fnName}' isn't bound.`);
-        }
-      });
-    };
-
-    mount(
-      <Formsy>
-        <TestInput ref={onInputRef} name="name" value="foo" />
-      </Formsy>,
-    );
   });
 
   it('unregisters on unmount', () => {

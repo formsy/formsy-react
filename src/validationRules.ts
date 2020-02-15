@@ -1,10 +1,10 @@
 import { ValidationFunction, Values } from './interfaces';
 import {
+  isNumber,
   isString,
-  isValueStringEmpty,
   isTypeUndefined,
   isValueNullOrUndefined,
-  isNumber,
+  isValueStringEmpty,
   isValueUndefined,
 } from './utils';
 
@@ -81,7 +81,7 @@ const validations: Validations<any> = {
     return validations.matchRegexp(values, value, /^[A-Z\s]+$/i);
   },
   isSpecialWords<V>(values: Values, value: V) {
-    return validations.matchRegexp(values, value, /^[A-Z\s\u00C0-\u017F]+$/i);
+    return validations.matchRegexp(values, value, /^[\sA-ZÀ-ÖØ-öø-ÿ]+$/i);
   },
   isLength(_values: Values, value: string, length: number) {
     return !isExisty(value) || isEmpty(value) || value.length === length;

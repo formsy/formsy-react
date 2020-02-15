@@ -2,20 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import * as utils from './utils';
-import { RequiredValidation, Validations, WrappedComponentClass } from './interfaces';
 import FormsyContext from './FormsyContext';
+import { ComponentWithStaticAttributes, RequiredValidation, Validations, WrappedComponentClass } from './interfaces';
 
 /* eslint-disable react/default-props-match-prop-types */
 
 const convertValidationsToObject = <V>(validations: false | Validations<V>): Validations<V> => {
   if (typeof validations === 'string') {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
-      let args = validation.split(':');
-      const validateMethod = args.shift();
-
-      if (typeof validateMethod !== 'string') {
-        throw new Error('Formsy encountered unexpected problem parsing validation string');
-      }
+      let args: string[] = validation.split(':');
+      const validateMethod: string = args.shift();
 
       args = args.map(arg => {
         try {
@@ -82,11 +78,17 @@ export interface InjectedProps<V> {
   isValid: boolean;
   isValidValue: (value: V) => boolean;
   ref?: any;
-  resetValue: any;
-  setValidations: any;
+  resetValue: () => void;
+  setValidations: (validations: Validations<V>, required: RequiredValidation<V>) => void;
   setValue: (value: V) => void;
   showError: boolean;
   showRequired: boolean;
+}
+
+export interface WrapperInstanceMethods {
+  isValid: () => boolean;
+  getValue: () => any;
+  getErrorMessage: () => any;
 }
 
 export type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
@@ -94,17 +96,13 @@ export type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
 export { propTypes };
 
 function getDisplayName(component: WrappedComponentClass) {
-  return (
-    (component as { displayName?: string }).displayName ||
-    component.name ||
-    (typeof component === 'string' ? component : 'Component')
-  );
+  return component.displayName || component.name || (utils.isString(component) ? component : 'Component');
 }
 
 export default function<T, V>(
   WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
 ): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
-  return class extends React.Component<T & WrapperProps<V>, WrapperState<V>> {
+  return class extends React.Component<T & WrapperProps<V>, WrapperState<V>> implements WrapperInstanceMethods {
     // eslint-disable-next-line react/sort-comp
     public static contextType = FormsyContext;
 
@@ -124,7 +122,7 @@ export default function<T, V>(
       validationError: '',
       validationErrors: {},
       validations: null,
-      value: (WrappedComponent as any).defaultValue,
+      value: (WrappedComponent as ComponentWithStaticAttributes).defaultValue,
     };
 
     public constructor(props) {
@@ -205,9 +203,9 @@ export default function<T, V>(
     };
 
     // eslint-disable-next-line react/destructuring-assignment
-    public getValue = () => this.state.value;
+    public getValue = (): V => this.state.value;
 
-    public setValidations = (validations: Validations<V>, required: RequiredValidation<V>) => {
+    public setValidations = (validations: Validations<V>, required: RequiredValidation<V>): void => {
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations =
@@ -216,8 +214,9 @@ export default function<T, V>(
 
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
-    public setValue = (value: any, validate = true) => {
+    public setValue = (value: V, validate = true): void => {
       const { validate: validateForm } = this.context;
+
       if (!validate) {
         this.setState({
           value,
@@ -245,22 +244,22 @@ export default function<T, V>(
     };
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isFormDisabled = () => this.context.isFormDisabled;
+    public isFormDisabled = (): boolean => this.context.isFormDisabled;
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isFormSubmitted = () => this.state.formSubmitted;
+    public isFormSubmitted = (): boolean => this.state.formSubmitted;
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isPristine = () => this.state.isPristine;
+    public isPristine = (): boolean => this.state.isPristine;
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isRequired = () => !!this.props.required;
+    public isRequired = (): boolean => !!this.props.required;
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isValid = () => this.state.isValid;
+    public isValid = (): boolean => this.state.isValid;
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isValidValue = value => this.context.isValidValue(this, value);
+    public isValidValue = (value: V) => this.context.isValidValue(this, value);
 
     public resetValue = () => {
       const { pristineValue } = this.state;
@@ -277,14 +276,14 @@ export default function<T, V>(
       );
     };
 
-    public showError = () => !this.showRequired() && !this.isValid();
+    public showError = (): boolean => !this.showRequired() && !this.isValid();
 
     // eslint-disable-next-line react/destructuring-assignment
-    public showRequired = () => this.state.isRequired;
+    public showRequired = (): boolean => this.state.isRequired;
 
     public render() {
       const { innerRef } = this.props;
-      const propsForElement: PassDownProps<V> = {
+      const propsForElement: T & PassDownProps<V> = {
         ...this.props,
         errorMessage: this.getErrorMessage(),
         errorMessages: this.getErrorMessages(),
@@ -307,7 +306,7 @@ export default function<T, V>(
         propsForElement.ref = innerRef;
       }
 
-      return React.createElement(WrappedComponent, propsForElement as any);
+      return React.createElement(WrappedComponent, propsForElement);
     }
   };
 }
