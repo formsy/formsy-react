@@ -39,11 +39,16 @@ export interface InjectedProps<V> {
     isValid: boolean;
     isValidValue: (value: V) => boolean;
     ref?: any;
-    resetValue: any;
-    setValidations: any;
+    resetValue: () => void;
+    setValidations: (validations: Validations<V>, required: RequiredValidation<V>) => void;
     setValue: (value: V) => void;
     showError: boolean;
     showRequired: boolean;
+}
+export interface WrapperInstanceMethods {
+    isValid: () => boolean;
+    getValue: () => any;
+    getErrorMessage: () => any;
 }
 export declare type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
 export { propTypes };

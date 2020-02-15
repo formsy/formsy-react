@@ -1,3 +1,5 @@
+import isPlainObject from 'lodash.isplainobject';
+
 import { Validations, Values } from './interfaces';
 
 export function isArray(value: unknown): value is unknown[] {
@@ -5,7 +7,7 @@ export function isArray(value: unknown): value is unknown[] {
 }
 
 export function isObject(value: unknown): value is object {
-  return Object.prototype.toString.call(value) === '[object Object]';
+  return isPlainObject(value);
 }
 
 export function isTypeUndefined(value: unknown): value is undefined {

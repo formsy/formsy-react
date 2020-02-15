@@ -10,7 +10,7 @@ export declare function isValueStringEmpty(value: string): boolean;
 export declare function isValueNullOrUndefined(value: unknown): boolean;
 export declare function isValueUndefined(value: unknown): boolean;
 export declare function noop(): void;
-export declare function cloneIfObject(value: unknown): unknown;
+export declare function protectAgainstParamReassignment(value: unknown): unknown;
 export declare function isSame(a: unknown, b: unknown): any;
 export declare function runRules<V>(value: V, currentValues: Values, validations: Validations<V>, validationRules: Validations<V>): {
     errors: string[];
