@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import * as utils from './utils';
 import { RequiredValidation, Validations, WrappedComponentClass } from './interfaces';
+import FormsyContext from './FormsyContext';
 
 /* eslint-disable react/default-props-match-prop-types */
 
@@ -104,17 +105,18 @@ export default function<T, V>(
   WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
 ): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
   return class extends React.Component<T & WrapperProps<V>, WrapperState<V>> {
+    // eslint-disable-next-line react/sort-comp
+    public static contextType = FormsyContext;
+
     public validations?: Validations<V>;
 
     public requiredValidations?: Validations<V>;
 
+    public context: React.ContextType<typeof FormsyContext>;
+
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
     public static propTypes: any = propTypes;
-
-    public static contextTypes = {
-      formsy: PropTypes.object, // What about required?
-    };
 
     public static defaultProps: any = {
       innerRef: null,
@@ -141,7 +143,7 @@ export default function<T, V>(
 
     public componentDidMount() {
       const { validations, required, name } = this.props;
-      const { formsy } = this.context;
+      const { attachToForm } = this.context;
 
       if (!name) {
         throw new Error('Form Input requires a name property when used');
@@ -150,27 +152,23 @@ export default function<T, V>(
       this.setValidations(validations, required);
 
       // Pass a function instead?
-      formsy.attachToForm(this);
+      attachToForm(this);
     }
 
     public shouldComponentUpdate(nextProps, nextState, nextContext) {
-      const {
-        props,
-        state,
-        context: { formsy: formsyContext },
-      } = this;
+      const { props, state, context } = this;
       const isPropsChanged = Object.keys(props).some(k => props[k] !== nextProps[k]);
 
       const isStateChanged = Object.keys(state).some(k => state[k] !== nextState[k]);
 
-      const isFormsyContextChanged = Object.keys(formsyContext).some(k => formsyContext[k] !== nextContext.formsy[k]);
+      const isFormsyContextChanged = Object.keys(context).some(k => context[k] !== nextContext[k]);
 
       return isPropsChanged || isStateChanged || isFormsyContextChanged;
     }
 
     public componentDidUpdate(prevProps) {
       const { value, validations, required } = this.props;
-      const { formsy } = this.context;
+      const { validate } = this.context;
 
       // If the value passed has changed, set it. If value is not passed it will
       // internally update, and this will never run
@@ -181,15 +179,15 @@ export default function<T, V>(
       // If validations or required is changed, run a new validation
       if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevProps.required)) {
         this.setValidations(validations, required);
-        formsy.validate(this);
+        validate(this);
       }
     }
 
     // Detach it when component unmounts
     // eslint-disable-next-line react/sort-comp
     public componentWillUnmount() {
-      const { formsy } = this.context;
-      formsy.detachFromForm(this);
+      const { detachFromForm } = this.context;
+      detachFromForm(this);
     }
 
     public getErrorMessage = () => {
@@ -218,9 +216,8 @@ export default function<T, V>(
 
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
-    public setValue = (value, validate = true) => {
-      const { formsy } = this.context;
-
+    public setValue = (value: any, validate = true) => {
+      const { validate: validateForm } = this.context;
       if (!validate) {
         this.setState({
           value,
@@ -232,7 +229,7 @@ export default function<T, V>(
             isPristine: false,
           },
           () => {
-            formsy.validate(this);
+            validateForm(this);
           },
         );
       }
@@ -248,7 +245,7 @@ export default function<T, V>(
     };
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isFormDisabled = () => this.context.formsy.isFormDisabled;
+    public isFormDisabled = () => this.context.isFormDisabled;
 
     // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = () => this.state.formSubmitted;
@@ -263,11 +260,11 @@ export default function<T, V>(
     public isValid = () => this.state.isValid;
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isValidValue = value => this.context.formsy.isValidValue.call(null, this, value);
+    public isValidValue = value => this.context.isValidValue(this, value);
 
     public resetValue = () => {
       const { pristineValue } = this.state;
-      const { formsy } = this.context;
+      const { validate } = this.context;
 
       this.setState(
         {
@@ -275,7 +272,7 @@ export default function<T, V>(
           isPristine: true,
         },
         () => {
-          formsy.validate(this);
+          validate(this);
         },
       );
     };
