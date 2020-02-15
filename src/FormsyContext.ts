@@ -4,6 +4,7 @@ import { FormsyContextInterface } from './interfaces';
 const noFormsyErrorMessage = 'Could not find Formsy Context Provider. Did you use withFormsy outside <Formsy />?';
 
 const throwNoFormsyProvider = () => {
+  // istanbul ignore next
   throw new Error(noFormsyErrorMessage);
 };
 
