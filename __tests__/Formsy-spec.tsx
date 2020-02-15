@@ -469,7 +469,7 @@ describe('Update a form', () => {
     }
     const form = mount(<TestForm />);
     const FoundForm = form.find(TestForm);
-    const submitEvent = {preventDefault: sinon.spy()};
+    const submitEvent = {preventDefault: jest.fn()};
     FoundForm.simulate('submit', submitEvent);
     expect(submitEvent.preventDefault.called).toEqual(true);
   });
@@ -486,7 +486,7 @@ describe('Update a form', () => {
     }
     const form = mount(<TestForm />);
     const FoundForm = form.find(TestForm);
-    const submitEvent = {preventDefault: sinon.spy()};
+    const submitEvent = {preventDefault: jest.fn()};
     FoundForm.simulate('submit', submitEvent);
     expect(submitEvent.preventDefault.called).toEqual(false);
   });
