@@ -46,11 +46,11 @@ const propTypes = {
 };
 
 export interface WrapperProps<V> {
-  innerRef?: (ref: any) => void;
+  innerRef?: (ref: React.Ref<any>) => void;
   name: string;
   required?: RequiredValidation<V>;
-  validationError?: any;
-  validationErrors?: any;
+  validationError?: string;
+  validationErrors?: { [key: string]: string };
   validations?: Validations<V>;
   value?: V;
 }
@@ -62,14 +62,14 @@ export interface WrapperState<V> {
   isPristine: boolean;
   isRequired: boolean;
   isValid: boolean;
-  pristineValue: any;
-  validationError: any[];
+  pristineValue: V;
+  validationError: string[];
   value: V;
 }
 
 export interface InjectedProps<V> {
-  errorMessage: any;
-  errorMessages: any;
+  errorMessage: string;
+  errorMessages: string[];
   hasValue: boolean;
   isFormDisabled: boolean;
   isFormSubmitted: boolean;
@@ -77,7 +77,7 @@ export interface InjectedProps<V> {
   isRequired: boolean;
   isValid: boolean;
   isValidValue: (value: V) => boolean;
-  ref?: any;
+  ref?: React.Ref<any>;
   resetValue: () => void;
   setValidations: (validations: Validations<V>, required: RequiredValidation<V>) => void;
   setValue: (value: V) => void;
@@ -88,7 +88,7 @@ export interface InjectedProps<V> {
 export interface WrapperInstanceMethods {
   isValid: () => boolean;
   getValue: () => any;
-  getErrorMessage: () => any;
+  getErrorMessage: () => null | string;
 }
 
 export type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;

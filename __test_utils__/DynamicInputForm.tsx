@@ -7,10 +7,13 @@ interface DynamicInputFormProps {
   inputName?: string;
 }
 
-class DynamicInputForm extends React.Component<DynamicInputFormProps> {
-  public state = {
-    input: null,
-  };
+class DynamicInputForm extends React.Component<DynamicInputFormProps, { input: typeof TestInput }> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      input: null,
+    };
+  }
 
   private addInput = () => {
     const { inputName } = this.props;
@@ -20,13 +23,18 @@ class DynamicInputForm extends React.Component<DynamicInputFormProps> {
   };
 
   public render() {
+    const { onSubmit, children } = this.props;
+    const { input } = this.state;
+
     return (
       <>
-        <Formsy onSubmit={this.props.onSubmit}>
-          {this.state.input}
-          {this.props.children}
+        <Formsy onSubmit={onSubmit}>
+          {input}
+          {children}
         </Formsy>
-        <button type="button" onClick={this.addInput} />
+        <button type="button" onClick={this.addInput}>
+          Add input
+        </button>
       </>
     );
   }

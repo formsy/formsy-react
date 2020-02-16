@@ -1,14 +1,16 @@
 # API
 
 - [Formsy](#formsy)
+  - [disabled](#disabled)
   - [getModel()](#getModel)
   - [mapping](#mapping)
-  - [onChange()](#onChange)
-  - [onInvalid()](#onInvalid)
-  - [onInvalidSubmit()](#onInvalidsubmit)
-  - [onSubmit()](#onSubmit)
-  - [onValid()](#onValid)
-  - [onValidSubmit()](#onValidsubmit)
+  - [onChange](#onChange)
+  - [onInvalid](#onInvalid)
+  - [onInvalidSubmit](#onInvalidsubmit)
+  - [onReset](#onReset)
+  - [onSubmit](#onSubmit)
+  - [onValid](#onValid)
+  - [onValidSubmit](#onValidsubmit)
   - [preventDefaultSubmit](#preventDefaultSubmit)
   - [preventExternalInvalidation](#preventExternalInvalidation)
   - [reset()](#reset)
@@ -44,6 +46,23 @@
 ### <a id="formsy">Formsy</a>
 
 `import Formsy from 'formsy-react';`
+
+#### <a id="disabled">disabled</a>
+
+```jsx
+class MyForm extends React.Component {
+  render() {
+    return (
+      <Formsy disabled>
+        <MyInput name="foo" value="" />
+        <MyInput name="bar" value="" />
+      </Formsy>
+    );
+  }
+}
+```
+
+Disable the form itself with a prop and use [isFormDisabled](#isFormDisabled).
 
 #### <a id="mapping">mapping</a>
 
@@ -102,6 +121,14 @@ class Form extends React.Component {
 }
 ```
 
+#### <a id="onReset">onReset</a>
+
+```jsx
+<Formsy onReset={this.handleOnReset}></Formsy>
+```
+
+Takes a function to run when the reset button has been clicked.
+
 #### <a id="onSubmit">onSubmit(data, resetForm, invalidateForm)</a>
 
 ```jsx
@@ -115,7 +142,7 @@ the form by taking an object that maps to inputs. This is useful for server side
 `{email: "This email is taken"}`. Resetting or invalidating the form will cause **setState** to run on the form element
 component.
 
-#### <a id="onValid">onValid()</a>
+#### <a id="onValid">onValid</a>
 
 ```jsx
 <Formsy onValid={this.enableSubmitButton}></Formsy>
