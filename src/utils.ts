@@ -1,3 +1,5 @@
+import isPlainObject from 'lodash.isplainobject';
+
 import { Validations, Values } from './interfaces';
 
 export function isArray(value: unknown): value is unknown[] {
@@ -5,7 +7,7 @@ export function isArray(value: unknown): value is unknown[] {
 }
 
 export function isObject(value: unknown): value is object {
-  return value !== null && typeof value === 'object';
+  return isPlainObject(value);
 }
 
 export function isTypeUndefined(value: unknown): value is undefined {
@@ -44,9 +46,11 @@ export function noop() {
   // do nothing.
 }
 
-export function cloneIfObject(value: unknown) {
+export function protectAgainstParamReassignment(value: unknown) {
   // Clone objects to avoid accidental param reassignment
-  return isObject(value) ? { ...value } : value;
+  if (isObject(value)) return { ...value };
+  if (isArray(value)) return [...value];
+  return value;
 }
 
 export function isSame(a: unknown, b: unknown) {

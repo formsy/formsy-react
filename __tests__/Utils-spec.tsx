@@ -1,32 +1,43 @@
 import * as utils from '../src/utils';
 
-const VALUES = [
-  undefined,
-  null,
-  '',
-  0,
-  100,
-  'Hello',
-  'Goodbye',
-  { foo: 'bar' },
-  { foo: 'lounge' },
-  [{ foo: ['bar'] }],
-  [{ foo: [] }],
-  ['a', 7],
-  ['a', 8],
-  ['a', 7, 7],
-  new Date(1000),
-  new Date(2000),
-  () => 2 + 2,
-  () => 2 + 3,
-  utils.noop,
-];
-
 function getReadable(value, index) {
   return `${typeof value} at ${index}`;
 }
 
+const TYPES = {
+  isArray: [[], [{ foo: ['bar'] }], [{ foo: [] }], ['a', 7], ['a', 8], ['a', 7, 7]],
+  isDate: [new Date(1000), new Date(2000)],
+  isFunction: [() => 2 + 2, () => 2 + 3, utils.noop],
+  isNumber: [0, 100, 0.4],
+  isObject: [{}, { foo: 'bar' }, { foo: 'lounge' }],
+  isString: ['', 'Hello', 'Goodbye'],
+  isTypeUndefined: [undefined],
+};
+
+const VALUES = [
+  null,
+  ...TYPES.isArray,
+  ...TYPES.isDate,
+  ...TYPES.isFunction,
+  ...TYPES.isNumber,
+  ...TYPES.isObject,
+  ...TYPES.isString,
+  ...TYPES.isTypeUndefined,
+];
+
 describe('Utils', () => {
+  // For each function in types
+  Object.keys(TYPES).forEach(isFn => {
+    // Create a test for that functiojn
+    it(isFn, () => {
+      // For each value in values
+      VALUES.forEach(value => {
+        // Make sure that if it is in that types TYPES array, it returns true
+        expect(utils[isFn](value)).toBe(TYPES[isFn].includes(value));
+      });
+    });
+  });
+
   // For every value in values, run isSame(a, b) with every other value in the array.
   // Expect isSame to return true only if you are at the same point in the array.
   VALUES.forEach((a, idxa) => {

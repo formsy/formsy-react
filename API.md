@@ -237,11 +237,7 @@ optionally validate the inputs by passing `true` as the second argument.
 ```jsx
 class MyForm extends React.Component {
   render() {
-    return (
-      <Formsy preventDefaultSubmit>
-        ...
-      </Formsy>
-    );
+    return <Formsy preventDefaultSubmit>...</Formsy>;
   }
 }
 ```

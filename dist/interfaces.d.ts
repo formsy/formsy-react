@@ -16,11 +16,17 @@ export interface ValidationsStructure<V> {
 }
 export declare type RequiredValidation<V> = boolean | Validations<V>;
 export interface ComponentWithStaticAttributes extends ComponentClass {
-    string?: any;
     defaultValue?: any;
 }
 export declare type WrappedComponentClass = React.FC | ComponentWithStaticAttributes;
 export interface InputComponent<V> extends React.Component<WrapperProps<V>, WrapperState<V>> {
     validations?: Validations<V>;
     requiredValidations?: Validations<V>;
+}
+export interface FormsyContextInterface {
+    attachToForm: (component: InputComponent<any>) => void;
+    detachFromForm: (component: InputComponent<any>) => void;
+    isFormDisabled: boolean;
+    isValidValue: (component: InputComponent<any>, value: any) => boolean;
+    validate: (component: InputComponent<any>) => void;
 }

@@ -469,7 +469,7 @@ describe('Update a form', () => {
     }
     const form = mount(<TestForm />);
     const FoundForm = form.find(TestForm);
-    const submitEvent = {preventDefault: jest.fn()};
+    const submitEvent = { preventDefault: jest.fn() };
     FoundForm.simulate('submit', submitEvent);
     expect(submitEvent.preventDefault).toHaveBeenCalled();
   });
@@ -486,11 +486,10 @@ describe('Update a form', () => {
     }
     const form = mount(<TestForm />);
     const FoundForm = form.find(TestForm);
-    const submitEvent = {preventDefault: jest.fn()};
+    const submitEvent = { preventDefault: jest.fn() };
     FoundForm.simulate('submit', submitEvent);
     expect(submitEvent.preventDefault).not.toHaveBeenCalled();
   });
-
 
   it('should trigger an onValidSubmit when submitting a valid form', () => {
     const isCalled = jest.fn();
