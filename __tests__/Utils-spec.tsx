@@ -65,8 +65,7 @@ describe('Utils', () => {
       success: [],
     });
 
-    // TODO: This fails but should pass
-    // expect(utils.runRules('', {}, { rule: () => true }, {})).toEqual({ errors: [], failed: [], success: ['rule'] });
+    expect(utils.runRules('', {}, { rule: () => true }, {})).toEqual({ errors: [], failed: [], success: ['rule'] });
 
     expect(utils.runRules('', {}, { rule: () => false }, {})).toEqual({ errors: [], failed: ['rule'], success: [] });
     expect(utils.runRules('', {}, { rule: true }, { rule: () => false })).toEqual({
@@ -99,13 +98,6 @@ describe('Utils', () => {
       errors: ['Error'],
       failed: ['rule'],
       success: [],
-    });
-
-    // TODO: What does this even mean?
-    expect(utils.runRules('', {}, { rule: true }, { rule: true })).toEqual({
-      errors: [],
-      failed: [],
-      success: ['rule'],
     });
   });
 });

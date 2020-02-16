@@ -29,7 +29,7 @@ issues.
 1.  Build any kind of form element components. Not just traditional inputs, but anything you want, and get that
     validation for free
 2.  Add validation rules and use them with simple syntax
-3.  Use handlers for different states of your form. (`onError`, `onSubmit`, `onValid`, etc.)
+3.  Use handlers for different states of your form. (`onSubmit`, `onValid`, etc.)
 4.  Pass external errors to the form to invalidate elements (E.g. a response from a server)
 5.  Dynamically add form elements to your form and they will register/unregister to the form
 

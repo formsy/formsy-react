@@ -8,7 +8,6 @@ import Wrapper, { propTypes } from './Wrapper';
 import FormsyContext from './FormsyContext';
 
 import {
-  IData,
   IModel,
   InputComponent,
   IResetModel,
@@ -23,32 +22,16 @@ type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>,
 /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
 export interface FormsyProps extends FormHTMLAttributesCleaned {
   disabled: boolean;
-  getErrorMessage: any;
-  getErrorMessages: any;
-  getValue: any;
-  hasValue: any;
-  isFormDisabled: any;
-  isFormSubmitted: any;
-  isPristine: any;
-  isRequired: any;
-  isValid: any;
-  isValidValue: any;
   mapping: null | ((model: IModel) => IModel);
   onChange: (model: IModel, isChanged: boolean) => void;
-  onError: any;
   onInvalid: () => void;
-  onInvalidSubmit: any;
+  onInvalidSubmit: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
   onReset?: () => void;
   onSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
   onValid: () => void;
   onValidSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
-  preventExternalInvalidation?: boolean;
   preventDefaultSubmit?: boolean;
-  resetValue: any;
-  setValidations: any;
-  setValue: any;
-  showError: any;
-  showRequired: any;
+  preventExternalInvalidation?: boolean;
   validationErrors?: null | object;
 }
 
@@ -72,16 +55,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public static propTypes = {
     disabled: PropTypes.bool,
-    getErrorMessage: PropTypes.func,
-    getErrorMessages: PropTypes.func,
-    getValue: PropTypes.func,
-    hasValue: PropTypes.func,
-    isFormDisabled: PropTypes.func,
-    isFormSubmitted: PropTypes.func,
-    isPristine: PropTypes.func,
-    isRequired: PropTypes.func,
-    isValid: PropTypes.func,
-    isValidValue: PropTypes.func,
     mapping: PropTypes.func,
     onChange: PropTypes.func,
     onInvalid: PropTypes.func,
@@ -90,45 +63,24 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     onSubmit: PropTypes.func,
     onValid: PropTypes.func,
     onValidSubmit: PropTypes.func,
-    preventExternalInvalidation: PropTypes.bool,
     preventDefaultSubmit: PropTypes.bool,
-    resetValue: PropTypes.func,
-    setValidations: PropTypes.func,
-    setValue: PropTypes.func,
-    showError: PropTypes.func,
-    showRequired: PropTypes.func,
+    preventExternalInvalidation: PropTypes.bool,
     validationErrors: PropTypes.object, // eslint-disable-line
   };
 
   public static defaultProps: Partial<FormsyProps> = {
     disabled: false,
-    getErrorMessage: utils.noop,
-    getErrorMessages: utils.noop,
-    getValue: utils.noop,
-    hasValue: utils.noop,
-    isFormDisabled: utils.noop,
-    isFormSubmitted: utils.noop,
-    isPristine: utils.noop,
-    isRequired: utils.noop,
-    isValid: utils.noop,
-    isValidValue: utils.noop,
     mapping: null,
     onChange: utils.noop,
-    onError: utils.noop,
     onInvalid: utils.noop,
     onInvalidSubmit: utils.noop,
     onReset: utils.noop,
     onSubmit: utils.noop,
     onValid: utils.noop,
     onValidSubmit: utils.noop,
-    preventExternalInvalidation: false,
     preventDefaultSubmit: true,
-    resetValue: utils.noop,
-    setValidations: utils.noop,
-    setValue: utils.noop,
-    showError: utils.noop,
-    showRequired: utils.noop,
-    validationErrors: null,
+    preventExternalInvalidation: false,
+    validationErrors: {},
   };
 
   public constructor(props: FormsyProps) {
@@ -280,9 +232,9 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     );
   };
 
-  public reset = (data?: IData) => {
+  public reset = (model?: IModel) => {
     this.setFormPristine(true);
-    this.resetModel(data);
+    this.resetModel(model);
   };
 
   private resetInternal = event => {
@@ -517,16 +469,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public render = () => {
     const {
       /* eslint-disable @typescript-eslint/no-unused-vars */
-      getErrorMessage,
-      getErrorMessages,
-      getValue,
-      hasValue,
-      isFormDisabled,
-      isFormSubmitted,
-      isPristine,
-      isRequired,
-      isValid,
-      isValidValue,
       mapping,
       onChange,
       onInvalid,
@@ -537,11 +479,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onValidSubmit,
       preventExternalInvalidation,
       preventDefaultSubmit,
-      resetValue,
-      setValidations,
-      setValue,
-      showError,
-      showRequired,
       validationErrors,
       children,
       /* eslint-enable @typescript-eslint/no-unused-vars */

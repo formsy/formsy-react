@@ -6,10 +6,9 @@ export interface Values {
 }
 
 export type IModel = any;
-export type IData = any;
 export type IResetModel = (model?: IModel) => void;
-export type IUpdateInputsWithValue<V> = (values: any, validate?: boolean) => void;
-export type IUpdateInputsWithError = (errors: any, invalidate?: boolean) => void;
+export type IUpdateInputsWithValue<V> = (values: { [key: string]: V }, validate?: boolean) => void;
+export type IUpdateInputsWithError = (errors: { [key: string]: string }, invalidate?: boolean) => void;
 
 export type ValidationFunction<V> = (values: Values, value: V, extra?: any) => boolean | string;
 

@@ -85,65 +85,52 @@ export function isSame(a: unknown, b: unknown) {
   return a === b;
 }
 
+interface RulesResult {
+  errors: string[];
+  failed: string[];
+  success: string[];
+}
+
 export function runRules<V>(
   value: V,
   currentValues: Values,
   validations: Validations<V>,
   validationRules: Validations<V>,
 ) {
-  const results: {
-    errors: string[];
-    failed: string[];
-    success: string[];
-  } = {
+  const results: RulesResult = {
     errors: [],
     failed: [],
     success: [],
   };
 
-  if (Object.keys(validations).length) {
-    Object.keys(validations).forEach(validationMethod => {
-      const validationsVal = validations[validationMethod];
-      const validationRulesVal = validationRules[validationMethod];
-
-      if (validationRulesVal && isFunction(validationsVal)) {
-        throw new Error(`Formsy does not allow you to override default validations: ${validationMethod}`);
+  Object.keys(validations).forEach(validationName => {
+    const validationsVal = validations[validationName];
+    const validationRulesVal = validationRules[validationName];
+    const addToResults = validation => {
+      if (isString(validation)) {
+        results.errors.push(validation);
+        results.failed.push(validationName);
+      } else if (!validation) {
+        results.failed.push(validationName);
+      } else {
+        results.success.push(validationName);
       }
+    };
 
-      if (!validationRulesVal && !isFunction(validationsVal)) {
-        throw new Error(`Formsy does not have the validation rule: ${validationMethod}`);
-      }
+    if (validationRulesVal && isFunction(validationsVal)) {
+      throw new Error(`Formsy does not allow you to override default validations: ${validationName}`);
+    }
 
-      if (isFunction(validationsVal)) {
-        const validation = validationsVal(currentValues, value);
+    if (!validationRulesVal && !isFunction(validationsVal)) {
+      throw new Error(`Formsy does not have the validation rule: ${validationName}`);
+    }
 
-        if (isString(validation)) {
-          results.errors.push(validation);
-          results.failed.push(validationMethod);
-        } else if (!validation) {
-          results.failed.push(validationMethod);
-        }
+    if (isFunction(validationsVal)) {
+      return addToResults(validationsVal(currentValues, value));
+    }
 
-        return;
-      }
-
-      if (!isFunction(validationsVal) && isFunction(validationRulesVal)) {
-        const validation = validationRulesVal(currentValues, value, validationsVal);
-
-        if (isString(validation)) {
-          results.errors.push(validation);
-          results.failed.push(validationMethod);
-        } else if (!validation) {
-          results.failed.push(validationMethod);
-        } else {
-          results.success.push(validationMethod);
-        }
-        return;
-      }
-
-      results.success.push(validationMethod);
-    });
-  }
+    return addToResults(validationRulesVal(currentValues, value, validationsVal));
+  });
 
   return results;
 }
