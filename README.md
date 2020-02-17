@@ -7,7 +7,7 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/contributors)
 ![Typescript Types included](https://badgen.net/npm/types/tslib)
 
-A form input builder and validator for React.attachToFormattachToFormattachToFormattachToForm
+A form input builder and validator for React.
 
 | [Quick Start](#quick-start) | [API](/API.md) | [1.x API](https://github.com/formsy/formsy-react/blob/v1.x/API.md) |
 | --------------------------- | -------------- | ------------------------------------------------------------------ |
