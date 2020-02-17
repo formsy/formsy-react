@@ -1,4 +1,4 @@
-/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file, react/destructuring-assignment */
 import { mount } from 'enzyme';
 import * as React from 'react';
 import DynamicInputForm from '../__test_utils__/DynamicInputForm';
@@ -6,6 +6,7 @@ import TestInput from '../__test_utils__/TestInput';
 import TestInputHoc from '../__test_utils__/TestInputHoc';
 
 import Formsy, { addValidationRule } from '../src';
+import { getFormInstance, getInputInstance } from '../__test_utils__/getInput';
 
 describe('Setting up a form', () => {
   it('should expose the users DOM node through an innerRef prop', () => {
@@ -27,7 +28,7 @@ describe('Setting up a form', () => {
     }
 
     const form = mount(<TestForm />);
-    const input = (form.instance() as TestForm).inputRef;
+    const input = ((form.instance() as TestForm) as TestForm).inputRef;
     expect(input.props.name).toEqual('name');
   });
 
@@ -203,7 +204,7 @@ describe('validations', () => {
     addValidationRule('ruleA', ruleA);
     addValidationRule('ruleB', ruleB);
 
-    class TestForm extends React.Component {
+    class TestForm extends React.Component<{}, { rule: string }> {
       constructor(props) {
         super(props);
         this.state = { rule: 'ruleA' };
@@ -225,7 +226,7 @@ describe('validations', () => {
     }
 
     const form = mount(<TestForm />);
-    form.instance().changeRule();
+    (form.instance() as TestForm).changeRule();
     const input = form.find('input');
     input.simulate('change', {
       target: { value: 'bar' },
@@ -236,8 +237,8 @@ describe('validations', () => {
   it('should invalidate a form if dynamically inserted input is invalid', () => {
     const isInValidSpy = jest.fn();
 
-    class TestForm extends React.Component {
-      formRef = React.createRef();
+    class TestForm extends React.Component<{}, { showSecondInput: boolean }> {
+      formRef = React.createRef<Formsy>();
 
       constructor(props) {
         super(props);
@@ -262,8 +263,8 @@ describe('validations', () => {
 
     const form = mount(<TestForm />);
 
-    expect(form.instance().formRef.current.state.isValid).toEqual(true);
-    form.instance().addInput();
+    expect((form.instance() as TestForm).formRef.current.state.isValid).toEqual(true);
+    (form.instance() as TestForm).addInput();
 
     expect(isInValidSpy).toHaveBeenCalled();
   });
@@ -271,8 +272,8 @@ describe('validations', () => {
   it('should validate a form when removing an invalid input', () => {
     const isValidSpy = jest.fn();
 
-    class TestForm extends React.Component {
-      formRef = React.createRef();
+    class TestForm extends React.Component<{}, { showSecondInput: boolean }> {
+      formRef = React.createRef<Formsy>();
 
       constructor(props) {
         super(props);
@@ -297,8 +298,8 @@ describe('validations', () => {
 
     const form = mount(<TestForm />);
 
-    expect(form.instance().formRef.current.state.isValid).toEqual(false);
-    form.instance().removeInput();
+    expect((form.instance() as TestForm).formRef.current.state.isValid).toEqual(false);
+    (form.instance() as TestForm).removeInput();
 
     expect(isValidSpy).toHaveBeenCalled();
   });
@@ -328,10 +329,8 @@ describe('onChange', () => {
   it('should not trigger onChange when form is mounted', () => {
     const hasChanged = jest.fn();
 
-    class TestForm extends React.Component {
-      render() {
-        return <Formsy onChange={hasChanged} />;
-      }
+    function TestForm() {
+      return <Formsy onChange={hasChanged} />;
     }
 
     mount(<TestForm />);
@@ -352,10 +351,13 @@ describe('onChange', () => {
   it('should trigger onChange once when new input is added to form', () => {
     const hasChanged = jest.fn();
 
-    class TestForm extends React.Component {
-      state = {
-        showInput: false,
-      };
+    class TestForm extends React.Component<{}, { showInput: boolean }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          showInput: false,
+        };
+      }
 
       addInput() {
         this.setState({
@@ -369,17 +371,20 @@ describe('onChange', () => {
     }
 
     const form = mount(<TestForm />);
-    form.instance().addInput();
+    (form.instance() as TestForm).addInput();
     expect(hasChanged).toHaveBeenCalledTimes(1);
   });
 
   it('onChange should honor dot notation transformations', () => {
     const hasChanged = jest.fn();
 
-    class TestForm extends React.Component {
-      state = {
-        showInput: false,
-      };
+    class TestForm extends React.Component<{}, { showInput: boolean }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          showInput: false,
+        };
+      }
 
       addInput() {
         this.setState({
@@ -397,7 +402,7 @@ describe('onChange', () => {
     }
 
     const form = mount(<TestForm />);
-    form.instance().addInput();
+    (form.instance() as TestForm).addInput();
     form.update();
 
     expect(hasChanged).toHaveBeenCalledWith({ parent: { child: 'test' } }, false);
@@ -406,8 +411,13 @@ describe('onChange', () => {
 
 describe('Update a form', () => {
   it('should allow elements to check if the form is disabled', () => {
-    class TestForm extends React.Component {
-      state = { disabled: true };
+    class TestForm extends React.Component<{}, { disabled: boolean }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          disabled: true,
+        };
+      }
 
       enableForm() {
         this.setState({ disabled: false });
@@ -424,16 +434,21 @@ describe('Update a form', () => {
 
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
-    expect(input.instance().isFormDisabled()).toEqual(true);
+    expect(getInputInstance(input).isFormDisabled()).toEqual(true);
 
-    form.instance().enableForm();
+    (form.instance() as TestForm).enableForm();
 
-    expect(input.instance().isFormDisabled()).toEqual(false);
+    expect(getInputInstance(input).isFormDisabled()).toEqual(false);
   });
 
   it('should be possible to pass error state of elements by changing an errors attribute', () => {
-    class TestForm extends React.Component {
-      state = { validationErrors: { foo: 'bar' } };
+    class TestForm extends React.Component<{}, { validationErrors: { [key: string]: React.ReactNode } }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          validationErrors: { foo: 'bar' },
+        };
+      }
 
       onChange = values => {
         this.setState(values.foo ? { validationErrors: {} } : { validationErrors: { foo: 'bar' } });
@@ -451,22 +466,21 @@ describe('Update a form', () => {
     const form = mount(<TestForm />);
 
     const input = form.find(TestInput);
-    expect(input.instance().getErrorMessage()).toEqual('bar');
-    input.instance().setValue('gotValue');
+    expect(getInputInstance(input).getErrorMessage()).toEqual('bar');
+    getInputInstance(input).setValue('gotValue');
 
-    expect(input.instance().getErrorMessage()).toEqual(null);
+    expect(getInputInstance(input).getErrorMessage()).toEqual(null);
   });
 
   it('should prevent a default submit', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
     const FoundForm = form.find(TestForm);
     const submitEvent = { preventDefault: jest.fn() };
@@ -475,15 +489,14 @@ describe('Update a form', () => {
   });
 
   it('should not prevent a default submit when preventDefaultSubmit is passed', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy preventDefaultSubmit={false}>
-            <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy preventDefaultSubmit={false}>
+          <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
     const FoundForm = form.find(TestForm);
     const submitEvent = { preventDefault: jest.fn() };
@@ -494,14 +507,12 @@ describe('Update a form', () => {
   it('should trigger an onValidSubmit when submitting a valid form', () => {
     const isCalled = jest.fn();
 
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy onValidSubmit={isCalled}>
-            <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy onValidSubmit={isCalled}>
+          <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
@@ -513,14 +524,12 @@ describe('Update a form', () => {
   it('should trigger an onInvalidSubmit when submitting an invalid form', () => {
     const isCalled = jest.fn();
 
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy onInvalidSubmit={isCalled}>
-            <TestInput name="foo" validations="isEmail" value="foo@bar" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy onInvalidSubmit={isCalled}>
+          <TestInput name="foo" validations="isEmail" value="foo@bar" />
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
@@ -535,15 +544,13 @@ describe('value === false', () => {
   it('should call onSubmit correctly', () => {
     const onSubmit = jest.fn();
 
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy onSubmit={onSubmit}>
-            <TestInput name="foo" value={false} type="checkbox" />
-            <button type="submit">Save</button>
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy onSubmit={onSubmit}>
+          <TestInput name="foo" value={false} type="checkbox" />
+          <button type="submit">Save</button>
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
@@ -554,10 +561,13 @@ describe('value === false', () => {
   it('should allow dynamic changes to false', () => {
     const onSubmit = jest.fn();
 
-    class TestForm extends React.Component {
-      state = {
-        value: true,
-      };
+    class TestForm extends React.Component<{}, { value: boolean }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          value: true,
+        };
+      }
 
       changeValue() {
         this.setState({
@@ -576,35 +586,36 @@ describe('value === false', () => {
     }
 
     const form = mount(<TestForm />);
-    form.instance().changeValue();
+    (form.instance() as TestForm).changeValue();
     form.simulate('submit');
     expect(onSubmit).toHaveBeenCalledWith({ foo: false }, expect.any(Function), expect.any(Function));
   });
 
   it('should say the form is submitted', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput name="foo" value type="checkbox" />
-            <button type="submit">Save</button>
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput name="foo" value type="checkbox" />
+          <button type="submit">Save</button>
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
-    expect(input.instance().isFormSubmitted()).toEqual(false);
+    expect(getInputInstance(input).isFormSubmitted()).toEqual(false);
     form.simulate('submit');
-    expect(input.instance().isFormSubmitted()).toEqual(true);
+    expect(getInputInstance(input).isFormSubmitted()).toEqual(true);
   });
 
   it('should be able to reset the form to its pristine state', () => {
-    class TestForm extends React.Component {
-      state = {
-        value: true,
-      };
+    class TestForm extends React.Component<{}, { value: boolean }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          value: true,
+        };
+      }
 
       changeValue() {
         this.setState({
@@ -625,19 +636,22 @@ describe('value === false', () => {
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
     const formsyForm = form.find(Formsy);
-    expect(input.instance().getValue()).toEqual(true);
-    form.instance().changeValue();
-    expect(input.instance().getValue()).toEqual(false);
-    formsyForm.instance().reset();
-    expect(input.instance().getValue()).toEqual(true);
+    expect(getInputInstance(input).getValue()).toEqual(true);
+    (form.instance() as TestForm).changeValue();
+    expect(getInputInstance(input).getValue()).toEqual(false);
+    getFormInstance(formsyForm).reset();
+    expect(getInputInstance(input).getValue()).toEqual(true);
   });
 
   it('should be able to set a value to components with updateInputsWithValue', () => {
-    class TestForm extends React.Component {
-      state = {
-        valueFoo: true,
-        valueBar: true,
-      };
+    class TestForm extends React.Component<{}, { valueFoo: boolean; valueBar: boolean }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          valueBar: true,
+          valueFoo: true,
+        };
+      }
 
       render() {
         return (
@@ -653,38 +667,21 @@ describe('value === false', () => {
     const form = mount(<TestForm />);
     const inputs = form.find(TestInput);
     const formsyForm = form.find(Formsy);
-    expect(
-      inputs
-        .at(0)
-        .instance()
-        .getValue(),
-    ).toEqual(true);
-    expect(
-      inputs
-        .at(1)
-        .instance()
-        .getValue(),
-    ).toEqual(true);
-    formsyForm.instance().updateInputsWithValue({ foo: false });
-    expect(
-      inputs
-        .at(0)
-        .instance()
-        .getValue(),
-    ).toEqual(false);
-    expect(
-      inputs
-        .at(1)
-        .instance()
-        .getValue(),
-    ).toEqual(true);
+    expect(getInputInstance(inputs.at(0)).getValue()).toEqual(true);
+    expect(getInputInstance(inputs.at(1)).getValue()).toEqual(true);
+    getFormInstance(formsyForm).updateInputsWithValue({ foo: false });
+    expect(getInputInstance(inputs.at(0)).getValue()).toEqual(false);
+    expect(getInputInstance(inputs.at(1)).getValue()).toEqual(true);
   });
 
   it('should be able to reset the form using custom data', () => {
-    class TestForm extends React.Component {
-      state = {
-        value: true,
-      };
+    class TestForm extends React.Component<{}, { value: boolean | string }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          value: true,
+        };
+      }
 
       changeValue() {
         this.setState({
@@ -693,9 +690,11 @@ describe('value === false', () => {
       }
 
       render() {
+        const { value } = this.state;
+
         return (
           <Formsy>
-            <TestInput name="foo" value={this.state.value} type="checkbox" />
+            <TestInput name="foo" value={value} />
             <button type="submit">Save</button>
           </Formsy>
         );
@@ -703,40 +702,40 @@ describe('value === false', () => {
     }
 
     const form = mount(<TestForm />);
-    const input = form.find(TestInput);
+    const input = form.find(TestInput).at(0);
     const formsyForm = form.find(Formsy);
 
-    expect(input.instance().getValue()).toEqual(true);
-    form.instance().changeValue();
-    expect(input.instance().getValue()).toEqual(false);
-    formsyForm.instance().reset({
+    expect(getInputInstance(input).getValue()).toEqual(true);
+
+    ((form.instance() as TestForm) as TestForm).changeValue();
+    expect(getInputInstance(input).getValue()).toEqual(false);
+
+    getFormInstance(formsyForm).reset({
       foo: 'bar',
     });
-    expect(input.instance().getValue()).toEqual('bar');
+    expect(getInputInstance(input).getValue()).toEqual('bar');
   });
 });
 
 describe('.reset()', () => {
   it('should be able to reset the form to empty values', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput name="foo" value="42" type="checkbox" />
-            <button type="submit">Save</button>
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput name="foo" value="42" type="checkbox" />
+          <button type="submit">Save</button>
+        </Formsy>
+      );
     }
 
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
     const formsyForm = form.find(Formsy);
 
-    formsyForm.instance().reset({
+    getFormInstance(formsyForm).reset({
       foo: '',
     });
-    expect(input.instance().getValue()).toEqual('');
+    expect(getInputInstance(input).getValue()).toEqual('');
   });
 
   it('should be able to reset the form using a button', () => {
@@ -753,11 +752,11 @@ describe('.reset()', () => {
     const input = form.find(TestInput);
     const formsyForm = form.find(Formsy);
 
-    expect(input.instance().getValue()).toEqual('foo');
+    expect(getInputInstance(input).getValue()).toEqual('foo');
     input.simulate('change', { target: { value: 'foobar' } });
-    expect(input.instance().getValue()).toEqual('foobar');
+    expect(getInputInstance(input).getValue()).toEqual('foobar');
     formsyForm.simulate('reset');
-    expect(input.instance().getValue()).toEqual('foo');
+    expect(getInputInstance(input).getValue()).toEqual('foo');
   });
 });
 
@@ -769,7 +768,7 @@ describe('.isChanged()', () => {
         <TestInput name="one" value="foo" />
       </Formsy>,
     );
-    expect(form.instance().isChanged()).toEqual(false);
+    expect(getFormInstance(form).isChanged()).toEqual(false);
     expect(hasOnChanged).not.toHaveBeenCalled();
   });
 
@@ -784,7 +783,7 @@ describe('.isChanged()', () => {
     input.simulate('change', {
       target: { value: 'bar' },
     });
-    expect(form.instance().isChanged()).toEqual(true);
+    expect(getFormInstance(form).isChanged()).toEqual(true);
     expect(hasOnChanged).toHaveBeenCalledWith({ one: 'bar' }, true);
   });
 
@@ -805,7 +804,7 @@ describe('.isChanged()', () => {
       target: { value: 'foo' },
     });
 
-    expect(form.instance().isChanged()).toEqual(false);
+    expect(getFormInstance(form).isChanged()).toEqual(false);
     expect(hasOnChanged).toHaveBeenCalledWith({ one: 'foo' }, false);
   });
 });
@@ -872,10 +871,15 @@ describe('form valid state', () => {
   it('should be false when validationErrors is not empty', () => {
     let isValid = true;
 
-    class TestForm extends React.Component {
-      state = { validationErrors: {} };
+    class TestForm extends React.Component<{}, { validationErrors: { [key: string]: string } }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          validationErrors: {},
+        };
+      }
 
-      setValidationErrors = empty => {
+      setValidationErrors = (empty?: unknown) => {
         this.setState(!empty ? { validationErrors: { foo: 'bar' } } : { validationErrors: {} });
       };
 
@@ -899,17 +903,21 @@ describe('form valid state', () => {
     const form = mount(<TestForm />);
 
     expect(isValid).toEqual(true);
-    form.instance().setValidationErrors();
-
+    (form.instance() as TestForm).setValidationErrors();
     expect(isValid).toEqual(false);
   });
 
   it('should be true when validationErrors is not empty and preventExternalInvalidation is true', () => {
     let isValid = true;
-    class TestForm extends React.Component {
-      state = { validationErrors: {} };
+    class TestForm extends React.Component<{}, { validationErrors: { [key: string]: string } }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          validationErrors: {},
+        };
+      }
 
-      setValidationErrors = empty => {
+      setValidationErrors = (empty?: unknown) => {
         this.setState(!empty ? { validationErrors: { foo: 'bar' } } : { validationErrors: {} });
       };
 
@@ -938,7 +946,7 @@ describe('form valid state', () => {
     const form = mount(<TestForm />);
 
     expect(isValid).toEqual(true);
-    form.instance().setValidationErrors();
+    (form.instance() as TestForm).setValidationErrors();
 
     expect(isValid).toEqual(true);
   });
