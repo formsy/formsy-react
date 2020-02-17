@@ -3,12 +3,19 @@ import PropTypes from 'prop-types';
 
 import * as utils from './utils';
 import FormsyContext from './FormsyContext';
-import { ComponentWithStaticAttributes, RequiredValidation, Validations, WrappedComponentClass } from './interfaces';
+import {
+  ComponentWithStaticAttributes,
+  RequiredValidation,
+  ValidationError,
+  Validations,
+  WrappedComponentClass,
+} from './interfaces';
+import { isString } from './utils';
 
 /* eslint-disable react/default-props-match-prop-types */
 
 const convertValidationsToObject = <V>(validations: false | Validations<V>): Validations<V> => {
-  if (typeof validations === 'string') {
+  if (isString(validations)) {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
       let args: string[] = validation.split(':');
       const validateMethod: string = args.shift();
@@ -49,8 +56,8 @@ export interface WrapperProps<V> {
   innerRef?: (ref: React.Ref<any>) => void;
   name: string;
   required?: RequiredValidation<V>;
-  validationError?: string;
-  validationErrors?: { [key: string]: string };
+  validationError?: ValidationError;
+  validationErrors?: { [key: string]: ValidationError };
   validations?: Validations<V>;
   value?: V;
 }
@@ -63,13 +70,13 @@ export interface WrapperState<V> {
   isRequired: boolean;
   isValid: boolean;
   pristineValue: V;
-  validationError: string[];
+  validationError: ValidationError[];
   value: V;
 }
 
 export interface InjectedProps<V> {
-  errorMessage: string;
-  errorMessages: string[];
+  errorMessage: ValidationError;
+  errorMessages: ValidationError[];
   hasValue: boolean;
   isFormDisabled: boolean;
   isFormSubmitted: boolean;
@@ -85,10 +92,13 @@ export interface InjectedProps<V> {
   showRequired: boolean;
 }
 
-export interface WrapperInstanceMethods {
+export interface WrapperInstanceMethods<V> {
+  getErrorMessage: () => null | ValidationError;
+  getErrorMessages: () => ValidationError[];
+  getValue: () => V;
+  isFormDisabled: () => boolean;
   isValid: () => boolean;
-  getValue: () => any;
-  getErrorMessage: () => null | string;
+  setValue: (value: V) => void;
 }
 
 export type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
@@ -102,7 +112,7 @@ function getDisplayName(component: WrappedComponentClass) {
 export default function<T, V>(
   WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
 ): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
-  return class extends React.Component<T & WrapperProps<V>, WrapperState<V>> implements WrapperInstanceMethods {
+  return class extends React.Component<T & WrapperProps<V>, WrapperState<V>> implements WrapperInstanceMethods<V> {
     // eslint-disable-next-line react/sort-comp
     public static contextType = FormsyContext;
 
@@ -155,11 +165,10 @@ export default function<T, V>(
 
     public shouldComponentUpdate(nextProps, nextState, nextContext) {
       const { props, state, context } = this;
-      const isPropsChanged = Object.keys(props).some(k => props[k] !== nextProps[k]);
-
-      const isStateChanged = Object.keys(state).some(k => state[k] !== nextState[k]);
-
-      const isFormsyContextChanged = Object.keys(context).some(k => context[k] !== nextContext[k]);
+      const isChanged = (a: object, b: object): boolean => Object.keys(a).some(k => a[k] !== b[k]);
+      const isPropsChanged = isChanged(props, nextProps);
+      const isStateChanged = isChanged(state, nextState);
+      const isFormsyContextChanged = isChanged(context, nextContext);
 
       return isPropsChanged || isStateChanged || isFormsyContextChanged;
     }
@@ -182,18 +191,17 @@ export default function<T, V>(
     }
 
     // Detach it when component unmounts
-    // eslint-disable-next-line react/sort-comp
     public componentWillUnmount() {
       const { detachFromForm } = this.context;
       detachFromForm(this);
     }
 
-    public getErrorMessage = () => {
+    public getErrorMessage = (): ValidationError | null => {
       const messages = this.getErrorMessages();
       return messages.length ? messages[0] : null;
     };
 
-    public getErrorMessages = () => {
+    public getErrorMessages = (): ValidationError[] => {
       const { externalError, validationError } = this.state;
 
       if (!this.isValid() || this.showRequired()) {
@@ -218,9 +226,7 @@ export default function<T, V>(
       const { validate: validateForm } = this.context;
 
       if (!validate) {
-        this.setState({
-          value,
-        });
+        this.setState({ value });
       } else {
         this.setState(
           {
@@ -237,7 +243,7 @@ export default function<T, V>(
     // eslint-disable-next-line react/destructuring-assignment
     public hasValue = () => {
       const { value } = this.state;
-      if (typeof value === 'string') {
+      if (isString(value)) {
         return value !== '';
       }
       return value !== undefined;

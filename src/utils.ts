@@ -1,6 +1,6 @@
 import isPlainObject from 'lodash.isplainobject';
 
-import { Validations, Values } from './interfaces';
+import { ValidationError, Validations, Values } from './interfaces';
 
 export function isArray(value: unknown): value is unknown[] {
   return Array.isArray(value);
@@ -86,7 +86,7 @@ export function isSame(a: unknown, b: unknown) {
 }
 
 interface RulesResult {
-  errors: string[];
+  errors: ValidationError[];
   failed: string[];
   success: string[];
 }
