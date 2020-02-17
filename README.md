@@ -4,7 +4,8 @@
 [![Build status](https://travis-ci.org/formsy/formsy-react.svg?branch=master)](https://travis-ci.org/formsy/formsy-react)
 [![Coverage Status](https://coveralls.io/repos/github/formsy/formsy-react/badge.svg?branch=master)](https://coveralls.io/github/formsy/formsy-react?branch=master)
 [![Gzipped size](http://img.badgesize.io/https://unpkg.com/formsy-react?compression=gzip)](https://unpkg.com/formsy-react)
-[![Gitter](https://badges.gitter.im/formsy/Lobby.svg)](https://gitter.im/formsy/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![GitHub contributors](https://img.shields.io/github/contributors/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/contributors)
+![Typescript Types included](https://badgen.net/npm/types/tslib)
 
 A form input builder and validator for React.
 
@@ -16,13 +17,13 @@ A form input builder and validator for React.
 
 [christianalfoni](https://github.com/christianalfoni/) wrote an article on forms and validation with React,
 [Nailing that validation with React JS](http://christianalfoni.github.io/javascript/2014/10/22/nailing-that-validation-with-reactjs.html),
-the result of that was this component.
+the result of that was this library.
 
 The main concept is that forms, inputs, and validation are done very differently across developers and projects. This
 React component aims to be that “sweet spot” between flexibility and reusability.
 
-This project was originally located at https://github.com/christianalfoni/formsy-react if you're looking for v0.x or old
-issues.
+This project was originally located at [christianalfoni/formsy-react](https://github.com/christianalfoni/formsy-react)
+if you're looking for old issues.
 
 ## What You Can Do
 
@@ -36,6 +37,14 @@ issues.
 ## Install
 
 `yarn add formsy-react react react-dom` and use with webpack, browserify, etc.
+
+## Formsy component packages
+
+- [twisty/formsy-react-components](https://github.com/twisty/formsy-react-components) - Bootstrap components for a
+  formsy-react form.\
+- [zabute/formsy-semantic-ui-react](https://github.com/zabute/formsy-semantic-ui-react) - Formsy-React wrappers for
+  Semantic-Ui-React's form components
+  ([currently being updated to formsy 2.x](https://github.com/zabute/formsy-semantic-ui-react/pull/77))
 
 ## 1.x to 2.x Upgrade Guide
 
@@ -143,13 +152,6 @@ export default class App extends React.Component {
 This code results in a form with a submit button that will run the `submit` method when the form is submitted with a
 valid email. The submit button is disabled as long as the input is empty ([required](/API.md#required)) and the value is
 not an email ([isEmail](/API.md#validators)). On validation error it will show the message: "This is not a valid email".
-
-## Formsy component packages
-
-- https://github.com/twisty/formsy-react-components, Bootstrap 3 compatible form fields
-- https://github.com/zabute/formsy-semantic-ui-react, Semantic UI form fields (out of date, for formsy-react 1.x)
-- https://github.com/gogoair/react-formsy-combo-select, wrapper for https://github.com/gogoair/react-combo-select (out
-  of date, for formsy-react 1.x)
 
 ## Contribute
 
