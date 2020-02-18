@@ -375,7 +375,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       const args = [
         {
           isValid: preventExternalInvalidation,
-          externalError: utils.isString(error) ? [error] : error,
+          validationError: utils.isString(error) ? [error] : error,
         },
       ];
       component.setState(...args);
@@ -413,7 +413,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     // the validator IF there is a value or it is required
     component.setState(
       {
-        externalError: null,
         isRequired: validation.isRequired,
         isValid: validation.isValid,
         validationError: validation.error,
@@ -442,15 +441,11 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     // last component validated will run the onValidationComplete callback
     this.inputs.forEach((component, index) => {
       const validation = this.runValidation(component);
-      if (validation.isValid && component.state.externalError) {
-        validation.isValid = false;
-      }
       component.setState(
         {
           isValid: validation.isValid,
           isRequired: validation.isRequired,
           validationError: validation.error,
-          externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null,
         },
         index === this.inputs.length - 1 ? onValidationComplete : null,
       );

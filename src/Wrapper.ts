@@ -64,7 +64,6 @@ export interface WrapperProps<V> {
 
 export interface WrapperState<V> {
   [key: string]: unknown;
-  externalError: null;
   formSubmitted: boolean;
   isPristine: boolean;
   isRequired: boolean;
@@ -138,7 +137,6 @@ export default function<T, V>(
     public constructor(props) {
       super(props);
       this.state = {
-        externalError: null,
         formSubmitted: false,
         isPristine: true,
         isRequired: false,
@@ -202,10 +200,10 @@ export default function<T, V>(
     };
 
     public getErrorMessages = (): ValidationError[] => {
-      const { externalError, validationError } = this.state;
+      const { validationError } = this.state;
 
       if (!this.isValid() || this.showRequired()) {
-        return externalError || validationError || [];
+        return validationError || [];
       }
       return [];
     };
