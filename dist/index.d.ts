@@ -1,37 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import validationRules from './validationRules';
-import Wrapper, { propTypes } from './Wrapper';
-import { IModel, InputComponent, IResetModel, IUpdateInputsWithValue, IUpdateInputsWithError, ValidationFunction, FormsyContextInterface } from './interfaces';
+import Wrapper, { PassDownProps, propTypes, WrapperState } from './Wrapper';
+import { FormsyContextInterface, IModel, InputComponent, IResetModel, IUpdateInputsWithError, IUpdateInputsWithValue, ValidationFunction } from './interfaces';
 declare type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 export interface FormsyProps extends FormHTMLAttributesCleaned {
     disabled: boolean;
-    getErrorMessage: any;
-    getErrorMessages: any;
-    getValue: any;
-    hasValue: any;
-    isFormDisabled: any;
-    isFormSubmitted: any;
-    isPristine: any;
-    isRequired: any;
-    isValid: any;
-    isValidValue: any;
     mapping: null | ((model: IModel) => IModel);
     onChange: (model: IModel, isChanged: boolean) => void;
-    onError: any;
     onInvalid: () => void;
-    onInvalidSubmit: any;
+    onInvalidSubmit: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
     onReset?: () => void;
     onSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
     onValid: () => void;
     onValidSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
-    preventExternalInvalidation?: boolean;
     preventDefaultSubmit?: boolean;
-    resetValue: any;
-    setValidations: any;
-    setValue: any;
-    showError: any;
-    showRequired: any;
+    preventExternalInvalidation?: boolean;
     validationErrors?: null | object;
 }
 export interface FormsyState {
@@ -43,22 +27,12 @@ export interface FormsyState {
     isValid: boolean;
 }
 declare class Formsy extends React.Component<FormsyProps, FormsyState> {
-    inputs: any[];
+    inputs: InstanceType<any & PassDownProps<any>>[];
     emptyArray: any[];
     prevInputNames: any[] | null;
     static displayName: string;
     static propTypes: {
         disabled: PropTypes.Requireable<boolean>;
-        getErrorMessage: PropTypes.Requireable<(...args: any[]) => any>;
-        getErrorMessages: PropTypes.Requireable<(...args: any[]) => any>;
-        getValue: PropTypes.Requireable<(...args: any[]) => any>;
-        hasValue: PropTypes.Requireable<(...args: any[]) => any>;
-        isFormDisabled: PropTypes.Requireable<(...args: any[]) => any>;
-        isFormSubmitted: PropTypes.Requireable<(...args: any[]) => any>;
-        isPristine: PropTypes.Requireable<(...args: any[]) => any>;
-        isRequired: PropTypes.Requireable<(...args: any[]) => any>;
-        isValid: PropTypes.Requireable<(...args: any[]) => any>;
-        isValidValue: PropTypes.Requireable<(...args: any[]) => any>;
         mapping: PropTypes.Requireable<(...args: any[]) => any>;
         onChange: PropTypes.Requireable<(...args: any[]) => any>;
         onInvalid: PropTypes.Requireable<(...args: any[]) => any>;
@@ -67,13 +41,8 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         onSubmit: PropTypes.Requireable<(...args: any[]) => any>;
         onValid: PropTypes.Requireable<(...args: any[]) => any>;
         onValidSubmit: PropTypes.Requireable<(...args: any[]) => any>;
-        preventExternalInvalidation: PropTypes.Requireable<boolean>;
         preventDefaultSubmit: PropTypes.Requireable<boolean>;
-        resetValue: PropTypes.Requireable<(...args: any[]) => any>;
-        setValidations: PropTypes.Requireable<(...args: any[]) => any>;
-        setValue: PropTypes.Requireable<(...args: any[]) => any>;
-        showError: PropTypes.Requireable<(...args: any[]) => any>;
-        showRequired: PropTypes.Requireable<(...args: any[]) => any>;
+        preventExternalInvalidation: PropTypes.Requireable<boolean>;
         validationErrors: PropTypes.Requireable<object>;
     };
     static defaultProps: Partial<FormsyProps>;
@@ -89,14 +58,10 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     isValidValue: (component: any, value: any) => boolean;
     isFormDisabled: () => boolean;
     mapModel: (model: any) => any;
-    reset: (data?: any) => void;
+    reset: (model?: any) => void;
     private resetInternal;
-    resetModel: IResetModel;
-    runValidation: <V>(component: InputComponent<V>, value?: V) => {
-        isRequired: boolean;
-        isValid: boolean;
-        error: any;
-    };
+    private resetModel;
+    runValidation: <V>(component: InputComponent<V>, value?: V) => Partial<WrapperState<V>>;
     attachToForm: (component: any) => void;
     detachFromForm: <V>(component: InputComponent<V>) => void;
     isChanged: () => boolean;

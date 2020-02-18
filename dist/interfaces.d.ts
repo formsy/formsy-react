@@ -4,11 +4,15 @@ export interface Values {
     [key: string]: any;
 }
 export declare type IModel = any;
-export declare type IData = any;
 export declare type IResetModel = (model?: IModel) => void;
-export declare type IUpdateInputsWithValue<V> = (values: any, validate?: boolean) => void;
-export declare type IUpdateInputsWithError = (errors: any, invalidate?: boolean) => void;
-export declare type ValidationFunction<V> = (values: Values, value: V, extra?: any) => boolean | string;
+export declare type IUpdateInputsWithValue<V> = (values: {
+    [key: string]: V;
+}, validate?: boolean) => void;
+export declare type IUpdateInputsWithError = (errors: {
+    [key: string]: string;
+}, invalidate?: boolean) => void;
+export declare type ValidationError = string | React.ReactNode;
+export declare type ValidationFunction<V> = (values: Values, value: V, extra?: any) => boolean | ValidationError;
 export declare type Validation<V> = string | boolean | ValidationFunction<V>;
 export declare type Validations<V> = ValidationsStructure<V> | string | object;
 export interface ValidationsStructure<V> {

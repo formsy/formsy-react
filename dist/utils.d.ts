@@ -1,4 +1,4 @@
-import { Validations, Values } from './interfaces';
+import { ValidationError, Validations, Values } from './interfaces';
 export declare function isArray(value: unknown): value is unknown[];
 export declare function isObject(value: unknown): value is object;
 export declare function isTypeUndefined(value: unknown): value is undefined;
@@ -12,8 +12,10 @@ export declare function isValueUndefined(value: unknown): boolean;
 export declare function noop(): void;
 export declare function protectAgainstParamReassignment(value: unknown): unknown;
 export declare function isSame(a: unknown, b: unknown): any;
-export declare function runRules<V>(value: V, currentValues: Values, validations: Validations<V>, validationRules: Validations<V>): {
-    errors: string[];
+interface RulesResult {
+    errors: ValidationError[];
     failed: string[];
     success: string[];
-};
+}
+export declare function runRules<V>(value: V, currentValues: Values, validations: Validations<V>, validationRules: Validations<V>): RulesResult;
+export {};

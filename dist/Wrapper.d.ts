@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { RequiredValidation, Validations } from './interfaces';
+import { RequiredValidation, ValidationError, Validations } from './interfaces';
 declare const propTypes: {
     innerRef: PropTypes.Requireable<(...args: any[]) => any>;
     name: PropTypes.Validator<string>;
@@ -9,28 +9,29 @@ declare const propTypes: {
     value: PropTypes.Requireable<any>;
 };
 export interface WrapperProps<V> {
-    innerRef?: (ref: any) => void;
+    innerRef?: (ref: React.Ref<any>) => void;
     name: string;
     required?: RequiredValidation<V>;
-    validationError?: any;
-    validationErrors?: any;
+    validationError?: ValidationError;
+    validationErrors?: {
+        [key: string]: ValidationError;
+    };
     validations?: Validations<V>;
     value?: V;
 }
 export interface WrapperState<V> {
     [key: string]: unknown;
-    externalError: null;
     formSubmitted: boolean;
     isPristine: boolean;
     isRequired: boolean;
     isValid: boolean;
-    pristineValue: any;
-    validationError: any[];
+    pristineValue: V;
+    validationError: ValidationError[];
     value: V;
 }
 export interface InjectedProps<V> {
-    errorMessage: any;
-    errorMessages: any;
+    errorMessage: ValidationError;
+    errorMessages: ValidationError[];
     hasValue: boolean;
     isFormDisabled: boolean;
     isFormSubmitted: boolean;
@@ -38,17 +39,20 @@ export interface InjectedProps<V> {
     isRequired: boolean;
     isValid: boolean;
     isValidValue: (value: V) => boolean;
-    ref?: any;
+    ref?: React.Ref<any>;
     resetValue: () => void;
     setValidations: (validations: Validations<V>, required: RequiredValidation<V>) => void;
     setValue: (value: V) => void;
     showError: boolean;
     showRequired: boolean;
 }
-export interface WrapperInstanceMethods {
+export interface WrapperInstanceMethods<V> {
+    getErrorMessage: () => null | ValidationError;
+    getErrorMessages: () => ValidationError[];
+    getValue: () => V;
+    isFormDisabled: () => boolean;
     isValid: () => boolean;
-    getValue: () => any;
-    getErrorMessage: () => any;
+    setValue: (value: V) => void;
 }
 export declare type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
 export { propTypes };
