@@ -675,26 +675,29 @@ describe('value === false', () => {
   });
 
   it('should be able to reset the form using custom data', () => {
-    class TestForm extends React.Component<{}, { value: boolean | string }> {
+    class TestForm extends React.Component<{}, { value: number; valueDeep: number }> {
       constructor(props) {
         super(props);
         this.state = {
-          value: true,
+          value: 1,
+          valueDeep: 11,
         };
       }
 
       changeValue() {
         this.setState({
-          value: false,
+          value: 2,
+          valueDeep: 12,
         });
       }
 
       render() {
-        const { value } = this.state;
+        const { value, valueDeep } = this.state;
 
         return (
           <Formsy>
             <TestInput name="foo" value={value} />
+            <TestInput name="bar.foo" value={valueDeep} />
             <button type="submit">Save</button>
           </Formsy>
         );
@@ -703,17 +706,22 @@ describe('value === false', () => {
 
     const form = mount(<TestForm />);
     const input = form.find(TestInput).at(0);
+    const inputDeep = form.find(TestInput).at(1);
     const formsyForm = form.find(Formsy);
 
-    expect(getInputInstance(input).getValue()).toEqual(true);
+    expect(getInputInstance(input).getValue()).toEqual(1);
+    expect(getInputInstance(inputDeep).getValue()).toEqual(11);
 
     ((form.instance() as TestForm) as TestForm).changeValue();
-    expect(getInputInstance(input).getValue()).toEqual(false);
+    expect(getInputInstance(input).getValue()).toEqual(2);
+    expect(getInputInstance(inputDeep).getValue()).toEqual(12);
 
     getFormInstance(formsyForm).reset({
-      foo: 'bar',
+      foo: 3,
+      bar: { foo: 13 },
     });
-    expect(getInputInstance(input).getValue()).toEqual('bar');
+    expect(getInputInstance(input).getValue()).toEqual(3);
+    expect(getInputInstance(inputDeep).getValue()).toEqual(13);
   });
 });
 
@@ -871,7 +879,7 @@ describe('form valid state', () => {
   it('should be false when validationErrors is not empty', () => {
     let isValid = true;
 
-    class TestForm extends React.Component<{}, { validationErrors: { [key: string]: string } }> {
+    class TestForm extends React.Component<{}, { validationErrors: { [key: string]: ValidationError } }> {
       constructor(props) {
         super(props);
         this.state = {
@@ -909,7 +917,7 @@ describe('form valid state', () => {
 
   it('should be true when validationErrors is not empty and preventExternalInvalidation is true', () => {
     let isValid = true;
-    class TestForm extends React.Component<{}, { validationErrors: { [key: string]: string } }> {
+    class TestForm extends React.Component<{}, { validationErrors: { [key: string]: ValidationError } }> {
       constructor(props) {
         super(props);
         this.state = {

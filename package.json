@@ -62,8 +62,10 @@
     "version": "npm run build && git add dist && npm run changelog && git add CHANGELOG.md"
   },
   "dependencies": {
-    "form-data-to-object": "^0.2.0",
+    "lodash.get": "^4.4.2",
+    "lodash.has": "^4.5.2",
     "lodash.isplainobject": "^4.0.6",
+    "lodash.set": "^4.3.2",
     "prop-types": "^15.7.2"
   },
   "devDependencies": {
@@ -78,10 +80,13 @@
     "@rollup/plugin-node-resolve": "^7.1.1",
     "@types/enzyme": "^3.10.3",
     "@types/jest": "^25.1.1",
+    "@types/lodash.get": "^4.4.6",
+    "@types/lodash.has": "^4.5.6",
     "@types/lodash.isplainobject": "^4.0.6",
+    "@types/lodash.set": "^4.3.6",
     "@types/prop-types": "^15.7.1",
-    "@types/react": "^16.8.24",
-    "@types/react-dom": "^16.8.5",
+    "@types/react": "^16.9.19",
+    "@types/react-dom": "^16.9.5",
     "@typescript-eslint/eslint-plugin": "^2.14.0",
     "@typescript-eslint/parser": "^2.14.0",
     "auto-changelog": "^1.14.1",
