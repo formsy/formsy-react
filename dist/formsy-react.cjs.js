@@ -4573,6 +4573,9 @@ function isString(value) {
 function isNumber(value) {
   return typeof value === 'number';
 }
+function isRegex(value) {
+  return value instanceof RegExp;
+}
 function isValueStringEmpty(value) {
   return value === '';
 }
@@ -4623,6 +4626,10 @@ function isSame(a, b) {
     });
   }
 
+  if (isRegex(a) && isRegex(b)) {
+    return a.toString() === b.toString();
+  }
+
   return a === b;
 }
 function runRules(value, currentValues, validations, validationRules) {
@@ -4663,11 +4670,10 @@ function runRules(value, currentValues, validations, validationRules) {
   return results;
 }
 
-var _isExisty = function isExisty(value) {
+function _isExisty(value) {
   return !isValueNullOrUndefined(value);
-};
-
-var isEmpty = function isEmpty(value) {
+}
+function isEmpty(value) {
   if (isString(value)) {
     return isValueStringEmpty(value);
   }
@@ -4677,75 +4683,82 @@ var isEmpty = function isEmpty(value) {
   }
 
   return isValueUndefined(value);
+}
+
+function _isDefaultRequiredValue(value) {
+  return isString(value) ? isValueStringEmpty(value) : isValueNullOrUndefined(value);
+}
+function matchRegexp(_values, value, regexp) {
+  return !_isExisty(value) || isEmpty(value) || regexp.test("".concat(value));
+}
+var REGEX_PATTERNS = {
+  ALPHA: /^[A-Z]+$/i,
+  ALPHANUMERIC: /^[0-9A-Z]+$/i,
+  EMAIL: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i,
+  // from http://emailregex.com/
+  FLOAT: /^(?:[-+]?(?:\d+))?(?:\.\d*)?(?:[eE][+-]?(?:\d+))?$/,
+  INT: /^(?:[-+]?(?:0|[1-9]\d*))$/,
+  NUMERIC: /^[-+]?(?:\d*[.])?\d+$/,
+  SPECIAL_WORDS: /^[\sA-ZÀ-ÖØ-öø-ÿ]+$/i,
+  URL: /^(?:\w+:)?\/\/([^\s.]+\.\S{2}|localhost[:?\d]*)\S*$/i,
+  WORDS: /^[A-Z\s]+$/i
 };
-
 var validations = {
-  isDefaultRequiredValue: function isDefaultRequiredValue(_values, value) {
-    if (isString(value)) {
-      return isValueStringEmpty(value);
-    }
-
-    return isValueNullOrUndefined(value);
-  },
-  isExisty: function isExisty(_values, value) {
-    return _isExisty(value);
-  },
-  matchRegexp: function matchRegexp(_values, value, regexp) {
-    return !_isExisty(value) || isEmpty(value) || regexp.test(value);
-  },
-  isUndefined: function isUndefined(_values, value) {
-    return isValueUndefined(value);
-  },
-  isEmptyString: function isEmptyString(_values, value) {
-    return isEmpty(value);
-  },
-  isEmail: function isEmail(values, value) {
-    // Regex from http://emailregex.com/
-    return validations.matchRegexp(values, value, /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i);
-  },
-  isUrl: function isUrl(values, value) {
-    return validations.matchRegexp(values, value, /^(?:\w+:)?\/\/([^\s.]+\.\S{2}|localhost[:?\d]*)\S*$/i);
-  },
-  isTrue: function isTrue(_values, value) {
-    return value === true;
-  },
-  isFalse: function isFalse(_values, value) {
-    return value === false;
-  },
-  isNumeric: function isNumeric(values, value) {
-    if (isNumber(value)) {
-      return true;
-    }
-
-    return validations.matchRegexp(values, value, /^[-+]?(?:\d*[.])?\d+$/);
-  },
-  isAlpha: function isAlpha(values, value) {
-    return validations.matchRegexp(values, value, /^[A-Z]+$/i);
-  },
-  isAlphanumeric: function isAlphanumeric(values, value) {
-    return validations.matchRegexp(values, value, /^[0-9A-Z]+$/i);
-  },
-  isInt: function isInt(values, value) {
-    return validations.matchRegexp(values, value, /^(?:[-+]?(?:0|[1-9]\d*))$/);
-  },
-  isFloat: function isFloat(values, value) {
-    return validations.matchRegexp(values, value, /^(?:[-+]?(?:\d+))?(?:\.\d*)?(?:[eE][+-]?(?:\d+))?$/);
-  },
-  isWords: function isWords(values, value) {
-    return validations.matchRegexp(values, value, /^[A-Z\s]+$/i);
-  },
-  isSpecialWords: function isSpecialWords(values, value) {
-    return validations.matchRegexp(values, value, /^[\sA-ZÀ-ÖØ-öø-ÿ]+$/i);
-  },
-  isLength: function isLength(_values, value, length) {
-    return !_isExisty(value) || isEmpty(value) || value.length === length;
-  },
   equals: function equals(_values, value, eql) {
     return !_isExisty(value) || isEmpty(value) || value === eql;
   },
   equalsField: function equalsField(values, value, field) {
     return value === values[field];
   },
+  isAlpha: function isAlpha(values, value) {
+    return matchRegexp(values, value, REGEX_PATTERNS.ALPHA);
+  },
+  isAlphanumeric: function isAlphanumeric(values, value) {
+    return matchRegexp(values, value, REGEX_PATTERNS.ALPHANUMERIC);
+  },
+  isDefaultRequiredValue: function isDefaultRequiredValue(values, value) {
+    return _isDefaultRequiredValue(value);
+  },
+  isEmail: function isEmail(values, value) {
+    return matchRegexp(values, value, REGEX_PATTERNS.EMAIL);
+  },
+  isEmptyString: function isEmptyString(_values, value) {
+    return isEmpty(value);
+  },
+  isExisty: function isExisty(_values, value) {
+    return _isExisty(value);
+  },
+  isFalse: function isFalse(_values, value) {
+    return value === false;
+  },
+  isFloat: function isFloat(values, value) {
+    return matchRegexp(values, value, REGEX_PATTERNS.FLOAT);
+  },
+  isInt: function isInt(values, value) {
+    return matchRegexp(values, value, REGEX_PATTERNS.INT);
+  },
+  isLength: function isLength(_values, value, length) {
+    return !_isExisty(value) || isEmpty(value) || value.length === length;
+  },
+  isNumeric: function isNumeric(values, value) {
+    return isNumber(value) || matchRegexp(values, value, REGEX_PATTERNS.NUMERIC);
+  },
+  isSpecialWords: function isSpecialWords(values, value) {
+    return matchRegexp(values, value, REGEX_PATTERNS.SPECIAL_WORDS);
+  },
+  isTrue: function isTrue(_values, value) {
+    return value === true;
+  },
+  isUndefined: function isUndefined(_values, value) {
+    return isValueUndefined(value);
+  },
+  isUrl: function isUrl(values, value) {
+    return matchRegexp(values, value, REGEX_PATTERNS.URL);
+  },
+  isWords: function isWords(values, value) {
+    return matchRegexp(values, value, REGEX_PATTERNS.WORDS);
+  },
+  matchRegexp: matchRegexp,
   maxLength: function maxLength(_values, value, length) {
     return !_isExisty(value) || value.length <= length;
   },
@@ -4880,12 +4893,7 @@ function Wrapper (WrappedComponent) {
 
       _this.hasValue = function () {
         var value = _this.state.value;
-
-        if (isString(value)) {
-          return value !== '';
-        }
-
-        return value !== undefined;
+        return _isDefaultRequiredValue(value);
       };
 
       _this.isFormDisabled = function () {

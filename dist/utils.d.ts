@@ -6,6 +6,7 @@ export declare function isDate(value: unknown): value is Date;
 export declare function isFunction(value: unknown): value is Function;
 export declare function isString(value: unknown): value is string;
 export declare function isNumber(value: unknown): value is number;
+export declare function isRegex(value: unknown): value is RegExp;
 export declare function isValueStringEmpty(value: string): boolean;
 export declare function isValueNullOrUndefined(value: unknown): boolean;
 export declare function isValueUndefined(value: unknown): boolean;
