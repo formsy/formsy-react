@@ -1,12 +1,13 @@
 /* eslint-disable max-classes-per-file, react/destructuring-assignment */
 import { mount } from 'enzyme';
 import * as React from 'react';
+
 import DynamicInputForm from '../__test_utils__/DynamicInputForm';
+import Formsy, { addValidationRule } from '../src';
 import TestInput from '../__test_utils__/TestInput';
 import TestInputHoc from '../__test_utils__/TestInputHoc';
-
-import Formsy, { addValidationRule } from '../src';
-import { getFormInstance, getInputInstance } from '../__test_utils__/getInput';
+import { getFormInstance, getWrapperInstance } from '../__test_utils__/getInput';
+import { ValidationError } from '../src/interfaces';
 
 describe('Setting up a form', () => {
   it('should expose the users DOM node through an innerRef prop', () => {
@@ -434,11 +435,11 @@ describe('Update a form', () => {
 
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
-    expect(getInputInstance(input).isFormDisabled()).toEqual(true);
+    expect(getWrapperInstance(input).isFormDisabled()).toEqual(true);
 
     (form.instance() as TestForm).enableForm();
 
-    expect(getInputInstance(input).isFormDisabled()).toEqual(false);
+    expect(getWrapperInstance(input).isFormDisabled()).toEqual(false);
   });
 
   it('should be possible to pass error state of elements by changing an errors attribute', () => {
@@ -466,10 +467,10 @@ describe('Update a form', () => {
     const form = mount(<TestForm />);
 
     const input = form.find(TestInput);
-    expect(getInputInstance(input).getErrorMessage()).toEqual('bar');
-    getInputInstance(input).setValue('gotValue');
+    expect(getWrapperInstance(input).getErrorMessage()).toEqual('bar');
+    getWrapperInstance(input).setValue('gotValue');
 
-    expect(getInputInstance(input).getErrorMessage()).toEqual(null);
+    expect(getWrapperInstance(input).getErrorMessage()).toEqual(null);
   });
 
   it('should prevent a default submit', () => {
@@ -603,9 +604,9 @@ describe('value === false', () => {
 
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
-    expect(getInputInstance(input).isFormSubmitted()).toEqual(false);
+    expect(getWrapperInstance(input).isFormSubmitted()).toEqual(false);
     form.simulate('submit');
-    expect(getInputInstance(input).isFormSubmitted()).toEqual(true);
+    expect(getWrapperInstance(input).isFormSubmitted()).toEqual(true);
   });
 
   it('should be able to reset the form to its pristine state', () => {
@@ -636,11 +637,11 @@ describe('value === false', () => {
     const form = mount(<TestForm />);
     const input = form.find(TestInput);
     const formsyForm = form.find(Formsy);
-    expect(getInputInstance(input).getValue()).toEqual(true);
+    expect(getWrapperInstance(input).getValue()).toEqual(true);
     (form.instance() as TestForm).changeValue();
-    expect(getInputInstance(input).getValue()).toEqual(false);
+    expect(getWrapperInstance(input).getValue()).toEqual(false);
     getFormInstance(formsyForm).reset();
-    expect(getInputInstance(input).getValue()).toEqual(true);
+    expect(getWrapperInstance(input).getValue()).toEqual(true);
   });
 
   it('should be able to set a value to components with updateInputsWithValue', () => {
@@ -667,11 +668,11 @@ describe('value === false', () => {
     const form = mount(<TestForm />);
     const inputs = form.find(TestInput);
     const formsyForm = form.find(Formsy);
-    expect(getInputInstance(inputs.at(0)).getValue()).toEqual(true);
-    expect(getInputInstance(inputs.at(1)).getValue()).toEqual(true);
+    expect(getWrapperInstance(inputs.at(0)).getValue()).toEqual(true);
+    expect(getWrapperInstance(inputs.at(1)).getValue()).toEqual(true);
     getFormInstance(formsyForm).updateInputsWithValue({ foo: false });
-    expect(getInputInstance(inputs.at(0)).getValue()).toEqual(false);
-    expect(getInputInstance(inputs.at(1)).getValue()).toEqual(true);
+    expect(getWrapperInstance(inputs.at(0)).getValue()).toEqual(false);
+    expect(getWrapperInstance(inputs.at(1)).getValue()).toEqual(true);
   });
 
   it('should be able to reset the form using custom data', () => {
@@ -709,19 +710,19 @@ describe('value === false', () => {
     const inputDeep = form.find(TestInput).at(1);
     const formsyForm = form.find(Formsy);
 
-    expect(getInputInstance(input).getValue()).toEqual(1);
-    expect(getInputInstance(inputDeep).getValue()).toEqual(11);
+    expect(getWrapperInstance(input).getValue()).toEqual(1);
+    expect(getWrapperInstance(inputDeep).getValue()).toEqual(11);
 
     ((form.instance() as TestForm) as TestForm).changeValue();
-    expect(getInputInstance(input).getValue()).toEqual(2);
-    expect(getInputInstance(inputDeep).getValue()).toEqual(12);
+    expect(getWrapperInstance(input).getValue()).toEqual(2);
+    expect(getWrapperInstance(inputDeep).getValue()).toEqual(12);
 
     getFormInstance(formsyForm).reset({
       foo: 3,
       bar: { foo: 13 },
     });
-    expect(getInputInstance(input).getValue()).toEqual(3);
-    expect(getInputInstance(inputDeep).getValue()).toEqual(13);
+    expect(getWrapperInstance(input).getValue()).toEqual(3);
+    expect(getWrapperInstance(inputDeep).getValue()).toEqual(13);
   });
 });
 
@@ -743,7 +744,7 @@ describe('.reset()', () => {
     getFormInstance(formsyForm).reset({
       foo: '',
     });
-    expect(getInputInstance(input).getValue()).toEqual('');
+    expect(getWrapperInstance(input).getValue()).toEqual('');
   });
 
   it('should be able to reset the form using a button', () => {
@@ -760,11 +761,11 @@ describe('.reset()', () => {
     const input = form.find(TestInput);
     const formsyForm = form.find(Formsy);
 
-    expect(getInputInstance(input).getValue()).toEqual('foo');
+    expect(getWrapperInstance(input).getValue()).toEqual('foo');
     input.simulate('change', { target: { value: 'foobar' } });
-    expect(getInputInstance(input).getValue()).toEqual('foobar');
+    expect(getWrapperInstance(input).getValue()).toEqual('foobar');
     formsyForm.simulate('reset');
-    expect(getInputInstance(input).getValue()).toEqual('foo');
+    expect(getWrapperInstance(input).getValue()).toEqual('foo');
   });
 });
 

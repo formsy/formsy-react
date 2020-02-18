@@ -1,9 +1,12 @@
+/* eslint-disable react/destructuring-assignment */
 import React from 'react';
 import sinon from 'sinon';
 import { mount } from 'enzyme';
+
 import Formsy, { withFormsy } from '../src';
 import immediate from '../__test_utils__/immediate';
-import TestInput, { InputFactory } from '../__test_utils__/TestInput';
+import TestInput, { FormsyInputProps, InputFactory } from '../__test_utils__/TestInput';
+import { getFormInstance, getInputInstance, getWrapperInstance } from '../__test_utils__/getInput';
 
 describe('Element', () => {
   it('should pass down correct value prop after using setValue()', () => {
@@ -14,14 +17,14 @@ describe('Element', () => {
     );
 
     const input = form.find('input');
-    expect(input.instance().value).toEqual('foo');
+    expect(getInputInstance(input).value).toEqual('foo');
     input.simulate('change', { target: { value: 'foobar' } });
-    expect(input.instance().value).toEqual('foobar');
+    expect(getInputInstance(input).value).toEqual('foobar');
   });
 
   it('withFormsy: should only set the value and not validate when calling setValue(val, false)', () => {
     const Input = withFormsy(
-      class TestInput extends React.Component {
+      class NoValidateInput extends React.Component<FormsyInputProps> {
         updateValue = event => {
           this.props.setValue(event.target.value, false);
         };
@@ -37,7 +40,7 @@ describe('Element', () => {
       </Formsy>,
     );
     const inputComponent = form.find(Input);
-    const setStateSpy = sinon.spy(inputComponent.instance(), 'setState');
+    const setStateSpy = sinon.spy(getWrapperInstance(inputComponent), 'setState');
     const inputElement = form.find('input');
 
     expect(setStateSpy.called).toEqual(false);
@@ -62,7 +65,7 @@ describe('Element', () => {
     const input = form.find('input');
     input.simulate('change', { target: { value: 'foobar' } });
     reset();
-    expect(input.instance().value).toEqual('foo');
+    expect(getInputInstance(input).value).toEqual('foo');
   });
 
   it('should return error message passed when calling getErrorMessage()', () => {
@@ -84,7 +87,7 @@ describe('Element', () => {
   it('should return true or false when calling isValid() depending on valid state', () => {
     let isValid = null;
     const Input = InputFactory({
-      componentDidUpdate: function() {
+      componentDidUpdate() {
         isValid = this.props.isValid;
       },
     });
@@ -141,27 +144,34 @@ describe('Element', () => {
   });
 
   it('should return true or false when calling isPristine() depending on input has been "touched" or not', () => {
-    const Input = InputFactory();
+    const Input = InputFactory({});
     const form = mount(
       <Formsy action="/users">
         <Input name="A" value="foo" />
       </Formsy>,
     );
 
-    expect(form.instance().inputs[0].isPristine()).toEqual(true);
+    expect(getFormInstance(form).inputs[0].isPristine()).toEqual(true);
     const input = form.find('input');
     input.simulate('change', { target: { value: 'foo' } });
-    expect(form.instance().inputs[0].isPristine()).toEqual(false);
+    expect(getFormInstance(form).inputs[0].isPristine()).toEqual(false);
   });
 
   it('should allow an undefined value to be updated to a value', () => {
-    class TestForm extends React.Component {
-      state = { value: undefined };
+    class TestForm extends React.Component<{}, { value?: string }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          value: undefined,
+        };
+      }
+
       changeValue = () => {
         this.setState({
           value: 'foo',
         });
       };
+
       render() {
         return (
           <Formsy action="/users">
@@ -170,161 +180,138 @@ describe('Element', () => {
         );
       }
     }
-    const form = mount(<TestForm />);
+    const form = mount<TestForm>(<TestForm />);
 
     form.instance().changeValue();
     const input = form.find('input');
     immediate(() => {
-      expect(input.instance().value).toEqual('foo');
+      expect(getInputInstance(input).value).toEqual('foo');
     });
   });
 
   it('should be able to test a values validity', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput name="A" validations="isEmail" />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput name="A" validations="isEmail" />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const input = form.find(TestInput);
-    expect(input.instance().isValidValue('foo@bar.com')).toEqual(true);
-    expect(input.instance().isValidValue('foo@bar')).toEqual(false);
+    expect(getWrapperInstance(input).isValidValue('foo@bar.com')).toEqual(true);
+    expect(getWrapperInstance(input).isValidValue('foo@bar')).toEqual(false);
   });
 
   it('should be able to use an object as validations property', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput
-              name="A"
-              validations={{
-                isEmail: true,
-              }}
-            />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput
+            name="A"
+            validations={{
+              isEmail: true,
+            }}
+          />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const input = form.find(TestInput);
-    expect(input.instance().isValidValue('foo@bar.com')).toEqual(true);
-    expect(input.instance().isValidValue('foo@bar')).toEqual(false);
+    expect(getWrapperInstance(input).isValidValue('foo@bar.com')).toEqual(true);
+    expect(getWrapperInstance(input).isValidValue('foo@bar')).toEqual(false);
   });
 
   it('should be able to pass complex values to a validation rule', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput
-              name="A"
-              validations={{
-                matchRegexp: /foo/,
-              }}
-              value="foo"
-            />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput
+            name="A"
+            validations={{
+              matchRegexp: /foo/,
+            }}
+            value="foo"
+          />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().isValid()).toEqual(true);
+    expect(getWrapperInstance(inputComponent).isValid()).toEqual(true);
     const input = form.find('input');
     input.simulate('change', { target: { value: 'bar' } });
-    expect(inputComponent.instance().isValid()).toEqual(false);
+    expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
   });
 
   it('should be able to run a function to validate', () => {
-    class TestForm extends React.Component {
-      customValidationA(values, value) {
-        return value === 'foo';
-      }
-      customValidationB(values, value) {
-        return value === 'foo' && values.A === 'foo';
-      }
-      render() {
-        return (
-          <Formsy>
-            <TestInput
-              name="A"
-              validations={{
-                custom: this.customValidationA,
-              }}
-              value="foo"
-            />
-            <TestInput
-              name="B"
-              validations={{
-                custom: this.customValidationB,
-              }}
-              value="foo"
-            />
-          </Formsy>
-        );
-      }
+    const customValidationA = (values, value) => {
+      return value === 'foo';
+    };
+
+    const customValidationB = (values, value) => {
+      return value === 'foo' && values.A === 'foo';
+    };
+
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput
+            name="A"
+            validations={{
+              custom: customValidationA,
+            }}
+            value="foo"
+          />
+          <TestInput
+            name="B"
+            validations={{
+              custom: customValidationB,
+            }}
+            value="foo"
+          />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const inputComponent = form.find(TestInput);
-    expect(
-      inputComponent
-        .at(0)
-        .instance()
-        .isValid(),
-    ).toEqual(true);
-    expect(
-      inputComponent
-        .at(1)
-        .instance()
-        .isValid(),
-    ).toEqual(true);
+    expect(getWrapperInstance(inputComponent.at(0)).isValid()).toEqual(true);
+    expect(getWrapperInstance(inputComponent.at(1)).isValid()).toEqual(true);
     const input = form.find('input');
     input.at(0).simulate('change', { target: { value: 'bar' } });
-    expect(
-      inputComponent
-        .at(0)
-        .instance()
-        .isValid(),
-    ).toEqual(false);
-    expect(
-      inputComponent
-        .at(1)
-        .instance()
-        .isValid(),
-    ).toEqual(false);
+    expect(getWrapperInstance(inputComponent.at(0)).isValid()).toEqual(false);
+    expect(getWrapperInstance(inputComponent.at(1)).isValid()).toEqual(false);
   });
 
   it('should not override error messages with error messages passed by form if passed error messages is an empty object', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy validationErrors={{}}>
-            <TestInput
-              name="A"
-              validations={{
-                isEmail: true,
-              }}
-              validationError="bar2"
-              validationErrors={{ isEmail: 'bar3' }}
-              value="foo"
-            />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy validationErrors={{}}>
+          <TestInput
+            name="A"
+            validations={{
+              isEmail: true,
+            }}
+            validationError="bar2"
+            validationErrors={{ isEmail: 'bar3' }}
+            value="foo"
+          />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().getErrorMessage()).toEqual('bar3');
+    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar3');
   });
 
   it('should handle multiple validation error messages passed from validators', () => {
@@ -357,124 +344,123 @@ describe('Element', () => {
     const formEl = form.find('form');
     formEl.simulate('submit');
 
-    expect(inputComponent.instance().getErrorMessage()).toEqual('error message one');
-    expect(inputComponent.instance().getErrorMessages()).toEqual(['error message one', 'error message two']);
+    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('error message one');
+    expect(getWrapperInstance(inputComponent).getErrorMessages()).toEqual(['error message one', 'error message two']);
   });
 
   it('should override all error messages with error messages passed by form', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy validationErrors={{ A: 'bar' }}>
-            <TestInput
-              name="A"
-              validations={{
-                isEmail: true,
-              }}
-              validationError="bar2"
-              validationErrors={{ isEmail: 'bar3' }}
-              value="foo"
-            />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy validationErrors={{ A: 'bar' }}>
+          <TestInput
+            name="A"
+            validations={{
+              isEmail: true,
+            }}
+            validationError="bar2"
+            validationErrors={{ isEmail: 'bar3' }}
+            value="foo"
+          />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().getErrorMessage()).toEqual('bar');
+    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar');
   });
 
   it('should override validation rules with required rules', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput
-              name="A"
-              validations={{
-                isEmail: true,
-              }}
-              validationError="bar"
-              validationErrors={{ isEmail: 'bar2', isLength: 'bar3' }}
-              value="f"
-              required={{
-                isLength: 1,
-              }}
-            />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput
+            name="A"
+            validations={{
+              isEmail: true,
+            }}
+            validationError="bar"
+            validationErrors={{ isEmail: 'bar2', isLength: 'bar3' }}
+            value="f"
+            required={{
+              isLength: 1,
+            }}
+          />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().getErrorMessage()).toEqual('bar3');
+    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar3');
   });
 
   it('should fall back to default error message when non exist in validationErrors map', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput
-              name="A"
-              validations={{
-                isEmail: true,
-              }}
-              validationError="bar1"
-              validationErrors={{ foo: 'bar2' }}
-              value="foo"
-            />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput
+            name="A"
+            validations={{
+              isEmail: true,
+            }}
+            validationError="bar1"
+            validationErrors={{ foo: 'bar2' }}
+            value="foo"
+          />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().getErrorMessage()).toEqual('bar1');
+    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar1');
   });
 
   it('should not be valid if it is required and required rule is true', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput name="A" required />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput name="A" required />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().isValid()).toEqual(false);
+    expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
   });
 
   it('should return the validationError if the field is invalid and required rule is true', () => {
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInput name="A" validationError="Field is required" required />
-          </Formsy>
-        );
-      }
+    function TestForm() {
+      return (
+        <Formsy>
+          <TestInput name="A" validationError="Field is required" required />
+        </Formsy>
+      );
     }
+
     const form = mount(<TestForm />);
 
     const inputComponent = form.find(TestInput);
-    expect(inputComponent.instance().isValid()).toEqual(false);
-    expect(inputComponent.instance().getErrorMessage()).toEqual('Field is required');
+    expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
+    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('Field is required');
   });
 
   it('should handle objects and arrays as values', () => {
-    class TestForm extends React.Component {
-      state = {
-        foo: { foo: 'bar' },
-        bar: ['foo'],
-      };
+    class TestForm extends React.Component<{}, { foo: { [key: string]: string }; bar: string[] }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          foo: { foo: 'bar' },
+          bar: ['foo'],
+        };
+      }
+
       render() {
         return (
           <Formsy>
@@ -492,28 +478,25 @@ describe('Element', () => {
     });
 
     const inputs = form.find(TestInput);
-    expect(
-      inputs
-        .at(0)
-        .instance()
-        .getValue(),
-    ).toEqual({ foo: 'foo' });
-    expect(
-      inputs
-        .at(1)
-        .instance()
-        .getValue(),
-    ).toEqual(['bar']);
+    expect(getWrapperInstance(inputs.at(0)).getValue()).toEqual({ foo: 'foo' });
+    expect(getWrapperInstance(inputs.at(1)).getValue()).toEqual(['bar']);
   });
 
   it('should handle isFormDisabled with dynamic inputs', () => {
-    class TestForm extends React.Component {
-      state = { bool: true };
+    class TestForm extends React.Component<{}, { bool: boolean }> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          bool: true,
+        };
+      }
+
       flip = () => {
         this.setState({
           bool: !this.state.bool,
         });
       };
+
       render() {
         return (
           <Formsy disabled={this.state.bool}>
@@ -522,12 +505,12 @@ describe('Element', () => {
         );
       }
     }
-    const form = mount(<TestForm />);
+    const form = mount<TestForm>(<TestForm />);
 
     const input = form.find(TestInput);
-    expect(input.instance().isFormDisabled()).toEqual(true);
+    expect(getWrapperInstance(input).isFormDisabled()).toEqual(true);
     form.instance().flip();
-    expect(input.instance().isFormDisabled()).toEqual(false);
+    expect(getWrapperInstance(input).isFormDisabled()).toEqual(false);
   });
 
   it('should allow for dot notation in name which maps to a deep object', () => {
@@ -535,6 +518,7 @@ describe('Element', () => {
       onSubmit(model) {
         expect(model).toEqual({ foo: { bar: 'foo', test: 'test' } });
       }
+
       render() {
         return (
           <Formsy onSubmit={this.onSubmit}>
@@ -558,6 +542,7 @@ describe('Element', () => {
       onSubmit(model) {
         expect(model).toEqual({ foo: ['foo', 'bar'] });
       }
+
       render() {
         return (
           <Formsy onSubmit={this.onSubmit}>
@@ -577,13 +562,14 @@ describe('Element', () => {
   });
 
   it('input should rendered once with PureRenderMixin', () => {
-    var renderSpy = sinon.spy();
+    const renderSpy = sinon.spy();
 
     const Input = InputFactory({
-      shouldComponentUpdate: function() {
+      shouldComponentUpdate() {
         return false;
       },
-      render: function() {
+
+      render() {
         renderSpy();
         return <input type={this.props.type} value={this.props.value} onChange={this.updateValue} />;
       },
@@ -599,13 +585,14 @@ describe('Element', () => {
   });
 
   it('input should call shouldComponentUpdate with correct value', () => {
-    var renderSpy = sinon.spy();
+    const renderSpy = sinon.spy();
 
     const Input = InputFactory({
-      shouldComponentUpdate: function(prevProps) {
+      shouldComponentUpdate(prevProps) {
         return prevProps.value !== this.props.value;
       },
-      render: function() {
+
+      render() {
         renderSpy();
         return <input type={this.props.type} value={this.props.value} onChange={this.updateValue} />;
       },
@@ -622,7 +609,7 @@ describe('Element', () => {
     expect(renderSpy.calledOnce).toEqual(true);
 
     input.simulate('change', { target: { value: 'fooz' } });
-    expect(input.instance().value).toEqual('fooz');
+    expect(getInputInstance(input).value).toEqual('fooz');
     expect(renderSpy.calledTwice).toEqual(true);
   });
 
@@ -630,7 +617,7 @@ describe('Element', () => {
     const TestComponent = ({ hasInput }) => <Formsy>{hasInput ? <TestInput name="foo" value="foo" /> : null}</Formsy>;
 
     const wrapper = mount(<TestComponent hasInput />);
-    const formsy = wrapper.find(Formsy).instance();
+    const formsy = getFormInstance(wrapper.find(Formsy));
 
     expect(formsy.inputs).toHaveLength(1);
 
