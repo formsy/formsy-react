@@ -86,7 +86,7 @@ export interface InjectedProps<V> {
   ref?: React.Ref<any>;
   resetValue: () => void;
   setValidations: (validations: Validations<V>, required: RequiredValidation<V>) => void;
-  setValue: (value: V) => void;
+  setValue: (value: V, validate?: boolean) => void;
   showError: boolean;
   showRequired: boolean;
 }
@@ -96,8 +96,10 @@ export interface WrapperInstanceMethods<V> {
   getErrorMessages: () => ValidationError[];
   getValue: () => V;
   isFormDisabled: () => boolean;
+  isFormSubmitted: () => boolean;
   isValid: () => boolean;
-  setValue: (value: V) => void;
+  isValidValue: (value: V) => boolean;
+  setValue: (value: V, validate?: boolean) => void;
 }
 
 export type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;

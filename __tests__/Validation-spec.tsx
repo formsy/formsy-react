@@ -6,7 +6,7 @@ import Formsy, { withFormsy } from '../src';
 import immediate from '../__test_utils__/immediate';
 import { InputFactory } from '../__test_utils__/TestInput';
 import { PassDownProps } from '../src/Wrapper';
-import { getFormInstance, getInputInstance } from '../__test_utils__/getInput';
+import { getFormInstance, getWrapperInstance } from '../__test_utils__/getInput';
 
 class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> {
   public static defaultProps = { type: 'text' };
@@ -36,13 +36,13 @@ describe('Validation', () => {
     const inputComponents = form.find(FormsyTest);
 
     getFormInstance(form).submit();
-    expect(getInputInstance(inputComponents.at(0)).isValid()).toEqual(false);
-    expect(getInputInstance(inputComponents.at(1)).isValid()).toEqual(false);
+    expect(getWrapperInstance(inputComponents.at(0)).isValid()).toEqual(false);
+    expect(getWrapperInstance(inputComponents.at(1)).isValid()).toEqual(false);
 
     input.simulate('change', { target: { value: 'bar' } });
     immediate(() => {
-      expect(getInputInstance(inputComponents.at(0)).isValid()).toEqual(true);
-      expect(getInputInstance(inputComponents).isValid()).toEqual(false);
+      expect(getWrapperInstance(inputComponents.at(0)).isValid()).toEqual(true);
+      expect(getWrapperInstance(inputComponents).isValid()).toEqual(false);
     });
   });
 
@@ -57,12 +57,12 @@ describe('Validation', () => {
     const inputComponent = form.find(FormsyTest);
 
     getFormInstance(form).submit();
-    expect(getInputInstance(inputComponent).isValid()).toEqual(false);
+    expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
 
     input.simulate('change', { target: { value: 'bar' } });
     immediate(() => {
-      expect(getInputInstance(inputComponent).getValue()).toEqual('bar');
-      expect(getInputInstance(inputComponent).isValid()).toEqual(false);
+      expect(getWrapperInstance(inputComponent).getValue()).toEqual('bar');
+      expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
     });
   });
 
@@ -138,7 +138,7 @@ describe('Validation', () => {
     const formEl = form.find('form');
     const input = form.find(FormsyTest);
     formEl.simulate('submit');
-    expect(getInputInstance(input).isValid()).toEqual(false);
+    expect(getWrapperInstance(input).isValid()).toEqual(false);
   });
 
   it('should provide invalidate callback on onInvalidSubmit', () => {
@@ -154,7 +154,7 @@ describe('Validation', () => {
     const formEl = form.find('form');
     const input = form.find(FormsyTest);
     formEl.simulate('submit');
-    expect(getInputInstance(input).getErrorMessage()).toEqual('bar');
+    expect(getWrapperInstance(input).getErrorMessage()).toEqual('bar');
   });
 
   it('should not invalidate inputs on external errors with preventExternalInvalidation prop', () => {
@@ -170,7 +170,7 @@ describe('Validation', () => {
     const formEl = form.find('form');
     const input = form.find(FormsyTest);
     formEl.simulate('submit');
-    expect(getInputInstance(input).isValid()).toEqual(true);
+    expect(getWrapperInstance(input).isValid()).toEqual(true);
   });
 
   it('should invalidate inputs on external errors without preventExternalInvalidation prop', () => {
@@ -186,7 +186,7 @@ describe('Validation', () => {
     const formEl = form.find('form');
     const input = form.find(FormsyTest);
     formEl.simulate('submit');
-    expect(getInputInstance(input).isValid()).toEqual(false);
+    expect(getWrapperInstance(input).isValid()).toEqual(false);
   });
 
   it('should throw errors on invalid validation string', () => {

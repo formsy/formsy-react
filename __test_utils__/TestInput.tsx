@@ -1,14 +1,14 @@
+/* eslint-disable react/destructuring-assignment */
 import React from 'react';
 
 import { withFormsy } from '../src';
 import { PassDownProps } from '../src/Wrapper';
 
-type Props = React.HTMLProps<HTMLInputElement>;
+export type FormsyInputProps = React.HTMLProps<HTMLInputElement> & PassDownProps<string>;
 
-class TestInput extends React.Component<Props> {
+class TestInput extends React.Component<FormsyInputProps> {
   updateValue = event => {
-    const formsyProps = this.props as PassDownProps<string>;
-    formsyProps.setValue(event.target[this.props.type === 'checkbox' ? 'checked' : 'value']);
+    this.props.setValue(event.target[this.props.type === 'checkbox' ? 'checked' : 'value']);
   };
 
   render() {
@@ -17,12 +17,12 @@ class TestInput extends React.Component<Props> {
 }
 
 export function InputFactory(methods) {
-  for (let method in methods) {
-    if (methods.hasOwnProperty(method)) {
+  Object.keys(methods).forEach(method => {
+    if (Object.prototype.hasOwnProperty.call(methods, method)) {
       TestInput.prototype[method] = methods[method];
     }
-  }
-  return withFormsy<Props, string>(TestInput);
+  });
+  return withFormsy<FormsyInputProps, string>(TestInput);
 }
 
-export default withFormsy<Props, string>(TestInput);
+export default withFormsy<FormsyInputProps, string>(TestInput);
