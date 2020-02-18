@@ -11,6 +11,7 @@ import {
   WrappedComponentClass,
 } from './interfaces';
 import { isString } from './utils';
+import { isDefaultRequiredValue } from './validationRules';
 
 /* eslint-disable react/default-props-match-prop-types */
 
@@ -243,10 +244,7 @@ export default function<T, V>(
     // eslint-disable-next-line react/destructuring-assignment
     public hasValue = () => {
       const { value } = this.state;
-      if (isString(value)) {
-        return value !== '';
-      }
-      return value !== undefined;
+      return isDefaultRequiredValue(value);
     };
 
     // eslint-disable-next-line react/destructuring-assignment
