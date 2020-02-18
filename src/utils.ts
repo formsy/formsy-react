@@ -30,6 +30,10 @@ export function isNumber(value: unknown): value is number {
   return typeof value === 'number';
 }
 
+export function isRegex(value: unknown): value is RegExp {
+  return value instanceof RegExp;
+}
+
 export function isValueStringEmpty(value: string): boolean {
   return value === '';
 }
@@ -80,6 +84,10 @@ export function isSame(a: unknown, b: unknown) {
     }
 
     return Object.keys(a).every(key => isSame(a[key], b[key]));
+  }
+
+  if (isRegex(a) && isRegex(b)) {
+    return a.toString() === b.toString();
   }
 
   return a === b;
