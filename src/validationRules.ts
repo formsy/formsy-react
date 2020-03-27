@@ -2,7 +2,7 @@ import { ValidationFunction, Value, Values } from './interfaces';
 
 const isExisty = (value: Value) => value !== null && value !== undefined;
 const isEmpty = (value: Value) => value === '';
-const isEmptyObject = (value: Value) => Object.keys(value).length === 0;
+const isEmptyObject = (value: Value) => typeof value === 'object' && Object.keys(value).length === 0;
 
 const validations: { [key: string]: ValidationFunction } = {
   isDefaultRequiredValue(_values: Values, value: Value) {

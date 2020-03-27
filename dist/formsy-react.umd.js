@@ -1553,9 +1553,13 @@
     return value === '';
   };
 
+  var isEmptyObject = function isEmptyObject(value) {
+    return _typeof(value) === 'object' && Object.keys(value).length === 0;
+  };
+
   var validations = {
     isDefaultRequiredValue: function isDefaultRequiredValue(_values, value) {
-      return value === undefined || value === null || value === '';
+      return value === undefined || value === null || value === '' || isEmptyObject(value);
     },
     isExisty: function isExisty(_values, value) {
       return _isExisty(value);
