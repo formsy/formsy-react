@@ -2,10 +2,11 @@ import { ValidationFunction, Value, Values } from './interfaces';
 
 const isExisty = (value: Value) => value !== null && value !== undefined;
 const isEmpty = (value: Value) => value === '';
+const isEmptyObject = (value: Value) => Object.keys(value).length === 0;
 
 const validations: { [key: string]: ValidationFunction } = {
   isDefaultRequiredValue(_values: Values, value: Value) {
-    return value === undefined || value === null || value === '';
+    return value === undefined || value === null || value === '' || isEmptyObject(value);
   },
   isExisty(_values: Values, value: Value) {
     return isExisty(value);
