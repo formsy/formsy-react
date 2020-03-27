@@ -1547,13 +1547,13 @@ var isEmpty = function isEmpty(value) {
   return value === '';
 };
 
-var isEmptyObject = function isEmptyObject(value) {
-  return _typeof(value) === 'object' && Object.keys(value).length === 0;
+var isEmptyArray = function isEmptyArray(value) {
+  return Array.isArray(value) && value.length === 0;
 };
 
 var validations = {
   isDefaultRequiredValue: function isDefaultRequiredValue(_values, value) {
-    return value === undefined || value === null || value === '' || isEmptyObject(value);
+    return value === undefined || value === null || value === '' || isEmptyArray(value);
   },
   isExisty: function isExisty(_values, value) {
     return _isExisty(value);
