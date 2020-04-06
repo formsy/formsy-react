@@ -301,7 +301,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Checks validation on current value or a passed value
-  public runValidation = (component: InputComponent, value = component.state.value) => {
+  public runValidation = (component: InputComponent, value = component.getValue()) => {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
 

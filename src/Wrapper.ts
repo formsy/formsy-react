@@ -99,6 +99,14 @@ function getDisplayName(component: WrappedComponentClass) {
   );
 }
 
+/**
+ * To check if value is passed in props
+ */
+function hasValueInProps(props: Record<string, any>) {
+  // eslint-disable-next-line no-prototype-builtins
+  return props.hasOwnProperty('value');
+}
+
 export default function<T>(
   WrappedComponent: React.ComponentType<T & PassDownProps>,
 ): React.ComponentType<T & WrapperProps> {
@@ -209,7 +217,13 @@ export default function<T>(
     };
 
     // eslint-disable-next-line react/destructuring-assignment
-    public getValue = () => this.state.value;
+    public getValue = () => {
+      if (hasValueInProps(this.props)) {
+        this.props.value;
+      }
+
+      return this.state.value;
+    };
 
     public setValidations = (validations: string | Validations, required: RequiredValidation) => {
       // Add validations to the store itself as the props object can not be modified
@@ -222,6 +236,20 @@ export default function<T>(
     // A user can override this and pass a second parameter of `false` to skip validation.
     public setValue = (value, validate = true) => {
       const { formsy } = this.context;
+
+      if (hasValueInProps(this.props)) {
+        if (validate) {
+          this.setState(
+            {
+              isPristine: false,
+            },
+            () => {
+              formsy.validate(this);
+            },
+          );
+        }
+        return;
+      }
 
       if (!validate) {
         this.setState({
@@ -265,15 +293,17 @@ export default function<T>(
       const { pristineValue } = this.state;
       const { formsy } = this.context;
 
-      this.setState(
-        {
-          value: pristineValue,
-          isPristine: true,
-        },
-        () => {
-          formsy.validate(this);
-        },
-      );
+      const stateChanges: Record<string, any> = {
+        isPristine: true,
+      };
+
+      if (!hasValueInProps(this.props)) {
+        stateChanges.value = pristineValue;
+      }
+
+      this.setState(stateChanges, () => {
+        formsy.validate(this);
+      });
     };
 
     public showError = () => !this.showRequired() && !this.isValid();

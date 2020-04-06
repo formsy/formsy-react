@@ -1673,6 +1673,15 @@
   function getDisplayName(component) {
     return component.displayName || component.name || (typeof component === 'string' ? component : 'Component');
   }
+  /**
+   * To check if value is passed in props
+   */
+
+
+  function hasValueInProps(props) {
+    // eslint-disable-next-line no-prototype-builtins
+    return props.hasOwnProperty('value');
+  }
 
   function Wrapper (WrappedComponent) {
     var _class, _temp;
@@ -1710,6 +1719,10 @@
         };
 
         _this.getValue = function () {
+          if (hasValueInProps(_this.props)) {
+            _this.props.value;
+          }
+
           return _this.state.value;
         };
 
@@ -1724,6 +1737,18 @@
         _this.setValue = function (value) {
           var validate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
           var formsy = _this.context.formsy;
+
+          if (hasValueInProps(_this.props)) {
+            if (validate) {
+              _this.setState({
+                isPristine: false
+              }, function () {
+                formsy.validate(_assertThisInitialized(_this));
+              });
+            }
+
+            return;
+          }
 
           if (!validate) {
             _this.setState({
@@ -1770,11 +1795,15 @@
         _this.resetValue = function () {
           var pristineValue = _this.state.pristineValue;
           var formsy = _this.context.formsy;
-
-          _this.setState({
-            value: pristineValue,
+          var stateChanges = {
             isPristine: true
-          }, function () {
+          };
+
+          if (!hasValueInProps(_this.props)) {
+            stateChanges.value = pristineValue;
+          }
+
+          _this.setState(stateChanges, function () {
             formsy.validate(_assertThisInitialized(_this));
           });
         };
@@ -2112,7 +2141,7 @@
       };
 
       _this.runValidation = function (component) {
-        var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : component.state.value;
+        var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : component.getValue();
         var validationErrors = _this.props.validationErrors;
 
         var currentValues = _this.getCurrentValues();

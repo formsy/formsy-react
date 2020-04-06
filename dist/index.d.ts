@@ -102,7 +102,7 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     resetInternal: (event: any) => void;
     resetModel: IResetModel;
     setValue: ISetInputValue;
-    runValidation: (component: InputComponent, value?: any) => Promise<{
+    runValidation: (component: InputComponent, value?: void) => Promise<{
         isRequired: boolean;
         isValid: boolean;
         error: any;
