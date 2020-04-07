@@ -300,7 +300,7 @@ export default function<T>(
         setValue: this.setValue,
         showError: this.showError(),
         showRequired: this.showRequired(),
-        getValue: this.getValue(),
+        getValue: this.getValue,
       };
 
       if (innerRef) {
