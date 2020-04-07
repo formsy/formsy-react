@@ -74,6 +74,7 @@ export interface WrapperState {
 export interface PassDownProps extends WrapperProps {
   errorMessage: any;
   errorMessages: any;
+  getValue: () => Value;
   hasValue: boolean;
   isFormDisabled: boolean;
   isFormSubmitted: boolean;
@@ -121,7 +122,6 @@ export default function<T>(
       validationError: '',
       validationErrors: {},
       validations: null,
-      value: (WrappedComponent as any).defaultValue,
     };
 
     public constructor(props) {
@@ -299,7 +299,7 @@ export default function<T>(
         setValue: this.setValue,
         showError: this.showError(),
         showRequired: this.showRequired(),
-        value: this.getValue(),
+        getValue: this.getValue,
       };
 
       if (innerRef) {

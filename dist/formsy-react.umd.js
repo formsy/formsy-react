@@ -1887,7 +1887,7 @@
             setValue: this.setValue,
             showError: this.showError(),
             showRequired: this.showRequired(),
-            value: this.getValue()
+            getValue: this.getValue
           });
 
           if (innerRef) {
@@ -1907,8 +1907,7 @@
       required: false,
       validationError: '',
       validationErrors: {},
-      validations: null,
-      value: WrappedComponent.defaultValue
+      validations: null
     }, _temp;
   }
 
