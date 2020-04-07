@@ -74,6 +74,7 @@ export interface WrapperState {
 export interface PassDownProps extends WrapperProps {
   errorMessage: any;
   errorMessages: any;
+  getValue: () => Value;
   hasValue: boolean;
   isFormDisabled: boolean;
   isFormSubmitted: boolean;
