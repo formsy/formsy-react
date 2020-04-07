@@ -23,5 +23,4 @@ export declare type WrappedComponentClass = React.FC | ComponentWithStaticAttrib
 export interface InputComponent extends React.Component<WrapperProps, WrapperState> {
     validations?: Validations;
     requiredValidations?: Validations;
-    getValue: () => void;
 }
