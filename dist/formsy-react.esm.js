@@ -1901,8 +1901,7 @@ function Wrapper (WrappedComponent) {
     required: false,
     validationError: '',
     validationErrors: {},
-    validations: null,
-    value: WrappedComponent.defaultValue
+    validations: null
   }, _temp;
 }
 

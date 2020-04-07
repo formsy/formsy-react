@@ -122,7 +122,6 @@ export default function<T>(
       validationError: '',
       validationErrors: {},
       validations: null,
-      value: (WrappedComponent as any).defaultValue,
     };
 
     public constructor(props) {
