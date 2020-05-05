@@ -112,7 +112,7 @@
     "pretty-quick": "^2.0.0",
     "react": "^16.2.0 || ^16.0.0",
     "react-dom": "^16.2.0 || ^16.0.0",
-    "rollup": "^1.19.2",
+    "rollup": "^2.7.6",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-peer-deps-external": "^2.2.0",
     "sinon": "^9.0.0",
