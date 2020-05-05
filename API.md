@@ -98,7 +98,7 @@ external validator.
 ```jsx
 class Form extends React.Component {
   state = { validationErrors: {} };
-  validateForm = values => {
+  validateForm = (values) => {
     if (!values.foo) {
       this.setState({
         validationErrors: {
@@ -305,7 +305,7 @@ class MyInput extends React.Component {
   render() {
     return (
       <div>
-        <input value={this.props.value} onChange={e => this.props.setValue(e.target.value)} />
+        <input value={this.props.value} onChange={(e) => this.props.setValue(e.target.value)} />
       </div>
     );
   }
@@ -337,7 +337,7 @@ class MyForm extends React.Component {
       <Formsy>
         <MyInput
           name="search"
-          innerRef={c => {
+          innerRef={(c) => {
             this.searchInput = c;
           }}
         />
@@ -446,7 +446,7 @@ Gets the current value of the form input component.
 
 ```jsx
 class MyInput extends React.Component {
-  changeValue = event => {
+  changeValue = (event) => {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
@@ -466,7 +466,7 @@ useful in cases where you want to only validate on blur / change / etc.
 
 ```jsx
 class MyInput extends React.Component {
-  changeValue = event => {
+  changeValue = (event) => {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
@@ -486,7 +486,7 @@ Resets to empty value. This will run a **setState()** on the component and do a 
 
 ```jsx
 class MyInput extends React.Component {
-  changeValue = event => {
+  changeValue = (event) => {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
@@ -512,7 +512,7 @@ will be an empty array.
 
 ```jsx
 class MyInput extends React.Component {
-  changeValue = event => {
+  changeValue = (event) => {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
@@ -561,7 +561,7 @@ class MyForm extends React.Component {
 
 ```jsx
 class MyInput extends React.Component {
-  changeValue = event => {
+  changeValue = (event) => {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
@@ -584,7 +584,7 @@ True if the required property has been passed.
 
 ```jsx
 class MyInput extends React.Component {
-  changeValue = event => {
+  changeValue = (event) => {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
@@ -606,7 +606,7 @@ value is empty and the required prop has been passed.
 
 ```jsx
 class MyInput extends React.Component {
-  changeValue = event => {
+  changeValue = (event) => {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
@@ -628,7 +628,7 @@ component value and it is invalid or if a server error is received.
 
 ```jsx
 class MyInput extends React.Component {
-  changeValue = event => {
+  changeValue = (event) => {
     this.props.setValue(event.currentTarget.value);
   };
   render() {
@@ -730,7 +730,7 @@ MyInput.propTypes = {
 An example:
 
 ```jsx
-addValidationRule('isFruit', function(values, value) {
+addValidationRule('isFruit', function (values, value) {
   return ['apple', 'orange', 'pear'].indexOf(value) >= 0;
 });
 ```
@@ -742,7 +742,7 @@ addValidationRule('isFruit', function(values, value) {
 Another example:
 
 ```jsx
-addValidationRule('isIn', function(values, value, array) {
+addValidationRule('isIn', function (values, value, array) {
   return array.indexOf(value) >= 0;
 });
 ```
@@ -756,7 +756,7 @@ addValidationRule('isIn', function(values, value, array) {
 Cross input validation:
 
 ```jsx
-addValidationRule('isMoreThan', function(values, value, otherField) {
+addValidationRule('isMoreThan', function (values, value, otherField) {
   // The this context points to an object containing the values
   // {childAge: "", parentAge: "5"}
   // otherField argument is from the validations rule ("childAge")

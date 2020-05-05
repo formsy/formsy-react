@@ -11,7 +11,7 @@ import { getFormInstance, getWrapperInstance } from '../__test_utils__/getInput'
 class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> {
   public static defaultProps = { type: 'text' };
 
-  handleChange = event => {
+  handleChange = (event) => {
     const { setValue } = this.props;
     setValue(event.target.value);
   };

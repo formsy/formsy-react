@@ -83,7 +83,7 @@ export function isSame(a: unknown, b: unknown) {
       return false;
     }
 
-    return Object.keys(a).every(key => isSame(a[key], b[key]));
+    return Object.keys(a).every((key) => isSame(a[key], b[key]));
   }
 
   if (isRegex(a) && isRegex(b)) {
@@ -111,10 +111,10 @@ export function runRules<V>(
     success: [],
   };
 
-  Object.keys(validations).forEach(validationName => {
+  Object.keys(validations).forEach((validationName) => {
     const validationsVal = validations[validationName];
     const validationRulesVal = validationRules[validationName];
-    const addToResults = validation => {
+    const addToResults = (validation) => {
       if (isString(validation)) {
         results.errors.push(validation);
         results.failed.push(validationName);

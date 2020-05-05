@@ -27,11 +27,11 @@ const VALUES = [
 
 describe('Utils', () => {
   // For each function in types
-  Object.keys(TYPES).forEach(isFn => {
+  Object.keys(TYPES).forEach((isFn) => {
     // Create a test for that functiojn
     it(isFn, () => {
       // For each value in values
-      VALUES.forEach(value => {
+      VALUES.forEach((value) => {
         // Make sure that if it is in that types TYPES array, it returns true
         expect(utils[isFn](value)).toBe(TYPES[isFn].includes(value));
       });
