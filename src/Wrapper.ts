@@ -161,8 +161,13 @@ export default function <T, V>(
       attachToForm(this);
     }
 
+<<<<<<< HEAD
     public shouldComponentUpdate(nextProps, nextState) {
       const { props, state } = this;
+=======
+    public shouldComponentUpdate(nextProps, nextState, nextContext) {
+      const { props, state, context } = this;
+>>>>>>> Run format
       const isChanged = (a: object, b: object): boolean => Object.keys(a).some((k) => a[k] !== b[k]);
       const isPropsChanged = isChanged(props, nextProps);
       const isStateChanged = isChanged(state, nextState);
