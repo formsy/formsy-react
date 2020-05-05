@@ -105,7 +105,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   }
 
   public componentDidMount = () => {
-    this.prevInputNames = this.inputs.map(component => component.props.name);
+    this.prevInputNames = this.inputs.map((component) => component.props.name);
     this.validateForm();
   };
 
@@ -116,7 +116,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.setInputValidationErrors(validationErrors);
     }
 
-    const newInputNames = this.inputs.map(component => component.props.name);
+    const newInputNames = this.inputs.map((component) => component.props.name);
     if (this.prevInputNames && !utils.isSame(this.prevInputNames, newInputNames)) {
       this.prevInputNames = newInputNames;
       this.validateForm();
@@ -125,7 +125,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     // Keep the disabled value in state/context the same as from props
     if (disabled !== prevProps.disabled) {
       // eslint-disable-next-line
-      this.setState(state => ({
+      this.setState((state) => ({
         ...state,
         contextValue: {
           ...state.contextValue,
@@ -168,7 +168,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
     // Iterate through each component and set it as pristine
     // or "dirty".
-    this.inputs.forEach(component => {
+    this.inputs.forEach((component) => {
       component.setState({
         formSubmitted: !isPristine,
         isPristine,
@@ -176,11 +176,11 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     });
   };
 
-  public setInputValidationErrors = errors => {
+  public setInputValidationErrors = (errors) => {
     const { preventExternalInvalidation } = this.props;
     const { isValid } = this.state;
 
-    this.inputs.forEach(component => {
+    this.inputs.forEach((component) => {
       const { name } = component.props;
       component.setState({
         isValid: !(name in errors),
@@ -219,7 +219,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     }
 
     const returnModel = {};
-    Object.keys(model).forEach(key => {
+    Object.keys(model).forEach((key) => {
       set(returnModel, key, model[key]);
     });
     return returnModel;
@@ -230,7 +230,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.resetModel(model);
   };
 
-  private resetInternal = event => {
+  private resetInternal = (event) => {
     const { onReset } = this.props;
 
     event.preventDefault();
@@ -241,8 +241,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Reset each key in the model to the original / initial / specified value
-  private resetModel: IResetModel = data => {
-    this.inputs.forEach(component => {
+  private resetModel: IResetModel = (data) => {
+    this.inputs.forEach((component) => {
       const { name } = component.props;
       if (data && has(data, name)) {
         component.setValue(get(data, name));
@@ -286,7 +286,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
         if (validationResults.failed.length) {
           return validationResults.failed
-            .map(failed => (componentValidationErrors[failed] ? componentValidationErrors[failed] : validationError))
+            .map((failed) => (componentValidationErrors[failed] ? componentValidationErrors[failed] : validationError))
             .filter((x, pos, arr) => arr.indexOf(x) === pos); // remove duplicates
         }
 
@@ -299,7 +299,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   // Method put on each input component to register
   // itself to the form
-  public attachToForm = component => {
+  public attachToForm = (component) => {
     if (this.inputs.indexOf(component) === -1) {
       this.inputs.push(component);
     }
@@ -353,7 +353,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     const { isValid } = this.state;
 
     Object.entries(errors).forEach(([name, error]) => {
-      const component = this.inputs.find(input => input.props.name === name);
+      const component = this.inputs.find((input) => input.props.name === name);
       if (!component) {
         throw new Error(
           `You are trying to update an input that does not exist. Verify errors object with input names. ${JSON.stringify(
@@ -375,7 +375,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // Set the value of components
   public updateInputsWithValue: IUpdateInputsWithValue<any> = (values, validate) => {
     Object.entries(values).forEach(([name, value]) => {
-      const input = this.inputs.find(component => component.props.name === name);
+      const input = this.inputs.find((component) => component.props.name === name);
 
       if (input) {
         input.setValue(value, validate);
@@ -407,7 +407,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     // We need a callback as we are validating all inputs again. This will
     // run when the last component has set its state
     const onValidationComplete = () => {
-      const allIsValid = this.inputs.every(component => component.state.isValid);
+      const allIsValid = this.inputs.every((component) => component.state.isValid);
 
       this.setFormValidState(allIsValid);
 

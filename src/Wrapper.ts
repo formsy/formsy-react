@@ -21,7 +21,7 @@ const convertValidationsToObject = <V>(validations: false | Validations<V>): Val
       let args: string[] = validation.split(':');
       const validateMethod: string = args.shift();
 
-      args = args.map(arg => {
+      args = args.map((arg) => {
         try {
           return JSON.parse(arg);
         } catch (e) {
@@ -111,7 +111,7 @@ function getDisplayName(component: WrappedComponentClass) {
   return component.displayName || component.name || (utils.isString(component) ? component : 'Component');
 }
 
-export default function<T, V>(
+export default function <T, V>(
   WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
 ): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
   return class extends React.Component<T & WrapperProps<V>, WrapperState<V>> implements WrapperInstanceMethods<V> {
@@ -166,7 +166,7 @@ export default function<T, V>(
 
     public shouldComponentUpdate(nextProps, nextState, nextContext) {
       const { props, state, context } = this;
-      const isChanged = (a: object, b: object): boolean => Object.keys(a).some(k => a[k] !== b[k]);
+      const isChanged = (a: object, b: object): boolean => Object.keys(a).some((k) => a[k] !== b[k]);
       const isPropsChanged = isChanged(props, nextProps);
       const isStateChanged = isChanged(state, nextState);
       const isFormsyContextChanged = isChanged(context, nextContext);

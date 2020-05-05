@@ -7,7 +7,7 @@ import { PassDownProps } from '../src/Wrapper';
 export type FormsyInputProps = React.HTMLProps<HTMLInputElement> & PassDownProps<string>;
 
 class TestInput extends React.Component<FormsyInputProps> {
-  updateValue = event => {
+  updateValue = (event) => {
     this.props.setValue(event.target[this.props.type === 'checkbox' ? 'checked' : 'value']);
   };
 
@@ -17,7 +17,7 @@ class TestInput extends React.Component<FormsyInputProps> {
 }
 
 export function InputFactory(methods) {
-  Object.keys(methods).forEach(method => {
+  Object.keys(methods).forEach((method) => {
     if (Object.prototype.hasOwnProperty.call(methods, method)) {
       TestInput.prototype[method] = methods[method];
     }

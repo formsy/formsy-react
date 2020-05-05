@@ -25,7 +25,7 @@ describe('Element', () => {
   it('withFormsy: should only set the value and not validate when calling setValue(val, false)', () => {
     const Input = withFormsy(
       class NoValidateInput extends React.Component<FormsyInputProps> {
-        updateValue = event => {
+        updateValue = (event) => {
           this.props.setValue(event.target.value, false);
         };
 

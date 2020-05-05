@@ -19,7 +19,7 @@ describe('Setting up a form', () => {
           <Formsy>
             <TestInputHoc
               name="name"
-              innerRef={c => {
+              innerRef={(c) => {
                 this.inputRef = c;
               }}
             />
@@ -49,7 +49,7 @@ describe('Setting up a form', () => {
     function TestForm() {
       return (
         <Formsy
-          onSubmit={formModel => {
+          onSubmit={(formModel) => {
             model = formModel;
           }}
         >
@@ -71,7 +71,7 @@ describe('Setting up a form', () => {
 
     const form = mount(
       <DynamicInputForm
-        onSubmit={formModel => {
+        onSubmit={(formModel) => {
           model = formModel;
         }}
         inputName="test"
@@ -89,7 +89,7 @@ describe('Setting up a form', () => {
 
     const form = mount(
       <DynamicInputForm
-        onSubmit={formModel => {
+        onSubmit={(formModel) => {
           model = formModel;
         }}
         inputName="test"
@@ -120,7 +120,7 @@ describe('Setting up a form', () => {
         const { inputValue } = this.state;
         return (
           <Formsy
-            onSubmit={formModel => {
+            onSubmit={(formModel) => {
               model = formModel;
             }}
           >
@@ -150,7 +150,7 @@ describe('Setting up a form', () => {
 
 describe('mapModel', () => {
   it('should honor mapModel transformations', () => {
-    const mapping = jest.fn(model => ({
+    const mapping = jest.fn((model) => ({
       ...model,
       testChange: true,
     }));
@@ -451,7 +451,7 @@ describe('Update a form', () => {
         };
       }
 
-      onChange = values => {
+      onChange = (values) => {
         this.setState(values.foo ? { validationErrors: {} } : { validationErrors: { foo: 'bar' } });
       };
 
