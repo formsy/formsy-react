@@ -9,7 +9,7 @@ export declare type IUpdateInputsWithValue<V> = (values: {
     [key: string]: V;
 }, validate?: boolean) => void;
 export declare type IUpdateInputsWithError = (errors: {
-    [key: string]: string;
+    [key: string]: ValidationError;
 }, invalidate?: boolean) => void;
 export declare type ValidationError = string | React.ReactNode;
 export declare type ValidationFunction<V> = (values: Values, value: V, extra?: any) => boolean | ValidationError;
