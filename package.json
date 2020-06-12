@@ -44,7 +44,6 @@
   "files": [
     "dist"
   ],
-  "browser": "dist/formsy-react.umd.js",
   "main": "dist/formsy-react.cjs.js",
   "module": "dist/formsy-react.esm.js",
   "types": "dist/index.d.ts",
