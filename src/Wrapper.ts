@@ -1,15 +1,16 @@
-import React from 'react';
 import PropTypes from 'prop-types';
-
-import * as utils from './utils';
+import React from 'react';
 import FormsyContext from './FormsyContext';
 import {
   ComponentWithStaticAttributes,
+  FormsyContextInterface,
   RequiredValidation,
   ValidationError,
   Validations,
   WrappedComponentClass,
 } from './interfaces';
+
+import * as utils from './utils';
 import { isString } from './utils';
 import { isDefaultRequiredValue } from './validationRules';
 
@@ -114,15 +115,11 @@ function getDisplayName(component: WrappedComponentClass) {
 export default function <T, V>(
   WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
 ): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
-  return class extends React.Component<T & WrapperProps<V>, WrapperState<V>> implements WrapperInstanceMethods<V> {
-    // eslint-disable-next-line react/sort-comp
-    public static contextType = FormsyContext;
-
+  class WithFormsyWrapper extends React.Component<T & WrapperProps<V> & FormsyContextInterface, WrapperState<V>>
+    implements WrapperInstanceMethods<V> {
     public validations?: Validations<V>;
 
     public requiredValidations?: Validations<V>;
-
-    public context: React.ContextType<typeof FormsyContext>;
 
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
@@ -139,44 +136,42 @@ export default function <T, V>(
 
     public constructor(props) {
       super(props);
+      const { runValidation, validations, required, value } = props;
+
+      this.state = { value } as any;
+
+      this.setValidations(validations, required);
+
       this.state = {
         formSubmitted: false,
         isPristine: true,
-        isRequired: false,
-        isValid: true,
         pristineValue: props.value,
-        validationError: [],
         value: props.value,
+        ...runValidation(this, props.value),
       };
     }
 
     public componentDidMount() {
-      const { validations, required, name } = this.props;
-      const { attachToForm } = this.context;
+      const { name, attachToForm } = this.props;
 
       if (!name) {
         throw new Error('Form Input requires a name property when used');
       }
 
-      this.setValidations(validations, required);
-
-      // Pass a function instead?
       attachToForm(this);
     }
 
-    public shouldComponentUpdate(nextProps, nextState, nextContext) {
-      const { props, state, context } = this;
+    public shouldComponentUpdate(nextProps, nextState) {
+      const { props, state } = this;
       const isChanged = (a: object, b: object): boolean => Object.keys(a).some((k) => a[k] !== b[k]);
       const isPropsChanged = isChanged(props, nextProps);
       const isStateChanged = isChanged(state, nextState);
-      const isFormsyContextChanged = isChanged(context, nextContext);
 
-      return isPropsChanged || isStateChanged || isFormsyContextChanged;
+      return isPropsChanged || isStateChanged;
     }
 
     public componentDidUpdate(prevProps) {
-      const { value, validations, required } = this.props;
-      const { validate } = this.context;
+      const { value, validations, required, validate } = this.props;
 
       // If the value passed has changed, set it. If value is not passed it will
       // internally update, and this will never run
@@ -193,7 +188,7 @@ export default function <T, V>(
 
     // Detach it when component unmounts
     public componentWillUnmount() {
-      const { detachFromForm } = this.context;
+      const { detachFromForm } = this.props;
       detachFromForm(this);
     }
 
@@ -224,7 +219,7 @@ export default function <T, V>(
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
     public setValue = (value: V, validate = true): void => {
-      const { validate: validateForm } = this.context;
+      const { validate: validateForm } = this.props;
 
       if (!validate) {
         this.setState({ value });
@@ -248,7 +243,7 @@ export default function <T, V>(
     };
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isFormDisabled = (): boolean => this.context.isFormDisabled;
+    public isFormDisabled = (): boolean => this.props.isFormDisabled;
 
     // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = (): boolean => this.state.formSubmitted;
@@ -263,11 +258,11 @@ export default function <T, V>(
     public isValid = (): boolean => this.state.isValid;
 
     // eslint-disable-next-line react/destructuring-assignment
-    public isValidValue = (value: V) => this.context.isValidValue(this, value);
+    public isValidValue = (value: V) => this.props.isValidValue(this, value);
 
     public resetValue = () => {
       const { pristineValue } = this.state;
-      const { validate } = this.context;
+      const { validate } = this.props;
 
       this.setState(
         {
@@ -312,5 +307,11 @@ export default function <T, V>(
 
       return React.createElement(WrappedComponent, propsForElement);
     }
-  };
+  }
+
+  // eslint-disable-next-line react/display-name
+  return (props) =>
+    React.createElement(FormsyContext.Consumer, null, (contextValue) => {
+      return React.createElement(WithFormsyWrapper, { ...props, ...contextValue });
+    });
 }
