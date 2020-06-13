@@ -17,7 +17,7 @@ function ValidationForm(props: { validations: string; value?: any; other?: any }
 
 export function expectIsValid(testForm: React.ComponentElement<any, any>) {
   const form = mount(testForm);
-  const inputComponent = form.find(TestInput).first();
+  const inputComponent = form.find('Formsy(TestInput)').first();
   return expect(inputComponent.instance().isValid());
 }
 

@@ -33,7 +33,7 @@ describe('Validation', () => {
     );
 
     const input = form.find('input').at(0);
-    const inputComponents = form.find(FormsyTest);
+    const inputComponents = form.find('Formsy(MyTest)');
 
     getFormInstance(form).submit();
     expect(getWrapperInstance(inputComponents.at(0)).isValid()).toEqual(false);
@@ -54,7 +54,7 @@ describe('Validation', () => {
     );
 
     const input = form.find('input');
-    const inputComponent = form.find(FormsyTest);
+    const inputComponent = form.find('Formsy(MyTest)');
 
     getFormInstance(form).submit();
     expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
@@ -136,7 +136,7 @@ describe('Validation', () => {
     const form = mount(<TestForm />);
 
     const formEl = form.find('form');
-    const input = form.find(FormsyTest);
+    const input = form.find('Formsy(MyTest)');
     formEl.simulate('submit');
     expect(getWrapperInstance(input).isValid()).toEqual(false);
   });
@@ -152,7 +152,7 @@ describe('Validation', () => {
 
     const form = mount(<TestForm />);
     const formEl = form.find('form');
-    const input = form.find(FormsyTest);
+    const input = form.find('Formsy(MyTest)');
     formEl.simulate('submit');
     expect(getWrapperInstance(input).getErrorMessage()).toEqual('bar');
   });
@@ -168,7 +168,7 @@ describe('Validation', () => {
 
     const form = mount(<TestForm />);
     const formEl = form.find('form');
-    const input = form.find(FormsyTest);
+    const input = form.find('Formsy(MyTest)');
     formEl.simulate('submit');
     expect(getWrapperInstance(input).isValid()).toEqual(true);
   });
@@ -184,7 +184,7 @@ describe('Validation', () => {
 
     const form = mount(<TestForm />);
     const formEl = form.find('form');
-    const input = form.find(FormsyTest);
+    const input = form.find('Formsy(MyTest)');
     formEl.simulate('submit');
     expect(getWrapperInstance(input).isValid()).toEqual(false);
   });
