@@ -14,6 +14,7 @@ const defaultValue = {
   isFormDisabled: true,
   isValidValue: throwNoFormsyProvider,
   validate: throwNoFormsyProvider,
+  runValidation: throwNoFormsyProvider,
 };
 
 export default React.createContext<FormsyContextInterface>(defaultValue);

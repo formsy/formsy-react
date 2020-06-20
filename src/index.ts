@@ -6,7 +6,7 @@ import set from 'lodash.set';
 
 import * as utils from './utils';
 import validationRules from './validationRules';
-import Wrapper, { PassDownProps, propTypes, WrapperState } from './Wrapper';
+import Wrapper, { PassDownProps, propTypes } from './Wrapper';
 import FormsyContext from './FormsyContext';
 
 import {
@@ -16,6 +16,7 @@ import {
   IResetModel,
   IUpdateInputsWithError,
   IUpdateInputsWithValue,
+  ValidationError,
   ValidationFunction,
 } from './interfaces';
 import { isObject, isString } from './utils';
@@ -98,6 +99,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
         isFormDisabled: props.disabled,
         isValidValue: this.isValidValue,
         validate: this.validate,
+        runValidation: this.runValidation,
       },
     };
     this.inputs = [];
@@ -254,7 +256,10 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Checks validation on current value or a passed value
-  public runValidation = <V>(component: InputComponent<V>, value = component.state.value): Partial<WrapperState<V>> => {
+  public runValidation = <V>(
+    component: InputComponent<V>,
+    value = component.state.value,
+  ): { isRequired: boolean; isValid: boolean; validationError: ValidationError[] } => {
     const { validationErrors } = this.props;
     const { validationError, validationErrors: componentValidationErrors, name } = component.props;
     const currentValues = this.getCurrentValues();
@@ -304,7 +309,13 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.inputs.push(component);
     }
 
-    this.validate(component);
+    const { onChange } = this.props;
+    const { canChange } = this.state;
+
+    // Trigger onChange
+    if (canChange) {
+      onChange(this.getModel(), this.isChanged());
+    }
   };
 
   // Method put on each input component to unregister

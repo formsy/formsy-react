@@ -39,7 +39,7 @@ describe('Element', () => {
         <Input name="foo" value="foo" />
       </Formsy>,
     );
-    const inputComponent = form.find(Input);
+    const inputComponent = form.find('Formsy(NoValidateInput)');
     const setStateSpy = sinon.spy(getWrapperInstance(inputComponent), 'setState');
     const inputElement = form.find('input');
 
@@ -106,7 +106,7 @@ describe('Element', () => {
   it('should return true or false when calling isRequired() depending on passed required attribute', () => {
     const isRequireds = [];
     const Input = InputFactory({
-      componentDidUpdate() {
+      componentDidMount() {
         isRequireds.push(this.props.isRequired);
       },
     });
@@ -126,7 +126,7 @@ describe('Element', () => {
   it('should return true or false when calling showRequired() depending on input being empty and required is passed, or not', () => {
     const showRequireds = [];
     const Input = InputFactory({
-      componentDidUpdate() {
+      componentDidMount() {
         showRequireds.push(this.props.showRequired);
       },
     });
@@ -200,7 +200,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const input = form.find(TestInput);
+    const input = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(input).isValidValue('foo@bar.com')).toEqual(true);
     expect(getWrapperInstance(input).isValidValue('foo@bar')).toEqual(false);
   });
@@ -221,7 +221,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const input = form.find(TestInput);
+    const input = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(input).isValidValue('foo@bar.com')).toEqual(true);
     expect(getWrapperInstance(input).isValidValue('foo@bar')).toEqual(false);
   });
@@ -243,7 +243,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const inputComponent = form.find(TestInput);
+    const inputComponent = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(inputComponent).isValid()).toEqual(true);
     const input = form.find('input');
     input.simulate('change', { target: { value: 'bar' } });
@@ -282,7 +282,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const inputComponent = form.find(TestInput);
+    const inputComponent = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(inputComponent.at(0)).isValid()).toEqual(true);
     expect(getWrapperInstance(inputComponent.at(1)).isValid()).toEqual(true);
     const input = form.find('input');
@@ -310,7 +310,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const inputComponent = form.find(TestInput);
+    const inputComponent = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar3');
   });
 
@@ -339,7 +339,7 @@ describe('Element', () => {
     }
 
     const form = mount(<TestForm />);
-    const inputComponent = form.find(TestInput);
+    const inputComponent = form.find('Formsy(TestInput)');
 
     const formEl = form.find('form');
     formEl.simulate('submit');
@@ -367,7 +367,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const inputComponent = form.find(TestInput);
+    const inputComponent = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar');
   });
 
@@ -393,7 +393,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const inputComponent = form.find(TestInput);
+    const inputComponent = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar3');
   });
 
@@ -416,7 +416,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const inputComponent = form.find(TestInput);
+    const inputComponent = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar1');
   });
 
@@ -431,7 +431,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const inputComponent = form.find(TestInput);
+    const inputComponent = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
   });
 
@@ -446,7 +446,7 @@ describe('Element', () => {
 
     const form = mount(<TestForm />);
 
-    const inputComponent = form.find(TestInput);
+    const inputComponent = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
     expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('Field is required');
   });
@@ -477,7 +477,7 @@ describe('Element', () => {
       bar: ['bar'],
     });
 
-    const inputs = form.find(TestInput);
+    const inputs = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(inputs.at(0)).getValue()).toEqual({ foo: 'foo' });
     expect(getWrapperInstance(inputs.at(1)).getValue()).toEqual(['bar']);
   });
@@ -507,7 +507,7 @@ describe('Element', () => {
     }
     const form = mount<TestForm>(<TestForm />);
 
-    const input = form.find(TestInput);
+    const input = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(input).isFormDisabled()).toEqual(true);
     form.instance().flip();
     expect(getWrapperInstance(input).isFormDisabled()).toEqual(false);

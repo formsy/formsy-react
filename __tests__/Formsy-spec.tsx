@@ -434,7 +434,7 @@ describe('Update a form', () => {
     }
 
     const form = mount(<TestForm />);
-    const input = form.find(TestInput);
+    const input = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(input).isFormDisabled()).toEqual(true);
 
     (form.instance() as TestForm).enableForm();
@@ -466,7 +466,7 @@ describe('Update a form', () => {
 
     const form = mount(<TestForm />);
 
-    const input = form.find(TestInput);
+    const input = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(input).getErrorMessage()).toEqual('bar');
     getWrapperInstance(input).setValue('gotValue');
 
@@ -603,7 +603,7 @@ describe('value === false', () => {
     }
 
     const form = mount(<TestForm />);
-    const input = form.find(TestInput);
+    const input = form.find('Formsy(TestInput)');
     expect(getWrapperInstance(input).isFormSubmitted()).toEqual(false);
     form.simulate('submit');
     expect(getWrapperInstance(input).isFormSubmitted()).toEqual(true);
@@ -635,7 +635,7 @@ describe('value === false', () => {
     }
 
     const form = mount(<TestForm />);
-    const input = form.find(TestInput);
+    const input = form.find('Formsy(TestInput)');
     const formsyForm = form.find(Formsy);
     expect(getWrapperInstance(input).getValue()).toEqual(true);
     (form.instance() as TestForm).changeValue();
@@ -666,7 +666,7 @@ describe('value === false', () => {
     }
 
     const form = mount(<TestForm />);
-    const inputs = form.find(TestInput);
+    const inputs = form.find('Formsy(TestInput)');
     const formsyForm = form.find(Formsy);
     expect(getWrapperInstance(inputs.at(0)).getValue()).toEqual(true);
     expect(getWrapperInstance(inputs.at(1)).getValue()).toEqual(true);
@@ -706,8 +706,8 @@ describe('value === false', () => {
     }
 
     const form = mount(<TestForm />);
-    const input = form.find(TestInput).at(0);
-    const inputDeep = form.find(TestInput).at(1);
+    const input = form.find('Formsy(TestInput)').at(0);
+    const inputDeep = form.find('Formsy(TestInput)').at(1);
     const formsyForm = form.find(Formsy);
 
     expect(getWrapperInstance(input).getValue()).toEqual(1);
@@ -738,7 +738,7 @@ describe('.reset()', () => {
     }
 
     const form = mount(<TestForm />);
-    const input = form.find(TestInput);
+    const input = form.find('Formsy(TestInput)');
     const formsyForm = form.find(Formsy);
 
     getFormInstance(formsyForm).reset({
@@ -758,7 +758,7 @@ describe('.reset()', () => {
     }
 
     const form = mount(<TestForm />);
-    const input = form.find(TestInput);
+    const input = form.find('Formsy(TestInput)');
     const formsyForm = form.find(Formsy);
 
     expect(getWrapperInstance(input).getValue()).toEqual('foo');
