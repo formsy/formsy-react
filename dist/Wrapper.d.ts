@@ -43,7 +43,7 @@ export interface PassDownProps extends WrapperProps {
     ref?: any;
     resetValue: any;
     setValidations: any;
-    setValue: (value: Value) => void;
+    setValue: (value: Value, validate: undefined | boolean, otherData: Record<string, any>) => void;
     showError: boolean;
     showRequired: boolean;
 }
