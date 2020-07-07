@@ -85,7 +85,7 @@ export interface PassDownProps extends WrapperProps {
   ref?: any;
   resetValue: any;
   setValidations: any;
-  setValue: (value: Value) => void;
+  setValue: (value: Value, validate?: boolean, otherData?: Record<string, any>) => void;
   showError: boolean;
   showRequired: boolean;
 }
@@ -220,7 +220,7 @@ export default function<T>(
 
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
-    public setValue = (value, validate = true) => {
+    public setValue = (value, validate = true, { isPristine = false } = {}) => {
       const { formsy } = this.context;
 
       if (!validate) {
@@ -231,7 +231,7 @@ export default function<T>(
         this.setState(
           {
             value,
-            isPristine: false,
+            isPristine,
           },
           () => {
             formsy.validate(this);

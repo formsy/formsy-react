@@ -1717,6 +1717,11 @@ function Wrapper (WrappedComponent) {
 
       _this.setValue = function (value) {
         var validate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+        var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+            _ref$isPristine = _ref.isPristine,
+            isPristine = _ref$isPristine === void 0 ? false : _ref$isPristine;
+
         var formsy = _this.context.formsy;
 
         if (!validate) {
@@ -1726,7 +1731,7 @@ function Wrapper (WrappedComponent) {
         } else {
           _this.setState({
             value: value,
-            isPristine: false
+            isPristine: isPristine
           }, function () {
             formsy.validate(_assertThisInitialized(_this));
           });
