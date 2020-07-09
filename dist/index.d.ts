@@ -146,7 +146,6 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         placeholder?: string;
         spellCheck?: boolean;
         tabIndex?: number;
-        translate?: "yes" | "no";
         radioGroup?: string;
         role?: string;
         about?: string;
