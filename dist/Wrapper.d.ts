@@ -48,4 +48,4 @@ export interface PassDownProps extends WrapperProps {
     showRequired: boolean;
 }
 export { propTypes };
-export default function <T>(WrappedComponent: React.ComponentType<T & PassDownProps>): React.ComponentType<T & WrapperProps>;
+export default function <T>(WrappedComponent: React.ComponentType<T & PassDownProps>, defaultProps?: Record<string, unknown>): React.ComponentType<T & WrapperProps>;

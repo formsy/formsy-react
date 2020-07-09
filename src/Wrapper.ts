@@ -102,6 +102,7 @@ function getDisplayName(component: WrappedComponentClass) {
 
 export default function<T>(
   WrappedComponent: React.ComponentType<T & PassDownProps>,
+  defaultProps: Record<string, unknown> = {},
 ): React.ComponentType<T & WrapperProps> {
   return class extends React.Component<T & WrapperProps, WrapperState> {
     public validations?: Validations;
@@ -122,6 +123,7 @@ export default function<T>(
       validationError: '',
       validationErrors: {},
       validations: null,
+      ...defaultProps,
     };
 
     public constructor(props) {
