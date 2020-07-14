@@ -22,9 +22,9 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
     onInvalid: () => void;
     onInvalidSubmit: any;
     onReset?: () => void;
-    onSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
+    onSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError, event: React.SyntheticEvent) => void;
     onValid: () => void;
-    onValidSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
+    onValidSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError, event: React.SyntheticEvent) => void;
     preventExternalInvalidation?: boolean;
     resetValue: any;
     setValidations: any;
@@ -146,6 +146,7 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         placeholder?: string;
         spellCheck?: boolean;
         tabIndex?: number;
+        translate?: "yes" | "no";
         radioGroup?: string;
         role?: string;
         about?: string;
