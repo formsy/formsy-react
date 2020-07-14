@@ -70,13 +70,13 @@ function _objectSpread2(target) {
     var source = arguments[i] != null ? arguments[i] : {};
 
     if (i % 2) {
-      ownKeys(source, true).forEach(function (key) {
+      ownKeys(Object(source), true).forEach(function (key) {
         _defineProperty(target, key, source[key]);
       });
     } else if (Object.getOwnPropertyDescriptors) {
       Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
     } else {
-      ownKeys(source).forEach(function (key) {
+      ownKeys(Object(source)).forEach(function (key) {
         Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
       });
     }
@@ -221,7 +221,7 @@ function createCommonjsModule(fn, module) {
 var reactIs_production_min = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports,"__esModule",{value:!0});
 var b="function"===typeof Symbol&&Symbol.for,c=b?Symbol.for("react.element"):60103,d=b?Symbol.for("react.portal"):60106,e=b?Symbol.for("react.fragment"):60107,f=b?Symbol.for("react.strict_mode"):60108,g=b?Symbol.for("react.profiler"):60114,h=b?Symbol.for("react.provider"):60109,k=b?Symbol.for("react.context"):60110,l=b?Symbol.for("react.async_mode"):60111,m=b?Symbol.for("react.concurrent_mode"):60111,n=b?Symbol.for("react.forward_ref"):60112,p=b?Symbol.for("react.suspense"):60113,q=b?Symbol.for("react.suspense_list"):
-60120,r=b?Symbol.for("react.memo"):60115,t=b?Symbol.for("react.lazy"):60116,v=b?Symbol.for("react.fundamental"):60117,w=b?Symbol.for("react.responder"):60118,x=b?Symbol.for("react.scope"):60119;function y(a){if("object"===typeof a&&null!==a){var u=a.$$typeof;switch(u){case c:switch(a=a.type,a){case l:case m:case e:case g:case f:case p:return a;default:switch(a=a&&a.$$typeof,a){case k:case n:case h:return a;default:return u}}case t:case r:case d:return u}}}function z(a){return y(a)===m}
+60120,r=b?Symbol.for("react.memo"):60115,t=b?Symbol.for("react.lazy"):60116,v=b?Symbol.for("react.fundamental"):60117,w=b?Symbol.for("react.responder"):60118,x=b?Symbol.for("react.scope"):60119;function y(a){if("object"===typeof a&&null!==a){var u=a.$$typeof;switch(u){case c:switch(a=a.type,a){case l:case m:case e:case g:case f:case p:return a;default:switch(a=a&&a.$$typeof,a){case k:case n:case t:case r:case h:return a;default:return u}}case d:return u}}}function z(a){return y(a)===m}
 exports.typeOf=y;exports.AsyncMode=l;exports.ConcurrentMode=m;exports.ContextConsumer=k;exports.ContextProvider=h;exports.Element=c;exports.ForwardRef=n;exports.Fragment=e;exports.Lazy=t;exports.Memo=r;exports.Portal=d;exports.Profiler=g;exports.StrictMode=f;exports.Suspense=p;
 exports.isValidElementType=function(a){return "string"===typeof a||"function"===typeof a||a===e||a===m||a===g||a===f||a===p||a===q||"object"===typeof a&&null!==a&&(a.$$typeof===t||a.$$typeof===r||a.$$typeof===h||a.$$typeof===k||a.$$typeof===n||a.$$typeof===v||a.$$typeof===w||a.$$typeof===x)};exports.isAsyncMode=function(a){return z(a)||y(a)===l};exports.isConcurrentMode=z;exports.isContextConsumer=function(a){return y(a)===k};exports.isContextProvider=function(a){return y(a)===h};
 exports.isElement=function(a){return "object"===typeof a&&null!==a&&a.$$typeof===c};exports.isForwardRef=function(a){return y(a)===n};exports.isFragment=function(a){return y(a)===e};exports.isLazy=function(a){return y(a)===t};exports.isMemo=function(a){return y(a)===r};exports.isPortal=function(a){return y(a)===d};exports.isProfiler=function(a){return y(a)===g};exports.isStrictMode=function(a){return y(a)===f};exports.isSuspense=function(a){return y(a)===p};
@@ -372,6 +372,8 @@ function typeOf(object) {
             switch ($$typeofType) {
               case REACT_CONTEXT_TYPE:
               case REACT_FORWARD_REF_TYPE:
+              case REACT_LAZY_TYPE:
+              case REACT_MEMO_TYPE:
               case REACT_PROVIDER_TYPE:
                 return $$typeofType;
 
@@ -381,8 +383,6 @@ function typeOf(object) {
 
         }
 
-      case REACT_LAZY_TYPE:
-      case REACT_MEMO_TYPE:
       case REACT_PORTAL_TYPE:
         return $$typeof;
     }
@@ -2199,12 +2199,12 @@ function (_React$Component) {
       var model = _this.getModel();
 
       if (isValid) {
-        onValidSubmit(model, _this.resetModel, _this.updateInputsWithError);
+        onValidSubmit(model, _this.resetModel, _this.updateInputsWithError, event);
       } else {
-        onInvalidSubmit(model, _this.resetModel, _this.updateInputsWithError);
+        onInvalidSubmit(model, _this.resetModel, _this.updateInputsWithError, event);
       }
 
-      return onSubmit(model, _this.resetModel, _this.updateInputsWithError);
+      return onSubmit(model, _this.resetModel, _this.updateInputsWithError, event);
     };
 
     _this.updateInputsWithError = function (errors, invalidate) {

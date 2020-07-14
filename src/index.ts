@@ -37,9 +37,19 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
   onInvalid: () => void;
   onInvalidSubmit: any;
   onReset?: () => void;
-  onSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
+  onSubmit?: (
+    model: IModel,
+    resetModel: IResetModel,
+    updateInputsWithError: IUpdateInputsWithError,
+    event: React.SyntheticEvent,
+  ) => void;
   onValid: () => void;
-  onValidSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
+  onValidSubmit?: (
+    model: IModel,
+    resetModel: IResetModel,
+    updateInputsWithError: IUpdateInputsWithError,
+    event: React.SyntheticEvent,
+  ) => void;
   preventExternalInvalidation?: boolean;
   resetValue: any;
   setValidations: any;
@@ -392,12 +402,12 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     const model = this.getModel();
 
     if (isValid) {
-      onValidSubmit(model, this.resetModel, this.updateInputsWithError);
+      onValidSubmit(model, this.resetModel, this.updateInputsWithError, event);
     } else {
-      onInvalidSubmit(model, this.resetModel, this.updateInputsWithError);
+      onInvalidSubmit(model, this.resetModel, this.updateInputsWithError, event);
     }
 
-    return onSubmit(model, this.resetModel, this.updateInputsWithError);
+    return onSubmit(model, this.resetModel, this.updateInputsWithError, event);
   };
 
   // Go through errors from server and grab the components
