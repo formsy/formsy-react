@@ -192,7 +192,7 @@
   function _createSuper(Derived) {
     var hasNativeReflectConstruct = _isNativeReflectConstruct();
 
-    return function () {
+    return function _createSuperInternal() {
       var Super = _getPrototypeOf(Derived),
           result;
 
@@ -280,10 +280,378 @@
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
+  /**
+   * lodash (Custom Build) <https://lodash.com/>
+   * Build: `lodash modularize exports="npm" -o ./`
+   * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+   * Released under MIT license <https://lodash.com/license>
+   * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+   * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+   */
+
+  /** `Object#toString` result references. */
+  var objectTag = '[object Object]';
+
+  /**
+   * Checks if `value` is a host object in IE < 9.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
+   */
+  function isHostObject(value) {
+    // Many host objects are `Object` objects that can coerce to strings
+    // despite having improperly defined `toString` methods.
+    var result = false;
+    if (value != null && typeof value.toString != 'function') {
+      try {
+        result = !!(value + '');
+      } catch (e) {}
+    }
+    return result;
+  }
+
+  /**
+   * Creates a unary function that invokes `func` with its argument transformed.
+   *
+   * @private
+   * @param {Function} func The function to wrap.
+   * @param {Function} transform The argument transform.
+   * @returns {Function} Returns the new function.
+   */
+  function overArg(func, transform) {
+    return function(arg) {
+      return func(transform(arg));
+    };
+  }
+
+  /** Used for built-in method references. */
+  var funcProto = Function.prototype,
+      objectProto = Object.prototype;
+
+  /** Used to resolve the decompiled source of functions. */
+  var funcToString = funcProto.toString;
+
+  /** Used to check objects for own properties. */
+  var hasOwnProperty = objectProto.hasOwnProperty;
+
+  /** Used to infer the `Object` constructor. */
+  var objectCtorString = funcToString.call(Object);
+
+  /**
+   * Used to resolve the
+   * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+   * of values.
+   */
+  var objectToString = objectProto.toString;
+
+  /** Built-in value references. */
+  var getPrototype = overArg(Object.getPrototypeOf, Object);
+
+  /**
+   * Checks if `value` is object-like. A value is object-like if it's not `null`
+   * and has a `typeof` result of "object".
+   *
+   * @static
+   * @memberOf _
+   * @since 4.0.0
+   * @category Lang
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+   * @example
+   *
+   * _.isObjectLike({});
+   * // => true
+   *
+   * _.isObjectLike([1, 2, 3]);
+   * // => true
+   *
+   * _.isObjectLike(_.noop);
+   * // => false
+   *
+   * _.isObjectLike(null);
+   * // => false
+   */
+  function isObjectLike(value) {
+    return !!value && typeof value == 'object';
+  }
+
+  /**
+   * Checks if `value` is a plain object, that is, an object created by the
+   * `Object` constructor or one with a `[[Prototype]]` of `null`.
+   *
+   * @static
+   * @memberOf _
+   * @since 0.8.0
+   * @category Lang
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+   * @example
+   *
+   * function Foo() {
+   *   this.a = 1;
+   * }
+   *
+   * _.isPlainObject(new Foo);
+   * // => false
+   *
+   * _.isPlainObject([1, 2, 3]);
+   * // => false
+   *
+   * _.isPlainObject({ 'x': 0, 'y': 0 });
+   * // => true
+   *
+   * _.isPlainObject(Object.create(null));
+   * // => true
+   */
+  function isPlainObject(value) {
+    if (!isObjectLike(value) ||
+        objectToString.call(value) != objectTag || isHostObject(value)) {
+      return false;
+    }
+    var proto = getPrototype(value);
+    if (proto === null) {
+      return true;
+    }
+    var Ctor = hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+    return (typeof Ctor == 'function' &&
+      Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString);
+  }
+
+  var lodash_isplainobject = isPlainObject;
+
+  function isArray(value) {
+    return Array.isArray(value);
+  }
+  function isObject(value) {
+    return lodash_isplainobject(value);
+  }
+  function isTypeUndefined(value) {
+    return typeof value === 'undefined';
+  }
+  function isDate(value) {
+    return value instanceof Date;
+  }
+  function isFunction(value) {
+    return value !== null && typeof value === 'function';
+  }
+  function isString(value) {
+    return typeof value === 'string';
+  }
+  function isNumber(value) {
+    return typeof value === 'number';
+  }
+  function isRegex(value) {
+    return value instanceof RegExp;
+  }
+  function isValueStringEmpty(value) {
+    return value === '';
+  }
+  function isValueNullOrUndefined(value) {
+    return value === null || value === undefined;
+  }
+  function isValueUndefined(value) {
+    return value === undefined;
+  }
+  function noop() {// do nothing.
+  }
+  function protectAgainstParamReassignment(value) {
+    // Clone objects to avoid accidental param reassignment
+    if (isObject(value)) return _objectSpread2({}, value);
+    if (isArray(value)) return _toConsumableArray(value);
+    return value;
+  }
+  function isSame(a, b) {
+    if (_typeof(a) !== _typeof(b)) {
+      return false;
+    }
+
+    if (isArray(a) && isArray(b)) {
+      if (a.length !== b.length) {
+        return false;
+      }
+
+      return a.every(function (item, index) {
+        return isSame(item, b[index]);
+      });
+    }
+
+    if (isFunction(a) && isFunction(b)) {
+      return a.toString() === b.toString();
+    }
+
+    if (isDate(a) && isDate(b)) {
+      return a.toString() === b.toString();
+    }
+
+    if (isObject(a) && isObject(b)) {
+      if (Object.keys(a).length !== Object.keys(b).length) {
+        return false;
+      }
+
+      return Object.keys(a).every(function (key) {
+        return isSame(a[key], b[key]);
+      });
+    }
+
+    if (isRegex(a) && isRegex(b)) {
+      return a.toString() === b.toString();
+    }
+
+    return a === b;
+  }
+  function runRules(value, currentValues, validations, validationRules) {
+    var results = {
+      errors: [],
+      failed: [],
+      success: []
+    };
+    Object.keys(validations).forEach(function (validationName) {
+      var validationsVal = validations[validationName];
+      var validationRulesVal = validationRules[validationName];
+
+      var addToResults = function addToResults(validation) {
+        if (isString(validation)) {
+          results.errors.push(validation);
+          results.failed.push(validationName);
+        } else if (!validation) {
+          results.failed.push(validationName);
+        } else {
+          results.success.push(validationName);
+        }
+      };
+
+      if (validationRulesVal && isFunction(validationsVal)) {
+        throw new Error("Formsy does not allow you to override default validations: ".concat(validationName));
+      }
+
+      if (!validationRulesVal && !isFunction(validationsVal)) {
+        throw new Error("Formsy does not have the validation rule: ".concat(validationName));
+      }
+
+      if (isFunction(validationsVal)) {
+        return addToResults(validationsVal(currentValues, value));
+      }
+
+      return addToResults(validationRulesVal(currentValues, value, validationsVal));
+    });
+    return results;
+  }
+
+  function _isExisty(value) {
+    return !isValueNullOrUndefined(value);
+  }
+  function isEmpty(value) {
+    if (isString(value)) {
+      return isValueStringEmpty(value);
+    }
+
+    if (isTypeUndefined(value)) {
+      return false;
+    }
+
+    return isValueUndefined(value);
+  }
+
+  function _isDefaultRequiredValue(value) {
+    return isString(value) ? isValueStringEmpty(value) : isValueNullOrUndefined(value);
+  }
+  function matchRegexp(_values, value, regexp) {
+    return !_isExisty(value) || isEmpty(value) || regexp.test("".concat(value));
+  }
+  var REGEX_PATTERNS = {
+    ALPHA: /^[A-Z]+$/i,
+    ALPHANUMERIC: /^[0-9A-Z]+$/i,
+    EMAIL: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i,
+    // from http://emailregex.com/
+    FLOAT: /^(?:[-+]?(?:\d+))?(?:\.\d*)?(?:[eE][+-]?(?:\d+))?$/,
+    INT: /^(?:[-+]?(?:0|[1-9]\d*))$/,
+    NUMERIC: /^[-+]?(?:\d*[.])?\d+$/,
+    SPECIAL_WORDS: /^[\sA-ZÀ-ÖØ-öø-ÿ]+$/i,
+    URL: /^(?:\w+:)?\/\/([^\s.]+\.\S{2}|localhost[:?\d]*)\S*$/i,
+    WORDS: /^[A-Z\s]+$/i
+  };
+  var validations = {
+    equals: function equals(_values, value, eql) {
+      return !_isExisty(value) || isEmpty(value) || value === eql;
+    },
+    equalsField: function equalsField(values, value, field) {
+      return value === values[field];
+    },
+    isAlpha: function isAlpha(values, value) {
+      return matchRegexp(values, value, REGEX_PATTERNS.ALPHA);
+    },
+    isAlphanumeric: function isAlphanumeric(values, value) {
+      return matchRegexp(values, value, REGEX_PATTERNS.ALPHANUMERIC);
+    },
+    isDefaultRequiredValue: function isDefaultRequiredValue(values, value) {
+      return _isDefaultRequiredValue(value);
+    },
+    isEmail: function isEmail(values, value) {
+      return matchRegexp(values, value, REGEX_PATTERNS.EMAIL);
+    },
+    isEmptyString: function isEmptyString(_values, value) {
+      return isEmpty(value);
+    },
+    isExisty: function isExisty(_values, value) {
+      return _isExisty(value);
+    },
+    isFalse: function isFalse(_values, value) {
+      return value === false;
+    },
+    isFloat: function isFloat(values, value) {
+      return matchRegexp(values, value, REGEX_PATTERNS.FLOAT);
+    },
+    isInt: function isInt(values, value) {
+      return matchRegexp(values, value, REGEX_PATTERNS.INT);
+    },
+    isLength: function isLength(_values, value, length) {
+      return !_isExisty(value) || isEmpty(value) || value.length === length;
+    },
+    isNumeric: function isNumeric(values, value) {
+      return isNumber(value) || matchRegexp(values, value, REGEX_PATTERNS.NUMERIC);
+    },
+    isSpecialWords: function isSpecialWords(values, value) {
+      return matchRegexp(values, value, REGEX_PATTERNS.SPECIAL_WORDS);
+    },
+    isTrue: function isTrue(_values, value) {
+      return value === true;
+    },
+    isUndefined: function isUndefined(_values, value) {
+      return isValueUndefined(value);
+    },
+    isUrl: function isUrl(values, value) {
+      return matchRegexp(values, value, REGEX_PATTERNS.URL);
+    },
+    isWords: function isWords(values, value) {
+      return matchRegexp(values, value, REGEX_PATTERNS.WORDS);
+    },
+    matchRegexp: matchRegexp,
+    maxLength: function maxLength(_values, value, length) {
+      return !_isExisty(value) || value.length <= length;
+    },
+    minLength: function minLength(_values, value, length) {
+      return !_isExisty(value) || isEmpty(value) || value.length >= length;
+    }
+  };
+  var addValidationRule = function addValidationRule(name, func) {
+    validations[name] = func;
+  };
+
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
-  function createCommonjsModule(fn, module) {
-  	return module = { exports: {} }, fn(module, module.exports), module.exports;
+  function createCommonjsModule(fn, basedir, module) {
+  	return module = {
+  	  path: basedir,
+  	  exports: {},
+  	  require: function (path, base) {
+        return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
+      }
+  	}, fn(module, module.exports), module.exports;
+  }
+
+  function commonjsRequire () {
+  	throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
   }
 
   /** @license React v16.13.1
@@ -504,34 +872,6 @@
     })();
   }
   });
-  var reactIs_development_1 = reactIs_development.AsyncMode;
-  var reactIs_development_2 = reactIs_development.ConcurrentMode;
-  var reactIs_development_3 = reactIs_development.ContextConsumer;
-  var reactIs_development_4 = reactIs_development.ContextProvider;
-  var reactIs_development_5 = reactIs_development.Element;
-  var reactIs_development_6 = reactIs_development.ForwardRef;
-  var reactIs_development_7 = reactIs_development.Fragment;
-  var reactIs_development_8 = reactIs_development.Lazy;
-  var reactIs_development_9 = reactIs_development.Memo;
-  var reactIs_development_10 = reactIs_development.Portal;
-  var reactIs_development_11 = reactIs_development.Profiler;
-  var reactIs_development_12 = reactIs_development.StrictMode;
-  var reactIs_development_13 = reactIs_development.Suspense;
-  var reactIs_development_14 = reactIs_development.isAsyncMode;
-  var reactIs_development_15 = reactIs_development.isConcurrentMode;
-  var reactIs_development_16 = reactIs_development.isContextConsumer;
-  var reactIs_development_17 = reactIs_development.isContextProvider;
-  var reactIs_development_18 = reactIs_development.isElement;
-  var reactIs_development_19 = reactIs_development.isForwardRef;
-  var reactIs_development_20 = reactIs_development.isFragment;
-  var reactIs_development_21 = reactIs_development.isLazy;
-  var reactIs_development_22 = reactIs_development.isMemo;
-  var reactIs_development_23 = reactIs_development.isPortal;
-  var reactIs_development_24 = reactIs_development.isProfiler;
-  var reactIs_development_25 = reactIs_development.isStrictMode;
-  var reactIs_development_26 = reactIs_development.isSuspense;
-  var reactIs_development_27 = reactIs_development.isValidElementType;
-  var reactIs_development_28 = reactIs_development.typeOf;
 
   var reactIs = createCommonjsModule(function (module) {
 
@@ -549,7 +889,7 @@
   */
   /* eslint-disable no-unused-vars */
   var getOwnPropertySymbols = Object.getOwnPropertySymbols;
-  var hasOwnProperty = Object.prototype.hasOwnProperty;
+  var hasOwnProperty$1 = Object.prototype.hasOwnProperty;
   var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
   function toObject(val) {
@@ -613,7 +953,7 @@
   		from = Object(arguments[s]);
 
   		for (var key in from) {
-  			if (hasOwnProperty.call(from, key)) {
+  			if (hasOwnProperty$1.call(from, key)) {
   				to[key] = from[key];
   			}
   		}
@@ -1387,6 +1727,303 @@
   }
   });
 
+  var noFormsyErrorMessage = 'Could not find Formsy Context Provider. Did you use withFormsy outside <Formsy />?';
+
+  var throwNoFormsyProvider = function throwNoFormsyProvider() {
+    // istanbul ignore next
+    throw new Error(noFormsyErrorMessage);
+  };
+
+  var defaultValue = {
+    attachToForm: throwNoFormsyProvider,
+    detachFromForm: throwNoFormsyProvider,
+    isFormDisabled: true,
+    isValidValue: throwNoFormsyProvider,
+    validate: throwNoFormsyProvider,
+    runValidation: throwNoFormsyProvider
+  };
+  var FormsyContext = React.createContext(defaultValue);
+
+  /* eslint-disable react/default-props-match-prop-types */
+
+  var convertValidationsToObject = function convertValidationsToObject(validations) {
+    if (isString(validations)) {
+      return validations.split(/,(?![^{[]*[}\]])/g).reduce(function (validationsAccumulator, validation) {
+        var args = validation.split(':');
+        var validateMethod = args.shift();
+        args = args.map(function (arg) {
+          try {
+            return JSON.parse(arg);
+          } catch (e) {
+            return arg; // It is a string if it can not parse it
+          }
+        });
+
+        if (args.length > 1) {
+          throw new Error('Formsy does not support multiple args on string validations. Use object format of validations instead.');
+        } // Avoid parameter reassignment
+
+
+        var validationsAccumulatorCopy = _objectSpread2({}, validationsAccumulator);
+
+        validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
+        return validationsAccumulatorCopy;
+      }, {});
+    }
+
+    return validations || {};
+  };
+
+  var propTypes$1 = {
+    innerRef: propTypes.func,
+    name: propTypes.string.isRequired,
+    required: propTypes.oneOfType([propTypes.bool, propTypes.object, propTypes.string]),
+    validations: propTypes.oneOfType([propTypes.object, propTypes.string]),
+    value: propTypes.any // eslint-disable-line react/forbid-prop-types
+
+  };
+
+  function getDisplayName(component) {
+    return component.displayName || component.name || (isString(component) ? component : 'Component');
+  }
+
+  function withFormsy(WrappedComponent) {
+    var WithFormsyWrapper = /*#__PURE__*/function (_React$Component) {
+      _inherits(WithFormsyWrapper, _React$Component);
+
+      var _super = _createSuper(WithFormsyWrapper);
+
+      function WithFormsyWrapper(props) {
+        var _this;
+
+        _classCallCheck(this, WithFormsyWrapper);
+
+        _this = _super.call(this, props);
+        _this.validations = void 0;
+        _this.requiredValidations = void 0;
+
+        _this.getErrorMessage = function () {
+          var messages = _this.getErrorMessages();
+
+          return messages.length ? messages[0] : null;
+        };
+
+        _this.getErrorMessages = function () {
+          var validationError = _this.state.validationError;
+
+          if (!_this.isValid() || _this.showRequired()) {
+            return validationError || [];
+          }
+
+          return [];
+        };
+
+        _this.getValue = function () {
+          return _this.state.value;
+        };
+
+        _this.setValidations = function (validations, required) {
+          // Add validations to the store itself as the props object can not be modified
+          _this.validations = convertValidationsToObject(validations) || {};
+          _this.requiredValidations = required === true ? {
+            isDefaultRequiredValue: required
+          } : convertValidationsToObject(required);
+        };
+
+        _this.setValue = function (value) {
+          var validate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+          var validateForm = _this.props.validate;
+
+          if (!validate) {
+            _this.setState({
+              value: value
+            });
+          } else {
+            _this.setState({
+              value: value,
+              isPristine: false
+            }, function () {
+              validateForm(_assertThisInitialized(_this));
+            });
+          }
+        };
+
+        _this.hasValue = function () {
+          var value = _this.state.value;
+          return _isDefaultRequiredValue(value);
+        };
+
+        _this.isFormDisabled = function () {
+          return _this.props.isFormDisabled;
+        };
+
+        _this.isFormSubmitted = function () {
+          return _this.state.formSubmitted;
+        };
+
+        _this.isPristine = function () {
+          return _this.state.isPristine;
+        };
+
+        _this.isRequired = function () {
+          return !!_this.props.required;
+        };
+
+        _this.isValid = function () {
+          return _this.state.isValid;
+        };
+
+        _this.isValidValue = function (value) {
+          return _this.props.isValidValue(_assertThisInitialized(_this), value);
+        };
+
+        _this.resetValue = function () {
+          var pristineValue = _this.state.pristineValue;
+          var validate = _this.props.validate;
+
+          _this.setState({
+            value: pristineValue,
+            isPristine: true
+          }, function () {
+            validate(_assertThisInitialized(_this));
+          });
+        };
+
+        _this.showError = function () {
+          return !_this.showRequired() && !_this.isValid();
+        };
+
+        _this.showRequired = function () {
+          return _this.state.isRequired;
+        };
+
+        var runValidation = props.runValidation,
+            _validations = props.validations,
+            _required = props.required,
+            _value = props.value;
+        _this.state = {
+          value: _value
+        };
+
+        _this.setValidations(_validations, _required);
+
+        _this.state = _objectSpread2({
+          formSubmitted: false,
+          isPristine: true,
+          pristineValue: props.value,
+          value: props.value
+        }, runValidation(_assertThisInitialized(_this), props.value));
+        return _this;
+      }
+
+      _createClass(WithFormsyWrapper, [{
+        key: "componentDidMount",
+        value: function componentDidMount() {
+          var _this$props = this.props,
+              name = _this$props.name,
+              attachToForm = _this$props.attachToForm;
+
+          if (!name) {
+            throw new Error('Form Input requires a name property when used');
+          }
+
+          attachToForm(this);
+        }
+      }, {
+        key: "shouldComponentUpdate",
+        value: function shouldComponentUpdate(nextProps, nextState) {
+          var props = this.props,
+              state = this.state;
+
+          var isChanged = function isChanged(a, b) {
+            return Object.keys(a).some(function (k) {
+              return a[k] !== b[k];
+            });
+          };
+
+          var isPropsChanged = isChanged(props, nextProps);
+          var isStateChanged = isChanged(state, nextState);
+          return isPropsChanged || isStateChanged;
+        }
+      }, {
+        key: "componentDidUpdate",
+        value: function componentDidUpdate(prevProps) {
+          var _this$props2 = this.props,
+              value = _this$props2.value,
+              validations = _this$props2.validations,
+              required = _this$props2.required,
+              validate = _this$props2.validate; // If the value passed has changed, set it. If value is not passed it will
+          // internally update, and this will never run
+
+          if (!isSame(value, prevProps.value)) {
+            this.setValue(value);
+          } // If validations or required is changed, run a new validation
+
+
+          if (!isSame(validations, prevProps.validations) || !isSame(required, prevProps.required)) {
+            this.setValidations(validations, required);
+            validate(this);
+          }
+        } // Detach it when component unmounts
+
+      }, {
+        key: "componentWillUnmount",
+        value: function componentWillUnmount() {
+          var detachFromForm = this.props.detachFromForm;
+          detachFromForm(this);
+        }
+      }, {
+        key: "render",
+        value: function render() {
+          var innerRef = this.props.innerRef;
+
+          var propsForElement = _objectSpread2(_objectSpread2({}, this.props), {}, {
+            errorMessage: this.getErrorMessage(),
+            errorMessages: this.getErrorMessages(),
+            hasValue: this.hasValue(),
+            isFormDisabled: this.isFormDisabled(),
+            isFormSubmitted: this.isFormSubmitted(),
+            isPristine: this.isPristine(),
+            isRequired: this.isRequired(),
+            isValid: this.isValid(),
+            isValidValue: this.isValidValue,
+            resetValue: this.resetValue,
+            setValidations: this.setValidations,
+            setValue: this.setValue,
+            showError: this.showError(),
+            showRequired: this.showRequired(),
+            value: this.getValue()
+          });
+
+          if (innerRef) {
+            propsForElement.ref = innerRef;
+          }
+
+          return /*#__PURE__*/React.createElement(WrappedComponent, propsForElement);
+        }
+      }]);
+
+      return WithFormsyWrapper;
+    }(React.Component); // eslint-disable-next-line react/display-name
+
+
+    WithFormsyWrapper.displayName = "Formsy(".concat(getDisplayName(WrappedComponent), ")");
+    WithFormsyWrapper.propTypes = propTypes$1;
+    WithFormsyWrapper.defaultProps = {
+      innerRef: null,
+      required: false,
+      validationError: '',
+      validationErrors: {},
+      validations: null,
+      value: WrappedComponent.defaultValue
+    };
+    return function (props) {
+      return /*#__PURE__*/React.createElement(FormsyContext.Consumer, null, function (contextValue) {
+        return /*#__PURE__*/React.createElement(WithFormsyWrapper, _objectSpread2(_objectSpread2({}, props), contextValue));
+      });
+    };
+  }
+
   /**
    * lodash (Custom Build) <https://lodash.com/>
    * Build: `lodash modularize exports="npm" -o ./`
@@ -1456,7 +2093,7 @@
    * @param {*} value The value to check.
    * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
    */
-  function isHostObject(value) {
+  function isHostObject$1(value) {
     // Many host objects are `Object` objects that can coerce to strings
     // despite having improperly defined `toString` methods.
     var result = false;
@@ -1470,8 +2107,8 @@
 
   /** Used for built-in method references. */
   var arrayProto = Array.prototype,
-      funcProto = Function.prototype,
-      objectProto = Object.prototype;
+      funcProto$1 = Function.prototype,
+      objectProto$1 = Object.prototype;
 
   /** Used to detect overreaching core-js shims. */
   var coreJsData = root['__core-js_shared__'];
@@ -1483,21 +2120,21 @@
   }());
 
   /** Used to resolve the decompiled source of functions. */
-  var funcToString = funcProto.toString;
+  var funcToString$1 = funcProto$1.toString;
 
   /** Used to check objects for own properties. */
-  var hasOwnProperty$1 = objectProto.hasOwnProperty;
+  var hasOwnProperty$2 = objectProto$1.hasOwnProperty;
 
   /**
    * Used to resolve the
    * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
    * of values.
    */
-  var objectToString = objectProto.toString;
+  var objectToString$1 = objectProto$1.toString;
 
   /** Used to detect if a method is native. */
   var reIsNative = RegExp('^' +
-    funcToString.call(hasOwnProperty$1).replace(reRegExpChar, '\\$&')
+    funcToString$1.call(hasOwnProperty$2).replace(reRegExpChar, '\\$&')
     .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
   );
 
@@ -1571,7 +2208,7 @@
       var result = data[key];
       return result === HASH_UNDEFINED ? undefined : result;
     }
-    return hasOwnProperty$1.call(data, key) ? data[key] : undefined;
+    return hasOwnProperty$2.call(data, key) ? data[key] : undefined;
   }
 
   /**
@@ -1585,7 +2222,7 @@
    */
   function hashHas(key) {
     var data = this.__data__;
-    return nativeCreate ? data[key] !== undefined : hasOwnProperty$1.call(data, key);
+    return nativeCreate ? data[key] !== undefined : hasOwnProperty$2.call(data, key);
   }
 
   /**
@@ -1864,10 +2501,10 @@
    *  else `false`.
    */
   function baseIsNative(value) {
-    if (!isObject(value) || isMasked(value)) {
+    if (!isObject$1(value) || isMasked(value)) {
       return false;
     }
-    var pattern = (isFunction(value) || isHostObject(value)) ? reIsNative : reIsHostCtor;
+    var pattern = (isFunction$1(value) || isHostObject$1(value)) ? reIsNative : reIsHostCtor;
     return pattern.test(toSource(value));
   }
 
@@ -1899,7 +2536,7 @@
    * @returns {Array} Returns the cast property path array.
    */
   function castPath(value) {
-    return isArray(value) ? value : stringToPath(value);
+    return isArray$1(value) ? value : stringToPath(value);
   }
 
   /**
@@ -1939,7 +2576,7 @@
    * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
    */
   function isKey(value, object) {
-    if (isArray(value)) {
+    if (isArray$1(value)) {
       return false;
     }
     var type = typeof value;
@@ -2021,7 +2658,7 @@
   function toSource(func) {
     if (func != null) {
       try {
-        return funcToString.call(func);
+        return funcToString$1.call(func);
       } catch (e) {}
       try {
         return (func + '');
@@ -2156,7 +2793,7 @@
    * _.isArray(_.noop);
    * // => false
    */
-  var isArray = Array.isArray;
+  var isArray$1 = Array.isArray;
 
   /**
    * Checks if `value` is classified as a `Function` object.
@@ -2175,10 +2812,10 @@
    * _.isFunction(/abc/);
    * // => false
    */
-  function isFunction(value) {
+  function isFunction$1(value) {
     // The use of `Object#toString` avoids issues with the `typeof` operator
     // in Safari 8-9 which returns 'object' for typed array and other constructors.
-    var tag = isObject(value) ? objectToString.call(value) : '';
+    var tag = isObject$1(value) ? objectToString$1.call(value) : '';
     return tag == funcTag || tag == genTag;
   }
 
@@ -2207,7 +2844,7 @@
    * _.isObject(null);
    * // => false
    */
-  function isObject(value) {
+  function isObject$1(value) {
     var type = typeof value;
     return !!value && (type == 'object' || type == 'function');
   }
@@ -2236,7 +2873,7 @@
    * _.isObjectLike(null);
    * // => false
    */
-  function isObjectLike(value) {
+  function isObjectLike$1(value) {
     return !!value && typeof value == 'object';
   }
 
@@ -2259,7 +2896,7 @@
    */
   function isSymbol(value) {
     return typeof value == 'symbol' ||
-      (isObjectLike(value) && objectToString.call(value) == symbolTag);
+      (isObjectLike$1(value) && objectToString$1.call(value) == symbolTag);
   }
 
   /**
@@ -2393,7 +3030,7 @@
    * @param {*} value The value to check.
    * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
    */
-  function isHostObject$1(value) {
+  function isHostObject$2(value) {
     // Many host objects are `Object` objects that can coerce to strings
     // despite having improperly defined `toString` methods.
     var result = false;
@@ -2407,8 +3044,8 @@
 
   /** Used for built-in method references. */
   var arrayProto$1 = Array.prototype,
-      funcProto$1 = Function.prototype,
-      objectProto$1 = Object.prototype;
+      funcProto$2 = Function.prototype,
+      objectProto$2 = Object.prototype;
 
   /** Used to detect overreaching core-js shims. */
   var coreJsData$1 = root$1['__core-js_shared__'];
@@ -2420,27 +3057,27 @@
   }());
 
   /** Used to resolve the decompiled source of functions. */
-  var funcToString$1 = funcProto$1.toString;
+  var funcToString$2 = funcProto$2.toString;
 
   /** Used to check objects for own properties. */
-  var hasOwnProperty$2 = objectProto$1.hasOwnProperty;
+  var hasOwnProperty$3 = objectProto$2.hasOwnProperty;
 
   /**
    * Used to resolve the
    * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
    * of values.
    */
-  var objectToString$1 = objectProto$1.toString;
+  var objectToString$2 = objectProto$2.toString;
 
   /** Used to detect if a method is native. */
   var reIsNative$1 = RegExp('^' +
-    funcToString$1.call(hasOwnProperty$2).replace(reRegExpChar$1, '\\$&')
+    funcToString$2.call(hasOwnProperty$3).replace(reRegExpChar$1, '\\$&')
     .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
   );
 
   /** Built-in value references. */
   var Symbol$2 = root$1.Symbol,
-      propertyIsEnumerable = objectProto$1.propertyIsEnumerable,
+      propertyIsEnumerable = objectProto$2.propertyIsEnumerable,
       splice$1 = arrayProto$1.splice;
 
   /* Built-in method references that are verified to be native. */
@@ -2509,7 +3146,7 @@
       var result = data[key];
       return result === HASH_UNDEFINED$1 ? undefined : result;
     }
-    return hasOwnProperty$2.call(data, key) ? data[key] : undefined;
+    return hasOwnProperty$3.call(data, key) ? data[key] : undefined;
   }
 
   /**
@@ -2523,7 +3160,7 @@
    */
   function hashHas$1(key) {
     var data = this.__data__;
-    return nativeCreate$1 ? data[key] !== undefined : hasOwnProperty$2.call(data, key);
+    return nativeCreate$1 ? data[key] !== undefined : hasOwnProperty$3.call(data, key);
   }
 
   /**
@@ -2782,7 +3419,7 @@
    * @returns {boolean} Returns `true` if `key` exists, else `false`.
    */
   function baseHas(object, key) {
-    return object != null && hasOwnProperty$2.call(object, key);
+    return object != null && hasOwnProperty$3.call(object, key);
   }
 
   /**
@@ -2794,10 +3431,10 @@
    *  else `false`.
    */
   function baseIsNative$1(value) {
-    if (!isObject$1(value) || isMasked$1(value)) {
+    if (!isObject$2(value) || isMasked$1(value)) {
       return false;
     }
-    var pattern = (isFunction$1(value) || isHostObject$1(value)) ? reIsNative$1 : reIsHostCtor$1;
+    var pattern = (isFunction$2(value) || isHostObject$2(value)) ? reIsNative$1 : reIsHostCtor$1;
     return pattern.test(toSource$1(value));
   }
 
@@ -2829,7 +3466,7 @@
    * @returns {Array} Returns the cast property path array.
    */
   function castPath$1(value) {
-    return isArray$1(value) ? value : stringToPath$1(value);
+    return isArray$2(value) ? value : stringToPath$1(value);
   }
 
   /**
@@ -2888,7 +3525,7 @@
     }
     var length = object ? object.length : 0;
     return !!length && isLength(length) && isIndex(key, length) &&
-      (isArray$1(object) || isArguments(object));
+      (isArray$2(object) || isArguments(object));
   }
 
   /**
@@ -2915,7 +3552,7 @@
    * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
    */
   function isKey$1(value, object) {
-    if (isArray$1(value)) {
+    if (isArray$2(value)) {
       return false;
     }
     var type = typeof value;
@@ -2997,7 +3634,7 @@
   function toSource$1(func) {
     if (func != null) {
       try {
-        return funcToString$1.call(func);
+        return funcToString$2.call(func);
       } catch (e) {}
       try {
         return (func + '');
@@ -3129,8 +3766,8 @@
    */
   function isArguments(value) {
     // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
-    return isArrayLikeObject(value) && hasOwnProperty$2.call(value, 'callee') &&
-      (!propertyIsEnumerable.call(value, 'callee') || objectToString$1.call(value) == argsTag);
+    return isArrayLikeObject(value) && hasOwnProperty$3.call(value, 'callee') &&
+      (!propertyIsEnumerable.call(value, 'callee') || objectToString$2.call(value) == argsTag);
   }
 
   /**
@@ -3156,7 +3793,7 @@
    * _.isArray(_.noop);
    * // => false
    */
-  var isArray$1 = Array.isArray;
+  var isArray$2 = Array.isArray;
 
   /**
    * Checks if `value` is array-like. A value is considered array-like if it's
@@ -3184,7 +3821,7 @@
    * // => false
    */
   function isArrayLike(value) {
-    return value != null && isLength(value.length) && !isFunction$1(value);
+    return value != null && isLength(value.length) && !isFunction$2(value);
   }
 
   /**
@@ -3213,7 +3850,7 @@
    * // => false
    */
   function isArrayLikeObject(value) {
-    return isObjectLike$1(value) && isArrayLike(value);
+    return isObjectLike$2(value) && isArrayLike(value);
   }
 
   /**
@@ -3233,10 +3870,10 @@
    * _.isFunction(/abc/);
    * // => false
    */
-  function isFunction$1(value) {
+  function isFunction$2(value) {
     // The use of `Object#toString` avoids issues with the `typeof` operator
     // in Safari 8-9 which returns 'object' for typed array and other constructors.
-    var tag = isObject$1(value) ? objectToString$1.call(value) : '';
+    var tag = isObject$2(value) ? objectToString$2.call(value) : '';
     return tag == funcTag$1 || tag == genTag$1;
   }
 
@@ -3296,7 +3933,7 @@
    * _.isObject(null);
    * // => false
    */
-  function isObject$1(value) {
+  function isObject$2(value) {
     var type = typeof value;
     return !!value && (type == 'object' || type == 'function');
   }
@@ -3325,7 +3962,7 @@
    * _.isObjectLike(null);
    * // => false
    */
-  function isObjectLike$1(value) {
+  function isObjectLike$2(value) {
     return !!value && typeof value == 'object';
   }
 
@@ -3348,7 +3985,7 @@
    */
   function isSymbol$1(value) {
     return typeof value == 'symbol' ||
-      (isObjectLike$1(value) && objectToString$1.call(value) == symbolTag$1);
+      (isObjectLike$2(value) && objectToString$2.call(value) == symbolTag$1);
   }
 
   /**
@@ -3482,7 +4119,7 @@
    * @param {*} value The value to check.
    * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
    */
-  function isHostObject$2(value) {
+  function isHostObject$3(value) {
     // Many host objects are `Object` objects that can coerce to strings
     // despite having improperly defined `toString` methods.
     var result = false;
@@ -3496,8 +4133,8 @@
 
   /** Used for built-in method references. */
   var arrayProto$2 = Array.prototype,
-      funcProto$2 = Function.prototype,
-      objectProto$2 = Object.prototype;
+      funcProto$3 = Function.prototype,
+      objectProto$3 = Object.prototype;
 
   /** Used to detect overreaching core-js shims. */
   var coreJsData$2 = root$2['__core-js_shared__'];
@@ -3509,21 +4146,21 @@
   }());
 
   /** Used to resolve the decompiled source of functions. */
-  var funcToString$2 = funcProto$2.toString;
+  var funcToString$3 = funcProto$3.toString;
 
   /** Used to check objects for own properties. */
-  var hasOwnProperty$3 = objectProto$2.hasOwnProperty;
+  var hasOwnProperty$4 = objectProto$3.hasOwnProperty;
 
   /**
    * Used to resolve the
    * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
    * of values.
    */
-  var objectToString$2 = objectProto$2.toString;
+  var objectToString$3 = objectProto$3.toString;
 
   /** Used to detect if a method is native. */
   var reIsNative$2 = RegExp('^' +
-    funcToString$2.call(hasOwnProperty$3).replace(reRegExpChar$2, '\\$&')
+    funcToString$3.call(hasOwnProperty$4).replace(reRegExpChar$2, '\\$&')
     .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
   );
 
@@ -3597,7 +4234,7 @@
       var result = data[key];
       return result === HASH_UNDEFINED$2 ? undefined : result;
     }
-    return hasOwnProperty$3.call(data, key) ? data[key] : undefined;
+    return hasOwnProperty$4.call(data, key) ? data[key] : undefined;
   }
 
   /**
@@ -3611,7 +4248,7 @@
    */
   function hashHas$2(key) {
     var data = this.__data__;
-    return nativeCreate$2 ? data[key] !== undefined : hasOwnProperty$3.call(data, key);
+    return nativeCreate$2 ? data[key] !== undefined : hasOwnProperty$4.call(data, key);
   }
 
   /**
@@ -3855,7 +4492,7 @@
    */
   function assignValue(object, key, value) {
     var objValue = object[key];
-    if (!(hasOwnProperty$3.call(object, key) && eq$2(objValue, value)) ||
+    if (!(hasOwnProperty$4.call(object, key) && eq$2(objValue, value)) ||
         (value === undefined && !(key in object))) {
       object[key] = value;
     }
@@ -3888,10 +4525,10 @@
    *  else `false`.
    */
   function baseIsNative$2(value) {
-    if (!isObject$2(value) || isMasked$2(value)) {
+    if (!isObject$3(value) || isMasked$2(value)) {
       return false;
     }
-    var pattern = (isFunction$2(value) || isHostObject$2(value)) ? reIsNative$2 : reIsHostCtor$2;
+    var pattern = (isFunction$3(value) || isHostObject$3(value)) ? reIsNative$2 : reIsHostCtor$2;
     return pattern.test(toSource$2(value));
   }
 
@@ -3906,7 +4543,7 @@
    * @returns {Object} Returns `object`.
    */
   function baseSet(object, path, value, customizer) {
-    if (!isObject$2(object)) {
+    if (!isObject$3(object)) {
       return object;
     }
     path = isKey$2(path, object) ? [path] : castPath$2(path);
@@ -3924,7 +4561,7 @@
         var objValue = nested[key];
         newValue = customizer ? customizer(objValue, key, nested) : undefined;
         if (newValue === undefined) {
-          newValue = isObject$2(objValue)
+          newValue = isObject$3(objValue)
             ? objValue
             : (isIndex$1(path[index + 1]) ? [] : {});
         }
@@ -3963,7 +4600,7 @@
    * @returns {Array} Returns the cast property path array.
    */
   function castPath$2(value) {
-    return isArray$2(value) ? value : stringToPath$2(value);
+    return isArray$3(value) ? value : stringToPath$2(value);
   }
 
   /**
@@ -4018,7 +4655,7 @@
    * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
    */
   function isKey$2(value, object) {
-    if (isArray$2(value)) {
+    if (isArray$3(value)) {
       return false;
     }
     var type = typeof value;
@@ -4100,7 +4737,7 @@
   function toSource$2(func) {
     if (func != null) {
       try {
-        return funcToString$2.call(func);
+        return funcToString$3.call(func);
       } catch (e) {}
       try {
         return (func + '');
@@ -4235,7 +4872,7 @@
    * _.isArray(_.noop);
    * // => false
    */
-  var isArray$2 = Array.isArray;
+  var isArray$3 = Array.isArray;
 
   /**
    * Checks if `value` is classified as a `Function` object.
@@ -4254,10 +4891,10 @@
    * _.isFunction(/abc/);
    * // => false
    */
-  function isFunction$2(value) {
+  function isFunction$3(value) {
     // The use of `Object#toString` avoids issues with the `typeof` operator
     // in Safari 8-9 which returns 'object' for typed array and other constructors.
-    var tag = isObject$2(value) ? objectToString$2.call(value) : '';
+    var tag = isObject$3(value) ? objectToString$3.call(value) : '';
     return tag == funcTag$2 || tag == genTag$2;
   }
 
@@ -4286,7 +4923,7 @@
    * _.isObject(null);
    * // => false
    */
-  function isObject$2(value) {
+  function isObject$3(value) {
     var type = typeof value;
     return !!value && (type == 'object' || type == 'function');
   }
@@ -4315,7 +4952,7 @@
    * _.isObjectLike(null);
    * // => false
    */
-  function isObjectLike$2(value) {
+  function isObjectLike$3(value) {
     return !!value && typeof value == 'object';
   }
 
@@ -4338,7 +4975,7 @@
    */
   function isSymbol$2(value) {
     return typeof value == 'symbol' ||
-      (isObjectLike$2(value) && objectToString$2.call(value) == symbolTag$2);
+      (isObjectLike$3(value) && objectToString$3.call(value) == symbolTag$2);
   }
 
   /**
@@ -4400,650 +5037,6 @@
 
   var lodash_set = set;
 
-  /**
-   * lodash (Custom Build) <https://lodash.com/>
-   * Build: `lodash modularize exports="npm" -o ./`
-   * Copyright jQuery Foundation and other contributors <https://jquery.org/>
-   * Released under MIT license <https://lodash.com/license>
-   * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
-   * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-   */
-
-  /** `Object#toString` result references. */
-  var objectTag = '[object Object]';
-
-  /**
-   * Checks if `value` is a host object in IE < 9.
-   *
-   * @private
-   * @param {*} value The value to check.
-   * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
-   */
-  function isHostObject$3(value) {
-    // Many host objects are `Object` objects that can coerce to strings
-    // despite having improperly defined `toString` methods.
-    var result = false;
-    if (value != null && typeof value.toString != 'function') {
-      try {
-        result = !!(value + '');
-      } catch (e) {}
-    }
-    return result;
-  }
-
-  /**
-   * Creates a unary function that invokes `func` with its argument transformed.
-   *
-   * @private
-   * @param {Function} func The function to wrap.
-   * @param {Function} transform The argument transform.
-   * @returns {Function} Returns the new function.
-   */
-  function overArg(func, transform) {
-    return function(arg) {
-      return func(transform(arg));
-    };
-  }
-
-  /** Used for built-in method references. */
-  var funcProto$3 = Function.prototype,
-      objectProto$3 = Object.prototype;
-
-  /** Used to resolve the decompiled source of functions. */
-  var funcToString$3 = funcProto$3.toString;
-
-  /** Used to check objects for own properties. */
-  var hasOwnProperty$4 = objectProto$3.hasOwnProperty;
-
-  /** Used to infer the `Object` constructor. */
-  var objectCtorString = funcToString$3.call(Object);
-
-  /**
-   * Used to resolve the
-   * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
-   * of values.
-   */
-  var objectToString$3 = objectProto$3.toString;
-
-  /** Built-in value references. */
-  var getPrototype = overArg(Object.getPrototypeOf, Object);
-
-  /**
-   * Checks if `value` is object-like. A value is object-like if it's not `null`
-   * and has a `typeof` result of "object".
-   *
-   * @static
-   * @memberOf _
-   * @since 4.0.0
-   * @category Lang
-   * @param {*} value The value to check.
-   * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
-   * @example
-   *
-   * _.isObjectLike({});
-   * // => true
-   *
-   * _.isObjectLike([1, 2, 3]);
-   * // => true
-   *
-   * _.isObjectLike(_.noop);
-   * // => false
-   *
-   * _.isObjectLike(null);
-   * // => false
-   */
-  function isObjectLike$3(value) {
-    return !!value && typeof value == 'object';
-  }
-
-  /**
-   * Checks if `value` is a plain object, that is, an object created by the
-   * `Object` constructor or one with a `[[Prototype]]` of `null`.
-   *
-   * @static
-   * @memberOf _
-   * @since 0.8.0
-   * @category Lang
-   * @param {*} value The value to check.
-   * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
-   * @example
-   *
-   * function Foo() {
-   *   this.a = 1;
-   * }
-   *
-   * _.isPlainObject(new Foo);
-   * // => false
-   *
-   * _.isPlainObject([1, 2, 3]);
-   * // => false
-   *
-   * _.isPlainObject({ 'x': 0, 'y': 0 });
-   * // => true
-   *
-   * _.isPlainObject(Object.create(null));
-   * // => true
-   */
-  function isPlainObject(value) {
-    if (!isObjectLike$3(value) ||
-        objectToString$3.call(value) != objectTag || isHostObject$3(value)) {
-      return false;
-    }
-    var proto = getPrototype(value);
-    if (proto === null) {
-      return true;
-    }
-    var Ctor = hasOwnProperty$4.call(proto, 'constructor') && proto.constructor;
-    return (typeof Ctor == 'function' &&
-      Ctor instanceof Ctor && funcToString$3.call(Ctor) == objectCtorString);
-  }
-
-  var lodash_isplainobject = isPlainObject;
-
-  function isArray$3(value) {
-    return Array.isArray(value);
-  }
-  function isObject$3(value) {
-    return lodash_isplainobject(value);
-  }
-  function isTypeUndefined(value) {
-    return typeof value === 'undefined';
-  }
-  function isDate(value) {
-    return value instanceof Date;
-  }
-  function isFunction$3(value) {
-    return value !== null && typeof value === 'function';
-  }
-  function isString(value) {
-    return typeof value === 'string';
-  }
-  function isNumber(value) {
-    return typeof value === 'number';
-  }
-  function isRegex(value) {
-    return value instanceof RegExp;
-  }
-  function isValueStringEmpty(value) {
-    return value === '';
-  }
-  function isValueNullOrUndefined(value) {
-    return value === null || value === undefined;
-  }
-  function isValueUndefined(value) {
-    return value === undefined;
-  }
-  function noop() {// do nothing.
-  }
-  function protectAgainstParamReassignment(value) {
-    // Clone objects to avoid accidental param reassignment
-    if (isObject$3(value)) return _objectSpread2({}, value);
-    if (isArray$3(value)) return _toConsumableArray(value);
-    return value;
-  }
-  function isSame(a, b) {
-    if (_typeof(a) !== _typeof(b)) {
-      return false;
-    }
-
-    if (isArray$3(a) && isArray$3(b)) {
-      if (a.length !== b.length) {
-        return false;
-      }
-
-      return a.every(function (item, index) {
-        return isSame(item, b[index]);
-      });
-    }
-
-    if (isFunction$3(a) && isFunction$3(b)) {
-      return a.toString() === b.toString();
-    }
-
-    if (isDate(a) && isDate(b)) {
-      return a.toString() === b.toString();
-    }
-
-    if (isObject$3(a) && isObject$3(b)) {
-      if (Object.keys(a).length !== Object.keys(b).length) {
-        return false;
-      }
-
-      return Object.keys(a).every(function (key) {
-        return isSame(a[key], b[key]);
-      });
-    }
-
-    if (isRegex(a) && isRegex(b)) {
-      return a.toString() === b.toString();
-    }
-
-    return a === b;
-  }
-  function runRules(value, currentValues, validations, validationRules) {
-    var results = {
-      errors: [],
-      failed: [],
-      success: []
-    };
-    Object.keys(validations).forEach(function (validationName) {
-      var validationsVal = validations[validationName];
-      var validationRulesVal = validationRules[validationName];
-
-      var addToResults = function addToResults(validation) {
-        if (isString(validation)) {
-          results.errors.push(validation);
-          results.failed.push(validationName);
-        } else if (!validation) {
-          results.failed.push(validationName);
-        } else {
-          results.success.push(validationName);
-        }
-      };
-
-      if (validationRulesVal && isFunction$3(validationsVal)) {
-        throw new Error("Formsy does not allow you to override default validations: ".concat(validationName));
-      }
-
-      if (!validationRulesVal && !isFunction$3(validationsVal)) {
-        throw new Error("Formsy does not have the validation rule: ".concat(validationName));
-      }
-
-      if (isFunction$3(validationsVal)) {
-        return addToResults(validationsVal(currentValues, value));
-      }
-
-      return addToResults(validationRulesVal(currentValues, value, validationsVal));
-    });
-    return results;
-  }
-
-  function _isExisty(value) {
-    return !isValueNullOrUndefined(value);
-  }
-  function isEmpty(value) {
-    if (isString(value)) {
-      return isValueStringEmpty(value);
-    }
-
-    if (isTypeUndefined(value)) {
-      return false;
-    }
-
-    return isValueUndefined(value);
-  }
-
-  function _isDefaultRequiredValue(value) {
-    return isString(value) ? isValueStringEmpty(value) : isValueNullOrUndefined(value);
-  }
-  function matchRegexp(_values, value, regexp) {
-    return !_isExisty(value) || isEmpty(value) || regexp.test("".concat(value));
-  }
-  var REGEX_PATTERNS = {
-    ALPHA: /^[A-Z]+$/i,
-    ALPHANUMERIC: /^[0-9A-Z]+$/i,
-    EMAIL: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i,
-    // from http://emailregex.com/
-    FLOAT: /^(?:[-+]?(?:\d+))?(?:\.\d*)?(?:[eE][+-]?(?:\d+))?$/,
-    INT: /^(?:[-+]?(?:0|[1-9]\d*))$/,
-    NUMERIC: /^[-+]?(?:\d*[.])?\d+$/,
-    SPECIAL_WORDS: /^[\sA-ZÀ-ÖØ-öø-ÿ]+$/i,
-    URL: /^(?:\w+:)?\/\/([^\s.]+\.\S{2}|localhost[:?\d]*)\S*$/i,
-    WORDS: /^[A-Z\s]+$/i
-  };
-  var validations = {
-    equals: function equals(_values, value, eql) {
-      return !_isExisty(value) || isEmpty(value) || value === eql;
-    },
-    equalsField: function equalsField(values, value, field) {
-      return value === values[field];
-    },
-    isAlpha: function isAlpha(values, value) {
-      return matchRegexp(values, value, REGEX_PATTERNS.ALPHA);
-    },
-    isAlphanumeric: function isAlphanumeric(values, value) {
-      return matchRegexp(values, value, REGEX_PATTERNS.ALPHANUMERIC);
-    },
-    isDefaultRequiredValue: function isDefaultRequiredValue(values, value) {
-      return _isDefaultRequiredValue(value);
-    },
-    isEmail: function isEmail(values, value) {
-      return matchRegexp(values, value, REGEX_PATTERNS.EMAIL);
-    },
-    isEmptyString: function isEmptyString(_values, value) {
-      return isEmpty(value);
-    },
-    isExisty: function isExisty(_values, value) {
-      return _isExisty(value);
-    },
-    isFalse: function isFalse(_values, value) {
-      return value === false;
-    },
-    isFloat: function isFloat(values, value) {
-      return matchRegexp(values, value, REGEX_PATTERNS.FLOAT);
-    },
-    isInt: function isInt(values, value) {
-      return matchRegexp(values, value, REGEX_PATTERNS.INT);
-    },
-    isLength: function isLength(_values, value, length) {
-      return !_isExisty(value) || isEmpty(value) || value.length === length;
-    },
-    isNumeric: function isNumeric(values, value) {
-      return isNumber(value) || matchRegexp(values, value, REGEX_PATTERNS.NUMERIC);
-    },
-    isSpecialWords: function isSpecialWords(values, value) {
-      return matchRegexp(values, value, REGEX_PATTERNS.SPECIAL_WORDS);
-    },
-    isTrue: function isTrue(_values, value) {
-      return value === true;
-    },
-    isUndefined: function isUndefined(_values, value) {
-      return isValueUndefined(value);
-    },
-    isUrl: function isUrl(values, value) {
-      return matchRegexp(values, value, REGEX_PATTERNS.URL);
-    },
-    isWords: function isWords(values, value) {
-      return matchRegexp(values, value, REGEX_PATTERNS.WORDS);
-    },
-    matchRegexp: matchRegexp,
-    maxLength: function maxLength(_values, value, length) {
-      return !_isExisty(value) || value.length <= length;
-    },
-    minLength: function minLength(_values, value, length) {
-      return !_isExisty(value) || isEmpty(value) || value.length >= length;
-    }
-  };
-
-  var noFormsyErrorMessage = 'Could not find Formsy Context Provider. Did you use withFormsy outside <Formsy />?';
-
-  var throwNoFormsyProvider = function throwNoFormsyProvider() {
-    // istanbul ignore next
-    throw new Error(noFormsyErrorMessage);
-  };
-
-  var defaultValue = {
-    attachToForm: throwNoFormsyProvider,
-    detachFromForm: throwNoFormsyProvider,
-    isFormDisabled: true,
-    isValidValue: throwNoFormsyProvider,
-    validate: throwNoFormsyProvider
-  };
-  var FormsyContext = React.createContext(defaultValue);
-
-  /* eslint-disable react/default-props-match-prop-types */
-
-  var convertValidationsToObject = function convertValidationsToObject(validations) {
-    if (isString(validations)) {
-      return validations.split(/,(?![^{[]*[}\]])/g).reduce(function (validationsAccumulator, validation) {
-        var args = validation.split(':');
-        var validateMethod = args.shift();
-        args = args.map(function (arg) {
-          try {
-            return JSON.parse(arg);
-          } catch (e) {
-            return arg; // It is a string if it can not parse it
-          }
-        });
-
-        if (args.length > 1) {
-          throw new Error('Formsy does not support multiple args on string validations. Use object format of validations instead.');
-        } // Avoid parameter reassignment
-
-
-        var validationsAccumulatorCopy = _objectSpread2({}, validationsAccumulator);
-
-        validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
-        return validationsAccumulatorCopy;
-      }, {});
-    }
-
-    return validations || {};
-  };
-
-  var propTypes$1 = {
-    innerRef: propTypes.func,
-    name: propTypes.string.isRequired,
-    required: propTypes.oneOfType([propTypes.bool, propTypes.object, propTypes.string]),
-    validations: propTypes.oneOfType([propTypes.object, propTypes.string]),
-    value: propTypes.any // eslint-disable-line react/forbid-prop-types
-
-  };
-
-  function getDisplayName(component) {
-    return component.displayName || component.name || (isString(component) ? component : 'Component');
-  }
-
-  function Wrapper (WrappedComponent) {
-    var _class, _temp;
-
-    return _temp = _class = /*#__PURE__*/function (_React$Component) {
-      _inherits(_class, _React$Component);
-
-      var _super = _createSuper(_class);
-
-      // eslint-disable-next-line react/sort-comp
-      function _class(props) {
-        var _this;
-
-        _classCallCheck(this, _class);
-
-        _this = _super.call(this, props);
-        _this.validations = void 0;
-        _this.requiredValidations = void 0;
-        _this.context = void 0;
-
-        _this.getErrorMessage = function () {
-          var messages = _this.getErrorMessages();
-
-          return messages.length ? messages[0] : null;
-        };
-
-        _this.getErrorMessages = function () {
-          var validationError = _this.state.validationError;
-
-          if (!_this.isValid() || _this.showRequired()) {
-            return validationError || [];
-          }
-
-          return [];
-        };
-
-        _this.getValue = function () {
-          return _this.state.value;
-        };
-
-        _this.setValidations = function (validations, required) {
-          // Add validations to the store itself as the props object can not be modified
-          _this.validations = convertValidationsToObject(validations) || {};
-          _this.requiredValidations = required === true ? {
-            isDefaultRequiredValue: required
-          } : convertValidationsToObject(required);
-        };
-
-        _this.setValue = function (value) {
-          var validate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-          var validateForm = _this.context.validate;
-
-          if (!validate) {
-            _this.setState({
-              value: value
-            });
-          } else {
-            _this.setState({
-              value: value,
-              isPristine: false
-            }, function () {
-              validateForm(_assertThisInitialized(_this));
-            });
-          }
-        };
-
-        _this.hasValue = function () {
-          var value = _this.state.value;
-          return _isDefaultRequiredValue(value);
-        };
-
-        _this.isFormDisabled = function () {
-          return _this.context.isFormDisabled;
-        };
-
-        _this.isFormSubmitted = function () {
-          return _this.state.formSubmitted;
-        };
-
-        _this.isPristine = function () {
-          return _this.state.isPristine;
-        };
-
-        _this.isRequired = function () {
-          return !!_this.props.required;
-        };
-
-        _this.isValid = function () {
-          return _this.state.isValid;
-        };
-
-        _this.isValidValue = function (value) {
-          return _this.context.isValidValue(_assertThisInitialized(_this), value);
-        };
-
-        _this.resetValue = function () {
-          var pristineValue = _this.state.pristineValue;
-          var validate = _this.context.validate;
-
-          _this.setState({
-            value: pristineValue,
-            isPristine: true
-          }, function () {
-            validate(_assertThisInitialized(_this));
-          });
-        };
-
-        _this.showError = function () {
-          return !_this.showRequired() && !_this.isValid();
-        };
-
-        _this.showRequired = function () {
-          return _this.state.isRequired;
-        };
-
-        _this.state = {
-          formSubmitted: false,
-          isPristine: true,
-          isRequired: false,
-          isValid: true,
-          pristineValue: props.value,
-          validationError: [],
-          value: props.value
-        };
-        return _this;
-      }
-
-      _createClass(_class, [{
-        key: "componentDidMount",
-        value: function componentDidMount() {
-          var _this$props = this.props,
-              validations = _this$props.validations,
-              required = _this$props.required,
-              name = _this$props.name;
-          var attachToForm = this.context.attachToForm;
-
-          if (!name) {
-            throw new Error('Form Input requires a name property when used');
-          }
-
-          this.setValidations(validations, required); // Pass a function instead?
-
-          attachToForm(this);
-        }
-      }, {
-        key: "shouldComponentUpdate",
-        value: function shouldComponentUpdate(nextProps, nextState, nextContext) {
-          var props = this.props,
-              state = this.state,
-              context = this.context;
-
-          var isChanged = function isChanged(a, b) {
-            return Object.keys(a).some(function (k) {
-              return a[k] !== b[k];
-            });
-          };
-
-          var isPropsChanged = isChanged(props, nextProps);
-          var isStateChanged = isChanged(state, nextState);
-          var isFormsyContextChanged = isChanged(context, nextContext);
-          return isPropsChanged || isStateChanged || isFormsyContextChanged;
-        }
-      }, {
-        key: "componentDidUpdate",
-        value: function componentDidUpdate(prevProps) {
-          var _this$props2 = this.props,
-              value = _this$props2.value,
-              validations = _this$props2.validations,
-              required = _this$props2.required;
-          var validate = this.context.validate; // If the value passed has changed, set it. If value is not passed it will
-          // internally update, and this will never run
-
-          if (!isSame(value, prevProps.value)) {
-            this.setValue(value);
-          } // If validations or required is changed, run a new validation
-
-
-          if (!isSame(validations, prevProps.validations) || !isSame(required, prevProps.required)) {
-            this.setValidations(validations, required);
-            validate(this);
-          }
-        } // Detach it when component unmounts
-
-      }, {
-        key: "componentWillUnmount",
-        value: function componentWillUnmount() {
-          var detachFromForm = this.context.detachFromForm;
-          detachFromForm(this);
-        }
-      }, {
-        key: "render",
-        value: function render() {
-          var innerRef = this.props.innerRef;
-
-          var propsForElement = _objectSpread2(_objectSpread2({}, this.props), {}, {
-            errorMessage: this.getErrorMessage(),
-            errorMessages: this.getErrorMessages(),
-            hasValue: this.hasValue(),
-            isFormDisabled: this.isFormDisabled(),
-            isFormSubmitted: this.isFormSubmitted(),
-            isPristine: this.isPristine(),
-            isRequired: this.isRequired(),
-            isValid: this.isValid(),
-            isValidValue: this.isValidValue,
-            resetValue: this.resetValue,
-            setValidations: this.setValidations,
-            setValue: this.setValue,
-            showError: this.showError(),
-            showRequired: this.showRequired(),
-            value: this.getValue()
-          });
-
-          if (innerRef) {
-            propsForElement.ref = innerRef;
-          }
-
-          return React.createElement(WrappedComponent, propsForElement);
-        }
-      }]);
-
-      return _class;
-    }(React.Component), _class.contextType = FormsyContext, _class.displayName = "Formsy(".concat(getDisplayName(WrappedComponent), ")"), _class.propTypes = propTypes$1, _class.defaultProps = {
-      innerRef: null,
-      required: false,
-      validationError: '',
-      validationErrors: {},
-      validations: null,
-      value: WrappedComponent.defaultValue
-    }, _temp;
-  }
-
   var Formsy = /*#__PURE__*/function (_React$Component) {
     _inherits(Formsy, _React$Component);
 
@@ -5072,7 +5065,7 @@
             validationErrors = _this$props.validationErrors,
             disabled = _this$props.disabled;
 
-        if (validationErrors && isObject$3(validationErrors) && Object.keys(validationErrors).length > 0) {
+        if (validationErrors && isObject(validationErrors) && Object.keys(validationErrors).length > 0) {
           _this.setInputValidationErrors(validationErrors);
         }
 
@@ -5282,7 +5275,12 @@
           _this.inputs.push(component);
         }
 
-        _this.validate(component);
+        var onChange = _this.props.onChange;
+        var canChange = _this.state.canChange; // Trigger onChange
+
+        if (canChange) {
+          onChange(_this.getModel(), _this.isChanged());
+        }
       };
 
       _this.detachFromForm = function (component) {
@@ -5420,8 +5418,28 @@
         }
       };
 
-      _this.render = function () {
-        var _this$props4 = _this.props,
+      _this.state = {
+        canChange: false,
+        isSubmitting: false,
+        isValid: true,
+        contextValue: {
+          attachToForm: _this.attachToForm,
+          detachFromForm: _this.detachFromForm,
+          isFormDisabled: props.disabled,
+          isValidValue: _this.isValidValue,
+          validate: _this.validate,
+          runValidation: _this.runValidation
+        }
+      };
+      _this.inputs = [];
+      _this.emptyArray = [];
+      return _this;
+    }
+
+    _createClass(Formsy, [{
+      key: "render",
+      value: function render() {
+        var _this$props4 = this.props,
             children = _this$props4.children,
             mapping = _this$props4.mapping,
             onChange = _this$props4.onChange,
@@ -5436,37 +5454,20 @@
             validationErrors = _this$props4.validationErrors,
             nonFormsyProps = _objectWithoutProperties(_this$props4, ["children", "mapping", "onChange", "onInvalid", "onInvalidSubmit", "onReset", "onSubmit", "onValid", "onValidSubmit", "preventDefaultSubmit", "preventExternalInvalidation", "validationErrors"]);
 
-        var contextValue = _this.state.contextValue;
-        return React.createElement(FormsyContext.Provider, {
+        var contextValue = this.state.contextValue;
+        return /*#__PURE__*/React.createElement(FormsyContext.Provider, {
           value: contextValue
-        }, React.createElement('form', _objectSpread2(_objectSpread2({
-          onReset: _this.resetInternal,
-          onSubmit: _this.submit
+        }, /*#__PURE__*/React.createElement('form', _objectSpread2(_objectSpread2({
+          onReset: this.resetInternal,
+          onSubmit: this.submit
         }, nonFormsyProps), {}, {
           disabled: false
         }), children));
-      };
-
-      _this.state = {
-        canChange: false,
-        isSubmitting: false,
-        isValid: true,
-        contextValue: {
-          attachToForm: _this.attachToForm,
-          detachFromForm: _this.detachFromForm,
-          isFormDisabled: props.disabled,
-          isValidValue: _this.isValidValue,
-          validate: _this.validate
-        }
-      };
-      _this.inputs = [];
-      _this.emptyArray = [];
-      return _this;
-    }
+      }
+    }]);
 
     return Formsy;
   }(React.Component);
-
   Formsy.displayName = 'Formsy';
   Formsy.propTypes = {
     disabled: propTypes.bool,
@@ -5498,15 +5499,11 @@
     validationErrors: {}
   };
 
-  var addValidationRule = function addValidationRule(name, func) {
-    validations[name] = func;
-  };
-
   exports.addValidationRule = addValidationRule;
   exports.default = Formsy;
   exports.propTypes = propTypes$1;
   exports.validationRules = validations;
-  exports.withFormsy = Wrapper;
+  exports.withFormsy = withFormsy;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

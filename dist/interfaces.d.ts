@@ -1,5 +1,5 @@
 import React, { ComponentClass } from 'react';
-import { WrapperProps, WrapperState } from './Wrapper';
+import { WrapperProps, WrapperState } from './withFormsy';
 export interface Values {
     [key: string]: any;
 }
@@ -33,4 +33,9 @@ export interface FormsyContextInterface {
     isFormDisabled: boolean;
     isValidValue: (component: InputComponent<any>, value: any) => boolean;
     validate: (component: InputComponent<any>) => void;
+    runValidation: (component: InputComponent<any>) => {
+        isRequired: boolean;
+        isValid: boolean;
+        validationError: ValidationError[];
+    };
 }

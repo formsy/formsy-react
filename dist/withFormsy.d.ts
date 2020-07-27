@@ -1,7 +1,7 @@
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { RequiredValidation, ValidationError, Validations } from './interfaces';
-declare const propTypes: {
+export declare const propTypes: {
     innerRef: PropTypes.Requireable<(...args: any[]) => any>;
     name: PropTypes.Validator<string>;
     required: PropTypes.Requireable<string | boolean | object>;
@@ -57,5 +57,4 @@ export interface WrapperInstanceMethods<V> {
     setValue: (value: V, validate?: boolean) => void;
 }
 export declare type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
-export { propTypes };
-export default function <T, V>(WrappedComponent: React.ComponentType<T & PassDownProps<V>>): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>>;
+export default function withFormsy<T, V>(WrappedComponent: React.ComponentType<T & PassDownProps<V>>): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>>;
