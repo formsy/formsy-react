@@ -70,4 +70,8 @@ const validations: Validations<any> = {
   minLength: (_values, value: string, length: number) => !isExisty(value) || isEmpty(value) || value.length >= length,
 };
 
+export const addValidationRule = <V>(name: string, func: ValidationFunction<V>) => {
+  validations[name] = func;
+};
+
 export default validations;
