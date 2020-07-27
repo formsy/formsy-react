@@ -1,5 +1,5 @@
 import React, { ComponentClass } from 'react';
-import { WrapperProps, WrapperState } from './Wrapper';
+import { WrapperProps, WrapperState } from './withFormsy';
 
 export interface Values {
   [key: string]: any;

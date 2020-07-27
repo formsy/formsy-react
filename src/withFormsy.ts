@@ -46,7 +46,7 @@ const convertValidationsToObject = <V>(validations: false | Validations<V>): Val
   return validations || {};
 };
 
-const propTypes = {
+export const propTypes = {
   innerRef: PropTypes.func,
   name: PropTypes.string.isRequired,
   required: PropTypes.oneOfType([PropTypes.bool, PropTypes.object, PropTypes.string]),
@@ -106,13 +106,11 @@ export interface WrapperInstanceMethods<V> {
 
 export type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
 
-export { propTypes };
-
 function getDisplayName(component: WrappedComponentClass) {
   return component.displayName || component.name || (utils.isString(component) ? component : 'Component');
 }
 
-export default function <T, V>(
+export default function withFormsy<T, V>(
   WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
 ): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
   class WithFormsyWrapper extends React.Component<T & WrapperProps<V> & FormsyContextInterface, WrapperState<V>>
