@@ -492,6 +492,6 @@ const addValidationRule = <V>(name: string, func: ValidationFunction<V>) => {
   validationRules[name] = func;
 };
 
-export { addValidationRule, propTypes, validationRules, Wrapper as withFormsy, PassDownProps as FormsyInjectedProps };
-
+export { addValidationRule, propTypes, validationRules, Wrapper as withFormsy };
+export type { PassDownProps as FormsyInjectedProps };
 export default Formsy;

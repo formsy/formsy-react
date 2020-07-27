@@ -21,7 +21,7 @@ export default [
   // browser-friendly UMD build
   {
     input,
-    output: { file: pkg.browser, format: 'umd', name, ...common },
+    output: { file: 'dist/formsy-react.umd.js', format: 'umd', name, ...common },
     plugins,
   },
 
