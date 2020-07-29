@@ -1836,6 +1836,21 @@ function Wrapper (WrappedComponent) {
         });
         return isPropsChanged || isStateChanged || isFormsyContextChanged;
       }
+      /**
+       * Updating value before component update to avoid re-rendering with old value.
+       * https://rippling.atlassian.net/browse/FRONTEND-1988
+       */
+
+    }, {
+      key: "UNSAFE_componentWillReceiveProps",
+      value: function UNSAFE_componentWillReceiveProps(nextProps) {
+        var value = nextProps.value; // If the value passed has changed, set it. If value is not passed it will
+        // internally update, and this will never run
+
+        if (!utils.isSame(value, this.props.value)) {
+          this.setValue(value);
+        }
+      }
     }, {
       key: "componentDidUpdate",
       value: function componentDidUpdate(prevProps) {
@@ -1846,13 +1861,7 @@ function Wrapper (WrappedComponent) {
             isRequired = _this$props2.isRequired;
         var required = isRequired || _required;
         var prevRequired = prevProps.isRequired || prevProps.required;
-        var formsy = this.context.formsy; // If the value passed has changed, set it. If value is not passed it will
-        // internally update, and this will never run
-
-        if (!utils.isSame(value, prevProps.value)) {
-          this.setValue(value);
-        } // If validations or required is changed, run a new validation
-
+        var formsy = this.context.formsy; // If validations or required is changed, run a new validation
 
         if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevRequired)) {
           this.setValidations(validations, required);

@@ -170,17 +170,25 @@ export default function<T>(
       return isPropsChanged || isStateChanged || isFormsyContextChanged;
     }
 
+    /**
+     * Updating value before component update to avoid re-rendering with old value.
+     * https://rippling.atlassian.net/browse/FRONTEND-1988
+     */
+    public UNSAFE_componentWillReceiveProps(nextProps) {
+      const { value } = nextProps;
+
+      // If the value passed has changed, set it. If value is not passed it will
+      // internally update, and this will never run
+      if (!utils.isSame(value, this.props.value)) {
+        this.setValue(value);
+      }
+    }
+
     public componentDidUpdate(prevProps) {
       const { value, validations, required: _required, isRequired } = this.props;
       const required = isRequired || _required;
       const prevRequired = prevProps.isRequired || prevProps.required;
       const { formsy } = this.context;
-
-      // If the value passed has changed, set it. If value is not passed it will
-      // internally update, and this will never run
-      if (!utils.isSame(value, prevProps.value)) {
-        this.setValue(value);
-      }
 
       // If validations or required is changed, run a new validation
       if (!utils.isSame(validations, prevProps.validations) || !utils.isSame(required, prevRequired)) {
