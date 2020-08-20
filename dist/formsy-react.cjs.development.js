@@ -1,9 +1,15 @@
-import isPlainObject from 'lodash.isplainobject';
-import PropTypes from 'prop-types';
-import React from 'react';
-import get from 'lodash.get';
-import has from 'lodash.has';
-import set from 'lodash.set';
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var isPlainObject = _interopDefault(require('lodash.isplainobject'));
+var PropTypes = _interopDefault(require('prop-types'));
+var React = _interopDefault(require('react'));
+var get = _interopDefault(require('lodash.get'));
+var has = _interopDefault(require('lodash.has'));
+var set = _interopDefault(require('lodash.set'));
 
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -1030,6 +1036,9 @@ Formsy.defaultProps = {
   validationErrors: {}
 };
 
-export default Formsy;
-export { addValidationRule, propTypes, validations as validationRules, withFormsy };
-//# sourceMappingURL=formsy-react.esm.js.map
+exports.addValidationRule = addValidationRule;
+exports.default = Formsy;
+exports.propTypes = propTypes;
+exports.validationRules = validations;
+exports.withFormsy = withFormsy;
+//# sourceMappingURL=formsy-react.cjs.development.js.map

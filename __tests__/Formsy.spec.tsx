@@ -3,16 +3,16 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 
 import DynamicInputForm from '../__test_utils__/DynamicInputForm';
-import Formsy, { addValidationRule } from '../src';
+import { getFormInstance, getWrapperInstance } from '../__test_utils__/getInput';
 import TestInput from '../__test_utils__/TestInput';
 import TestInputHoc from '../__test_utils__/TestInputHoc';
-import { getFormInstance, getWrapperInstance } from '../__test_utils__/getInput';
+import Formsy, { addValidationRule } from '../src';
 import { ValidationError } from '../src/interfaces';
 
 describe('Setting up a form', () => {
   it('should expose the users DOM node through an innerRef prop', () => {
     class TestForm extends React.Component {
-      public inputRef: typeof TestInputHoc;
+      public inputRef: any;
 
       render() {
         return (
@@ -823,7 +823,7 @@ describe('form valid state', () => {
     let isValid = true;
 
     class TestForm extends React.Component {
-      onValidSubmit = (model, reset, updateInputsWithError) => {
+      onValidSubmit = (_model, _reset, updateInputsWithError) => {
         updateInputsWithError({ foo: 'bar' }, true);
       };
 
@@ -859,7 +859,7 @@ describe('form valid state', () => {
     });
 
     class TestForm extends React.Component {
-      onValidSubmit = (model, reset, updateInputsWithError) => {
+      onValidSubmit = (_model, _reset, updateInputsWithError) => {
         updateInputsWithError({ bar: 'bar' }, true);
       };
 
@@ -918,6 +918,7 @@ describe('form valid state', () => {
 
   it('should be true when validationErrors is not empty and preventExternalInvalidation is true', () => {
     let isValid = true;
+
     class TestForm extends React.Component<{}, { validationErrors: { [key: string]: ValidationError } }> {
       constructor(props) {
         super(props);

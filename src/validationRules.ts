@@ -51,7 +51,7 @@ const validations: Validations<any> = {
   equalsField: <V>(values, value: V, field: string) => value === values[field],
   isAlpha: <V>(values, value: V) => matchRegexp(values, value, REGEX_PATTERNS.ALPHA),
   isAlphanumeric: <V>(values, value: V) => matchRegexp(values, value, REGEX_PATTERNS.ALPHANUMERIC),
-  isDefaultRequiredValue: <V>(values, value: V) => isDefaultRequiredValue(value),
+  isDefaultRequiredValue: <V>(_values, value: V) => isDefaultRequiredValue(value),
   isEmail: (values, value: string) => matchRegexp(values, value, REGEX_PATTERNS.EMAIL),
   isEmptyString: (_values, value: string) => isEmpty(value),
   isExisty: <V>(_values, value: V) => isExisty(value),

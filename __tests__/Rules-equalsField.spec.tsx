@@ -1,8 +1,9 @@
+import { mount } from 'enzyme';
 import React from 'react';
+import TestInput from '../__test_utils__/TestInput';
 
 import Formsy from '../src';
-import TestInput from '../__test_utils__/TestInput';
-import { mount } from 'enzyme';
+import { WrapperInstanceMethods } from '../src/withFormsy';
 
 function ValidationForm(props: { validations: string; value?: any; other?: any }) {
   const { validations, value, other } = props;
@@ -18,7 +19,7 @@ function ValidationForm(props: { validations: string; value?: any; other?: any }
 export function expectIsValid(testForm: React.ComponentElement<any, any>) {
   const form = mount(testForm);
   const inputComponent = form.find('Formsy(TestInput)').first();
-  return expect(inputComponent.instance().isValid());
+  return expect(((inputComponent.instance() as unknown) as WrapperInstanceMethods<any>).isValid());
 }
 
 describe('equalsField', () => {

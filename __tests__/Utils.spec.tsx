@@ -94,7 +94,7 @@ describe('Utils', () => {
       failed: ['rule'],
       success: [],
     });
-    expect(utils.runRules('', {}, { rule: true }, { rule: (_cv, _v, validationsVal) => 'Error' })).toEqual({
+    expect(utils.runRules('', {}, { rule: true }, { rule: (_cv, _v, _validationsVal) => 'Error' })).toEqual({
       errors: ['Error'],
       failed: ['rule'],
       success: [],
