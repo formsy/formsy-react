@@ -1,12 +1,11 @@
-import React from 'react';
-import sinon from 'sinon';
 import { mount } from 'enzyme';
-
-import Formsy, { withFormsy } from '../src';
+import React from 'react';
+import { getFormInstance, getWrapperInstance } from '../__test_utils__/getInput';
 import immediate from '../__test_utils__/immediate';
 import { InputFactory } from '../__test_utils__/TestInput';
-import { PassDownProps } from '../src/Wrapper';
-import { getFormInstance, getWrapperInstance } from '../__test_utils__/getInput';
+
+import Formsy, { withFormsy } from '../src';
+import { PassDownProps } from '../src/withFormsy';
 
 class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> {
   public static defaultProps = { type: 'text' };
@@ -21,12 +20,13 @@ class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> 
     return <input type={type} value={value || ''} onChange={this.handleChange} />;
   }
 }
+
 const FormsyTest = withFormsy<{ type?: string }, string>(MyTest);
 
 describe('Validation', () => {
   it('should reset only changed form element when external error is passed', () => {
     const form = mount(
-      <Formsy onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar', bar: 'foo' })}>
+      <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar', bar: 'foo' })}>
         <FormsyTest name="foo" />
         <FormsyTest name="bar" />
       </Formsy>,
@@ -48,7 +48,7 @@ describe('Validation', () => {
 
   it('should let normal validation take over when component with external error is changed', () => {
     const form = mount(
-      <Formsy onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+      <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
         <FormsyTest name="foo" validations="isEmail" />
       </Formsy>,
     );
@@ -67,8 +67,8 @@ describe('Validation', () => {
   });
 
   it('should trigger an onValid handler, if passed, when form is valid', () => {
-    const onValid = sinon.spy();
-    const onInvalid = sinon.spy();
+    const onValid = jest.fn();
+    const onInvalid = jest.fn();
 
     mount(
       <Formsy onValid={onValid} onInvalid={onInvalid}>
@@ -76,13 +76,13 @@ describe('Validation', () => {
       </Formsy>,
     );
 
-    expect(onValid.called).toEqual(true);
-    expect(onInvalid.called).toEqual(false);
+    expect(onValid).toHaveBeenCalled();
+    expect(onInvalid).not.toHaveBeenCalled();
   });
 
   it('should trigger an onInvalid handler, if passed, when form is invalid', () => {
-    const onValid = sinon.spy();
-    const onInvalid = sinon.spy();
+    const onValid = jest.fn();
+    const onInvalid = jest.fn();
 
     mount(
       <Formsy onValid={onValid} onInvalid={onInvalid}>
@@ -90,13 +90,13 @@ describe('Validation', () => {
       </Formsy>,
     );
 
-    expect(onValid.called).toEqual(false);
-    expect(onInvalid.called).toEqual(true);
+    expect(onValid).not.toHaveBeenCalled();
+    expect(onInvalid).toHaveBeenCalled();
   });
 
   it('should trigger the `onInvalid` handler if a required element receives `null` as the value', () => {
-    const onValid = sinon.spy();
-    const onInvalid = sinon.spy();
+    const onValid = jest.fn();
+    const onInvalid = jest.fn();
 
     mount(
       <Formsy onValid={onValid} onInvalid={onInvalid}>
@@ -104,8 +104,8 @@ describe('Validation', () => {
       </Formsy>,
     );
 
-    expect(onValid.called).toEqual(false);
-    expect(onInvalid.called).toEqual(true);
+    expect(onValid).not.toHaveBeenCalled();
+    expect(onInvalid).toHaveBeenCalled();
   });
 
   it('should be able to use provided validate function', () => {
@@ -127,7 +127,7 @@ describe('Validation', () => {
   it('should provide invalidate callback on onValidSubmit', () => {
     function TestForm() {
       return (
-        <Formsy onValidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+        <Formsy onValidSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
           <FormsyTest name="foo" value="foo" />
         </Formsy>
       );
@@ -144,7 +144,7 @@ describe('Validation', () => {
   it('should provide invalidate callback on onInvalidSubmit', () => {
     function TestForm() {
       return (
-        <Formsy onInvalidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+        <Formsy onInvalidSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
           <FormsyTest name="foo" value="foo" validations="isEmail" />
         </Formsy>
       );
@@ -160,7 +160,7 @@ describe('Validation', () => {
   it('should not invalidate inputs on external errors with preventExternalInvalidation prop', () => {
     function TestForm() {
       return (
-        <Formsy preventExternalInvalidation onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+        <Formsy preventExternalInvalidation onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
           <FormsyTest name="foo" value="foo" />
         </Formsy>
       );
@@ -176,7 +176,7 @@ describe('Validation', () => {
   it('should invalidate inputs on external errors without preventExternalInvalidation prop', () => {
     function TestForm() {
       return (
-        <Formsy onSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+        <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
           <FormsyTest name="foo" value="foo" />
         </Formsy>
       );
@@ -197,7 +197,7 @@ describe('Validation', () => {
 
     function TestForm() {
       return (
-        <Formsy onInvalidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+        <Formsy onInvalidSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
           <FormsyTest name="foo" value="foo" validations="isLength:3:7" />
         </Formsy>
       );
@@ -218,7 +218,7 @@ describe('Validation', () => {
 
     function TestForm() {
       return (
-        <Formsy onInvalidSubmit={(model, reset, invalidate) => invalidate({ foo: 'bar' })}>
+        <Formsy onInvalidSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
           <FormsyTest name="" value="foo" />
         </Formsy>
       );

@@ -2,9 +2,9 @@
 import React from 'react';
 
 import { withFormsy } from '../src';
-import { PassDownProps } from '../src/Wrapper';
+import { PassDownProps } from '../src/withFormsy';
 
-export type FormsyInputProps = React.HTMLProps<HTMLInputElement> & PassDownProps<string>;
+export type FormsyInputProps = Omit<React.HTMLProps<HTMLInputElement>, 'required' | 'value'> & PassDownProps<string>;
 
 class TestInput extends React.Component<FormsyInputProps> {
   updateValue = (event) => {
@@ -22,7 +22,7 @@ export function InputFactory(methods) {
       TestInput.prototype[method] = methods[method];
     }
   });
-  return withFormsy<FormsyInputProps, string>(TestInput);
+  return withFormsy<FormsyInputProps, any>(TestInput);
 }
 
-export default withFormsy<FormsyInputProps, string>(TestInput);
+export default withFormsy<FormsyInputProps, any>(TestInput);

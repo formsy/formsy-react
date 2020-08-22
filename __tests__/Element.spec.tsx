@@ -1,12 +1,10 @@
-/* eslint-disable react/destructuring-assignment */
-import React from 'react';
-import sinon from 'sinon';
 import { mount } from 'enzyme';
-
-import Formsy, { withFormsy } from '../src';
+import React from 'react';
+import { getFormInstance, getInputInstance, getWrapperInstance } from '../__test_utils__/getInput';
 import immediate from '../__test_utils__/immediate';
 import TestInput, { FormsyInputProps, InputFactory } from '../__test_utils__/TestInput';
-import { getFormInstance, getInputInstance, getWrapperInstance } from '../__test_utils__/getInput';
+
+import Formsy, { withFormsy } from '../src';
 
 describe('Element', () => {
   it('should pass down correct value prop after using setValue()', () => {
@@ -40,13 +38,13 @@ describe('Element', () => {
       </Formsy>,
     );
     const inputComponent = form.find('Formsy(NoValidateInput)');
-    const setStateSpy = sinon.spy(getWrapperInstance(inputComponent), 'setState');
+    const setStateSpy = jest.spyOn(getWrapperInstance(inputComponent) as any, 'setState');
     const inputElement = form.find('input');
 
-    expect(setStateSpy.called).toEqual(false);
+    expect(setStateSpy).not.toHaveBeenCalled();
     inputElement.simulate('change', { target: { value: 'foobar' } });
-    expect(setStateSpy.calledOnce).toEqual(true);
-    expect(setStateSpy.calledWithExactly({ value: 'foobar' })).toEqual(true);
+    expect(setStateSpy).toHaveBeenCalledTimes(1);
+    expect(setStateSpy).toHaveBeenCalledWith({ value: 'foobar' });
   });
 
   it('should set back to pristine value when running reset', () => {
@@ -113,7 +111,7 @@ describe('Element', () => {
     mount(
       <Formsy action="/users">
         <Input name="foo" value="" />
-        <Input name="foo" value="" required />
+        <Input name="foo" value="" required  />
         <Input name="foo" value="foo" required="isLength:3" />
       </Formsy>,
     );
@@ -180,6 +178,7 @@ describe('Element', () => {
         );
       }
     }
+
     const form = mount<TestForm>(<TestForm />);
 
     form.instance().changeValue();
@@ -251,7 +250,7 @@ describe('Element', () => {
   });
 
   it('should be able to run a function to validate', () => {
-    const customValidationA = (values, value) => {
+    const customValidationA = (_values, value) => {
       return value === 'foo';
     };
 
@@ -470,6 +469,7 @@ describe('Element', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
 
     form.setState({
@@ -505,6 +505,7 @@ describe('Element', () => {
         );
       }
     }
+
     const form = mount<TestForm>(<TestForm />);
 
     const input = form.find('Formsy(TestInput)');
@@ -528,6 +529,7 @@ describe('Element', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
 
     // TODO: Beef up this smoke test
@@ -552,6 +554,7 @@ describe('Element', () => {
         );
       }
     }
+
     const form = mount(<TestForm />);
 
     // TODO: Beef up this smoke test
@@ -562,7 +565,7 @@ describe('Element', () => {
   });
 
   it('input should rendered once with PureRenderMixin', () => {
-    const renderSpy = sinon.spy();
+    const renderSpy = jest.fn();
 
     const Input = InputFactory({
       shouldComponentUpdate() {
@@ -575,17 +578,17 @@ describe('Element', () => {
       },
     });
 
-    const form = mount(
+    mount(
       <Formsy>
         <Input name="foo" value="foo" />
       </Formsy>,
     );
 
-    expect(renderSpy.calledOnce).toEqual(true);
+    expect(renderSpy).toHaveBeenCalledTimes(1);
   });
 
   it('input should call shouldComponentUpdate with correct value', () => {
-    const renderSpy = sinon.spy();
+    const renderSpy = jest.fn();
 
     const Input = InputFactory({
       shouldComponentUpdate(prevProps) {
@@ -606,11 +609,11 @@ describe('Element', () => {
 
     const input = form.find('input');
 
-    expect(renderSpy.calledOnce).toEqual(true);
+    expect(renderSpy).toHaveBeenCalledTimes(1);
 
     input.simulate('change', { target: { value: 'fooz' } });
     expect(getInputInstance(input).value).toEqual('fooz');
-    expect(renderSpy.calledTwice).toEqual(true);
+    expect(renderSpy).toHaveBeenCalledTimes(2);
   });
 
   it('unregisters on unmount', () => {

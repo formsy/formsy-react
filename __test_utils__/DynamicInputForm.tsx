@@ -7,7 +7,7 @@ interface DynamicInputFormProps {
   inputName?: string;
 }
 
-class DynamicInputForm extends React.Component<DynamicInputFormProps, { input: typeof TestInput }> {
+class DynamicInputForm extends React.Component<DynamicInputFormProps, { input: any }> {
   constructor(props) {
     super(props);
     this.state = {

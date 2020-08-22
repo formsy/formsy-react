@@ -10,29 +10,6 @@
     "react-component",
     "validation"
   ],
-  "standard-version": {
-    "skip": {
-      "tag": true
-    }
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
-  },
-  "jest": {
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "src/**/*.tsx",
-      "src/**/*.ts"
-    ],
-    "transform": {
-      "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
-    },
-    "setupFilesAfterEnv": [
-      "./setupTests.ts"
-    ]
-  },
   "license": "MIT",
   "homepage": "https://github.com/formsy/formsy-react",
   "bugs": "https://github.com/formsy/formsy-react/issues",
@@ -41,23 +18,25 @@
     "url": "https://github.com/formsy/formsy-react.git"
   },
   "author": "Christian Alfoni and the Formsy Authors",
-  "files": [
-    "dist"
-  ],
-  "main": "dist/formsy-react.cjs.js",
+  "main": "dist/index.js",
   "module": "dist/formsy-react.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run build:clean && npm run build:types && npm run build:js",
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test --passWithNoTests",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
     "build:clean": "rm -r dist/* || true",
-    "build:js": "rollup -c",
-    "build:types": "tsc --emitDeclarationOnly",
     "changelog": "auto-changelog",
     "deploy": "np",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md}\"",
-    "lint": "eslint .",
     "preversion": "npm run lint",
-    "test": "jest",
     "version": "npm run build && git add dist && npm run changelog && git add CHANGELOG.md"
   },
   "dependencies": {
@@ -68,15 +47,6 @@
     "prop-types": "^15.7.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/node": "^7.5.5",
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-react": "^7.0.0",
-    "@babel/preset-typescript": "^7.3.3",
-    "@rollup/plugin-commonjs": "^13.0.0",
-    "@rollup/plugin-node-resolve": "^8.0.1",
     "@types/enzyme": "^3.10.3",
     "@types/jest": "^26.0.0",
     "@types/lodash.get": "^4.4.6",
@@ -84,41 +54,51 @@
     "@types/lodash.isplainobject": "^4.0.6",
     "@types/lodash.set": "^4.3.6",
     "@types/prop-types": "^15.7.1",
-    "@types/react": "^16.9.19",
-    "@types/react-dom": "^16.9.5",
-    "@typescript-eslint/eslint-plugin": "^2.14.0",
-    "@typescript-eslint/parser": "^2.14.0",
+    "@types/react": "^16.9.43",
+    "@types/react-dom": "^16.9.8",
     "auto-changelog": "^2.0.0",
-    "babel-eslint": "^10.0.2",
-    "babel-jest": "^26.0.1",
-    "babel-loader": "^8.0.6",
-    "babelrc-rollup": "^3.0.0",
     "coveralls": "^3.0.9",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
-    "eslint": "^6.1.0",
-    "eslint-config-airbnb": "^18.0.1",
-    "eslint-config-prettier": "^6.0.0",
-    "eslint-config-react": "^1.1.7",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-prettier": "^3.1.0",
-    "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.2.1",
-    "jest": "^26.0.1",
     "np": "^5.0.0",
     "prettier": "^2.0.2",
-    "pretty-quick": "^2.0.0",
     "react": "^16.2.0 || ^16.0.0",
     "react-dom": "^16.2.0 || ^16.0.0",
-    "rollup": "^2.7.6",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-peer-deps-external": "^2.2.0",
-    "sinon": "^9.0.0",
-    "typescript": "^3.5.3"
+    "tsdx": "^0.13.2",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.7"
   },
   "peerDependencies": {
     "react": "^16.0.0",
     "react-dom": "^16.0.0"
+  },
+  "standard-version": {
+    "skip": {
+      "tag": true
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 120,
+    "semi": true,
+    "singleQuote": true,
+    "proseWrap": "always",
+    "trailingComma": "all"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.tsx",
+      "src/**/*.ts"
+    ],
+    "setupFilesAfterEnv": [
+      "./setupTests.ts"
+    ]
   }
 }

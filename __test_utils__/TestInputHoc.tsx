@@ -7,4 +7,4 @@ class TestComponent extends React.Component {
   }
 }
 
-export default withFormsy(TestComponent);
+export default withFormsy(TestComponent as any);

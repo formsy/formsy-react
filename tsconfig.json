@@ -1,12 +1,22 @@
 {
   "compilerOptions": {
+    "module": "esnext",
+    "importHelpers": true,
     "declaration": true,
     "esModuleInterop": true,
     "jsx": "react",
-    "lib": ["dom", "es5", "es6", "es7", "es2017.object"],
-    "outDir": "dist",
-    "sourceMap": true
+    "lib": ["dom", "esnext"],
+    "sourceMap": true,
+    "rootDir": "./src",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "*": ["src/*", "node_modules/*"]
+    }
   },
-  "exclude": ["node_modules", "dist", "coverage"],
-  "include": ["src"]
+  "include": ["src", "types"]
 }
