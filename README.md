@@ -25,7 +25,7 @@ React component aims to be that “sweet spot” between flexibility and reusabi
 This project was originally located at [christianalfoni/formsy-react](https://github.com/christianalfoni/formsy-react)
 if you're looking for old issues.
 
-## What You Can Do 
+## What You Can Do
 
 1.  Build any kind of form element components. Not just traditional inputs, but anything you want, and get that
     validation for free
