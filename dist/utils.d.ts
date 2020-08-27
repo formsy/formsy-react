@@ -19,4 +19,5 @@ interface RulesResult {
     success: string[];
 }
 export declare function runRules<V>(value: V, currentValues: Values, validations: Validations<V>, validationRules: Validations<V>): RulesResult;
+export declare function throttle(callback: any, interval: any): (...args: any[]) => void;
 export {};

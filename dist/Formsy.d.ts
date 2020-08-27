@@ -3,16 +3,17 @@ import React from 'react';
 import { FormsyContextInterface, IModel, InputComponent, IResetModel, IUpdateInputsWithError, IUpdateInputsWithValue, ValidationError } from './interfaces';
 import { PassDownProps } from './withFormsy';
 declare type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
+declare type OnSubmitCallback = (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError, event: React.SyntheticEvent<React.FormHTMLAttributes<any>>) => void;
 export interface FormsyProps extends FormHTMLAttributesCleaned {
     disabled: boolean;
     mapping: null | ((model: IModel) => IModel);
     onChange: (model: IModel, isChanged: boolean) => void;
     onInvalid: () => void;
-    onInvalidSubmit: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
     onReset?: () => void;
-    onSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
+    onSubmit?: OnSubmitCallback;
+    onValidSubmit?: OnSubmitCallback;
+    onInvalidSubmit: OnSubmitCallback;
     onValid: () => void;
-    onValidSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
     preventDefaultSubmit?: boolean;
     preventExternalInvalidation?: boolean;
     validationErrors?: null | object;
@@ -45,6 +46,7 @@ export declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         validationErrors: PropTypes.Requireable<object>;
     };
     static defaultProps: Partial<FormsyProps>;
+    private readonly throttledValidateForm;
     constructor(props: FormsyProps);
     componentDidMount: () => void;
     componentDidUpdate: (prevProps: FormsyProps) => void;
@@ -68,7 +70,7 @@ export declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     attachToForm: (component: any) => void;
     detachFromForm: <V>(component: InputComponent<V>) => void;
     isChanged: () => boolean;
-    submit: (event?: any) => void;
+    submit: (event?: React.SyntheticEvent) => void;
     updateInputsWithError: IUpdateInputsWithError;
     updateInputsWithValue: IUpdateInputsWithValue<any>;
     validate: <V>(component: InputComponent<V>) => void;

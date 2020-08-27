@@ -175,6 +175,22 @@ function runRules(value, currentValues, validations, validationRules) {
   });
   return results;
 }
+function throttle(callback, interval) {
+  var enableCall = true;
+  return function () {
+    if (!enableCall) return;
+    enableCall = false;
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    callback.apply(this, args);
+    setTimeout(function () {
+      return enableCall = true;
+    }, interval);
+  };
+}
 
 function _isExisty(value) {
   return !isValueNullOrUndefined(value);
@@ -574,6 +590,7 @@ function withFormsy(WrappedComponent) {
   };
 }
 
+var ONE_RENDER_FRAME = 66;
 var Formsy = /*#__PURE__*/function (_React$Component) {
   _inheritsLoose(Formsy, _React$Component);
 
@@ -819,7 +836,10 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
 
       if (canChange) {
         onChange(_this.getModel(), _this.isChanged());
-      }
+      } // Will be triggered immediately & every one frame rate
+
+
+      _this.throttledValidateForm();
     }; // Method put on each input component to unregister
     // itself from the form
 
@@ -859,12 +879,12 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
 
       var model = _this.getModel();
 
-      onSubmit(model, _this.resetModel, _this.updateInputsWithError);
+      onSubmit(model, _this.resetModel, _this.updateInputsWithError, event);
 
       if (isValid) {
-        onValidSubmit(model, _this.resetModel, _this.updateInputsWithError);
+        onValidSubmit(model, _this.resetModel, _this.updateInputsWithError, event);
       } else {
-        onInvalidSubmit(model, _this.resetModel, _this.updateInputsWithError);
+        onInvalidSubmit(model, _this.resetModel, _this.updateInputsWithError, event);
       }
     }; // Go through errors from server and grab the components
     // stored in the inputs map. Change their state to invalid
@@ -983,6 +1003,7 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
     };
     _this.inputs = [];
     _this.emptyArray = [];
+    _this.throttledValidateForm = throttle(_this.validateForm, ONE_RENDER_FRAME);
     return _this;
   }
 
