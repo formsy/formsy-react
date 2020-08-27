@@ -21,16 +21,23 @@ import { PassDownProps } from './withFormsy';
 
 type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 
+type OnSubmitCallback = (
+  model: IModel,
+  resetModel: IResetModel,
+  updateInputsWithError: IUpdateInputsWithError,
+  event: React.SyntheticEvent<React.FormHTMLAttributes<any>>,
+) => void;
+
 export interface FormsyProps extends FormHTMLAttributesCleaned {
   disabled: boolean;
   mapping: null | ((model: IModel) => IModel);
   onChange: (model: IModel, isChanged: boolean) => void;
   onInvalid: () => void;
-  onInvalidSubmit: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
   onReset?: () => void;
-  onSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
+  onSubmit?: OnSubmitCallback;
+  onValidSubmit?: OnSubmitCallback;
+  onInvalidSubmit: OnSubmitCallback;
   onValid: () => void;
-  onValidSubmit?: (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError) => void;
   preventDefaultSubmit?: boolean;
   preventExternalInvalidation?: boolean;
   validationErrors?: null | object;
@@ -331,7 +338,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
   public isChanged = () => !utils.isSame(this.getPristineValues(), this.getCurrentValues());
 
   // Update model, submit to url prop and send the model
-  public submit = (event?: any) => {
+  public submit = (event?: React.SyntheticEvent) => {
     const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit } = this.props;
     const { isValid } = this.state;
 
@@ -344,12 +351,12 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     // so validation becomes visible (if based on isPristine)
     this.setFormPristine(false);
     const model = this.getModel();
-    onSubmit(model, this.resetModel, this.updateInputsWithError);
+    onSubmit(model, this.resetModel, this.updateInputsWithError, event);
 
     if (isValid) {
-      onValidSubmit(model, this.resetModel, this.updateInputsWithError);
+      onValidSubmit(model, this.resetModel, this.updateInputsWithError, event);
     } else {
-      onInvalidSubmit(model, this.resetModel, this.updateInputsWithError);
+      onInvalidSubmit(model, this.resetModel, this.updateInputsWithError, event);
     }
   };
 
