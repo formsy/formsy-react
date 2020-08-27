@@ -45,6 +45,8 @@ export interface FormsyState {
   isValid: boolean;
 }
 
+const ONE_RENDER_FRAME = 66;
+
 export class Formsy extends React.Component<FormsyProps, FormsyState> {
   public inputs: InstanceType<any & PassDownProps<any>>[];
 
@@ -103,7 +105,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     };
     this.inputs = [];
     this.emptyArray = [];
-    this.throttledValidateForm = throttle(this.validateForm, 66);
+    this.throttledValidateForm = throttle(this.validateForm, ONE_RENDER_FRAME);
   }
 
   public componentDidMount = () => {
@@ -317,6 +319,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
       onChange(this.getModel(), this.isChanged());
     }
 
+    // Will be triggered immediately & every one frame rate
     this.throttledValidateForm();
   };
 
