@@ -1,7 +1,7 @@
 # formsy-react
 
 [![GitHub release](https://img.shields.io/github/release/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/releases)
-[![Build status](https://travis-ci.org/formsy/formsy-react.svg?branch=master)](https://travis-ci.org/formsy/formsy-react)
+![CI](https://github.com/formsy/formsy-react/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/formsy/formsy-react/badge.svg?branch=master)](https://coveralls.io/github/formsy/formsy-react?branch=master)
 [![Gzipped size](http://img.badgesize.io/https://unpkg.com/formsy-react?compression=gzip)](https://unpkg.com/formsy-react)
 [![GitHub contributors](https://img.shields.io/github/contributors/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/contributors)
