@@ -14,7 +14,7 @@ import {
   IUpdateInputsWithValue,
   ValidationError,
 } from './interfaces';
-import { isObject, isString } from './utils';
+import { throttle, isObject, isString } from './utils';
 import * as utils from './utils';
 import validationRules from './validationRules';
 import { PassDownProps } from './withFormsy';
@@ -84,6 +84,8 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     validationErrors: {},
   };
 
+  private readonly throttledValidateForm: () => void;
+
   public constructor(props: FormsyProps) {
     super(props);
     this.state = {
@@ -101,6 +103,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     };
     this.inputs = [];
     this.emptyArray = [];
+    this.throttledValidateForm = throttle(this.validateForm, 66);
   }
 
   public componentDidMount = () => {
@@ -313,6 +316,8 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     if (canChange) {
       onChange(this.getModel(), this.isChanged());
     }
+
+    this.throttledValidateForm();
   };
 
   // Method put on each input component to unregister
