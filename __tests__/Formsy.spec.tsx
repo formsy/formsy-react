@@ -172,6 +172,7 @@ describe('mapModel', () => {
       { 'parent.child': 'test', testChange: true },
       expect.any(Function),
       expect.any(Function),
+      expect.any(Object),
     );
   });
 });
@@ -556,7 +557,12 @@ describe('value === false', () => {
 
     const form = mount(<TestForm />);
     form.simulate('submit');
-    expect(onSubmit).toHaveBeenCalledWith({ foo: false }, expect.any(Function), expect.any(Function));
+    expect(onSubmit).toHaveBeenCalledWith(
+      { foo: false },
+      expect.any(Function),
+      expect.any(Function),
+      expect.any(Object),
+    );
   });
 
   it('should allow dynamic changes to false', () => {
@@ -589,7 +595,12 @@ describe('value === false', () => {
     const form = mount(<TestForm />);
     (form.instance() as TestForm).changeValue();
     form.simulate('submit');
-    expect(onSubmit).toHaveBeenCalledWith({ foo: false }, expect.any(Function), expect.any(Function));
+    expect(onSubmit).toHaveBeenCalledWith(
+      { foo: false },
+      expect.any(Function),
+      expect.any(Function),
+      expect.any(Object),
+    );
   });
 
   it('should say the form is submitted', () => {
@@ -959,5 +970,29 @@ describe('form valid state', () => {
     (form.instance() as TestForm).setValidationErrors();
 
     expect(isValid).toEqual(true);
+  });
+});
+
+describe('onSubmit/onValidSubmit/onInvalidSubmit', () => {
+  ['onSubmit', 'onValidSubmit', 'onInvalidSubmit'].forEach((key) => {
+    it(`should pass submit event to "${key}"`, () => {
+      const submitSpy = jest.fn();
+
+      const form = mount(
+        <Formsy {...{ [key]: submitSpy }}>
+          <button id="submit">submit</button>
+          {key === 'onInvalidSubmit' && <TestInput name="test" required={true} />}
+        </Formsy>,
+      );
+      const button = form.find('#submit');
+      button.simulate('submit');
+
+      expect(submitSpy).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Function),
+        expect.any(Function),
+        expect.objectContaining({ type: 'submit' }),
+      );
+    });
   });
 });
