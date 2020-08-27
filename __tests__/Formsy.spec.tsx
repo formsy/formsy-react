@@ -1,6 +1,7 @@
 /* eslint-disable max-classes-per-file, react/destructuring-assignment */
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { useState } from 'react';
 
 import DynamicInputForm from '../__test_utils__/DynamicInputForm';
 import { getFormInstance, getWrapperInstance } from '../__test_utils__/getInput';
@@ -970,6 +971,58 @@ describe('form valid state', () => {
     (form.instance() as TestForm).setValidationErrors();
 
     expect(isValid).toEqual(true);
+  });
+
+  it('should revalidate form when input added dynamically', () => {
+    let isValid = false;
+    const Inputs = () => {
+      const [counter, setCounter] = useState(1);
+
+      return (
+        <>
+          <button type="button" onClick={() => setCounter(counter + 1)} id="add">
+            +
+          </button>
+          {Array.from(Array(counter)).map((_, index) => (
+            <TestInput key={index} name={`foo-${index}`} required={true} value={index === 0 ? 'bla' : undefined} />
+          ))}
+        </>
+      );
+    };
+
+    const TestForm = () => {
+      return (
+        <Formsy onInvalid={() => (isValid = false)} onValid={() => (isValid = true)}>
+          <Inputs />
+        </Formsy>
+      );
+    };
+    jest.useFakeTimers();
+    const form = mount(<TestForm />);
+    const plusButton = form.find('#add');
+    jest.runAllTimers();
+
+    expect(isValid).toBe(true);
+
+    plusButton.simulate('click');
+
+    expect(isValid).toBe(false);
+  });
+
+  it('should revalidate form once when mounting multiple inputs', () => {
+    const validSpy = jest.fn();
+    const TestForm = () => (
+      <Formsy onValid={validSpy}>
+        // onValid is called each time the form revalidates
+        {Array.from(Array(5)).map((_, index) => (
+          <TestInput key={index} name={`foo-${index}`} required={true} value={'bla'} />
+        ))}
+      </Formsy>
+    );
+
+    mount(<TestForm />);
+
+    expect(validSpy).toHaveBeenCalledTimes(1 + 1); // one for form mount & 1 for all attachToForm calls
   });
 });
 
