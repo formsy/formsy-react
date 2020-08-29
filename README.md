@@ -41,8 +41,8 @@ if you're looking for old issues.
 
 - [twisty/formsy-react-components](https://github.com/twisty/formsy-react-components) - Bootstrap components for a
   Formsy-React form.
-- [zabute/formsy-semantic-ui-react](https://github.com/zabute/formsy-semantic-ui-react) - Semantic-Ui-React components for a
-  Formsy-React form.
+- [zabute/formsy-semantic-ui-react](https://github.com/zabute/formsy-semantic-ui-react) - Semantic-Ui-React components
+  for a Formsy-React form.
 
 ## 1.x to 2.x Upgrade Guide
 
