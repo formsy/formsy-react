@@ -1,7 +1,5 @@
 /* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
-import get from 'lodash.get';
-import has from 'lodash.has';
-import set from 'lodash.set';
+import { get, has, set } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import FormsyContext from './FormsyContext';
