@@ -3,7 +3,6 @@
 [![GitHub release](https://img.shields.io/github/release/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/releases)
 ![CI](https://github.com/formsy/formsy-react/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/formsy/formsy-react/badge.svg?branch=master)](https://coveralls.io/github/formsy/formsy-react?branch=master)
-[![Gzipped size](http://img.badgesize.io/https://unpkg.com/formsy-react?compression=gzip)](https://unpkg.com/formsy-react)
 [![GitHub contributors](https://img.shields.io/github/contributors/formsy/formsy-react.svg)](https://github.com/formsy/formsy-react/contributors)
 ![Typescript Types included](https://badgen.net/npm/types/tslib)
 
@@ -41,10 +40,9 @@ if you're looking for old issues.
 ## Formsy component packages
 
 - [twisty/formsy-react-components](https://github.com/twisty/formsy-react-components) - Bootstrap components for a
-  formsy-react form.\
-- [zabute/formsy-semantic-ui-react](https://github.com/zabute/formsy-semantic-ui-react) - Formsy-React wrappers for
-  Semantic-Ui-React's form components
-  ([currently being updated to formsy 2.x](https://github.com/zabute/formsy-semantic-ui-react/pull/77))
+  Formsy-React form.
+- [zabute/formsy-semantic-ui-react](https://github.com/zabute/formsy-semantic-ui-react) - Semantic-Ui-React components for a
+  Formsy-React form.
 
 ## 1.x to 2.x Upgrade Guide
 
@@ -152,6 +150,10 @@ export default class App extends React.Component {
 This code results in a form with a submit button that will run the `submit` method when the form is submitted with a
 valid email. The submit button is disabled as long as the input is empty ([required](/API.md#required)) and the value is
 not an email ([isEmail](/API.md#validators)). On validation error it will show the message: "This is not a valid email".
+
+## 3. More
+
+See the [API](/API.md) for more information.
 
 ## Contribute
 
