@@ -27,16 +27,16 @@
   ],
   "types": "dist/index.d.ts",
   "scripts": {
-    "start": "tsdx watch",
     "build": "tsdx build",
-    "test": "tsdx test --passWithNoTests",
-    "lint": "tsdx lint",
-    "prepare": "tsdx build",
     "build:clean": "rm -r dist/* || true",
     "changelog": "auto-changelog",
     "deploy": "np",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md}\"",
+    "lint": "tsdx lint",
+    "prepublishOnly": "tsdx build",
     "preversion": "npm run lint",
+    "start": "tsdx watch",
+    "test": "tsdx test --passWithNoTests",
     "version": "npm run build && git add dist && npm run changelog && git add CHANGELOG.md"
   },
   "dependencies": {
