@@ -168,7 +168,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public componentDidUpdate = () => {
     const { validationErrors } = this.props;
 
-    if (utils.isNonEmptyObject(validationErrors)) {
+    if (validationErrors && typeof validationErrors === 'object' && Object.keys(validationErrors).length > 0) {
       this.setInputValidationErrors(validationErrors);
     }
 
@@ -315,7 +315,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
     const { validationErrors: componentValidationErrors } = component.props;
-    const hasComponentValidationsErrors = utils.isNonEmptyObject(componentValidationErrors);
+    const hasComponentValidationsErrors = utils.isPlainObject(componentValidationErrors);
 
     return Promise.all([
       utils.runRules(value, currentValues, component.validations, validationRules),

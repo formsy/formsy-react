@@ -119,7 +119,7 @@ export default {
     return Promise.resolve(results);
   },
 
-  isNonEmptyObject(value: unknown) {
-    return value && typeof value === 'object' && Object.keys(value).length > 0;
+  isPlainObject(value: unknown) {
+    return typeof value === 'object' && !Array.isArray(value);
   },
 };
