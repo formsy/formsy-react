@@ -118,4 +118,8 @@ export default {
 
     return Promise.resolve(results);
   },
+
+  isPlainObject(value: unknown) {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value); // extra truthy check of value is required because typeof null is 'object'
+  },
 };

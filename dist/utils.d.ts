@@ -9,5 +9,6 @@ declare const _default: {
         failed: string[];
         success: string[];
     }>;
+    isPlainObject(value: unknown): boolean;
 };
 export default _default;

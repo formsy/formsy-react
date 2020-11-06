@@ -314,6 +314,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public runValidation = (component: InputComponent, value = component.state.value) => {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
+    const { validationErrors: componentValidationErrors } = component.props;
+    const hasComponentValidationsErrors = utils.isPlainObject(componentValidationErrors);
 
     return Promise.all([
       utils.runRules(value, currentValues, component.validations, validationRules),
@@ -341,15 +343,16 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
           if (isRequired) {
             const error =
-              component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
+              (hasComponentValidationsErrors && componentValidationErrors[requiredResults.success[0]]) ||
+              component.props.validationError;
             return error ? [error] : null;
           }
 
           if (validationResults.failed.length) {
             return validationResults.failed
               .map(failed =>
-                component.props.validationErrors[failed]
-                  ? component.props.validationErrors[failed]
+                hasComponentValidationsErrors && componentValidationErrors[failed]
+                  ? componentValidationErrors[failed]
                   : component.props.validationError,
               )
               .filter((x, pos, arr) => arr.indexOf(x) === pos); // remove duplicates
