@@ -1542,6 +1542,9 @@
       }
 
       return Promise.resolve(results);
+    },
+    isPlainObject: function isPlainObject(value) {
+      return _typeof(value) === 'object' && !Array.isArray(value);
     }
   };
 
@@ -2131,6 +2134,8 @@
 
         var currentValues = _this.getCurrentValues();
 
+        var componentValidationErrors = component.props.validationErrors;
+        var hasComponentValidationsErrors = utils.isPlainObject(componentValidationErrors);
         return Promise.all([utils.runRules(value, currentValues, component.validations, validations), utils.runRules(value, currentValues, component.requiredValidations, validations)]).then(function (_ref) {
           var _ref2 = _slicedToArray(_ref, 2),
               validationResults = _ref2[0],
@@ -2155,13 +2160,13 @@
               }
 
               if (isRequired) {
-                var error = component.props.validationErrors[requiredResults.success[0]] || component.props.validationError;
+                var error = hasComponentValidationsErrors && componentValidationErrors[requiredResults.success[0]] || component.props.validationError;
                 return error ? [error] : null;
               }
 
               if (validationResults.failed.length) {
                 return validationResults.failed.map(function (failed) {
-                  return component.props.validationErrors[failed] ? component.props.validationErrors[failed] : component.props.validationError;
+                  return hasComponentValidationsErrors && componentValidationErrors[failed] ? componentValidationErrors[failed] : component.props.validationError;
                 }).filter(function (x, pos, arr) {
                   return arr.indexOf(x) === pos;
                 }); // remove duplicates
