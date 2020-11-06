@@ -1538,7 +1538,7 @@ var utils = {
     return Promise.resolve(results);
   },
   isPlainObject: function isPlainObject(value) {
-    return value && _typeof(value) === 'object' && !Array.isArray(value); // extra truthy check of value is required because typeof null is 'object'
+    return Boolean(value) && _typeof(value) === 'object' && !Array.isArray(value); // extra truthy check of value is required because typeof null is 'object'
   }
 };
 
