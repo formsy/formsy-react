@@ -120,6 +120,6 @@ export default {
   },
 
   isPlainObject(value: unknown) {
-    return typeof value === 'object' && !Array.isArray(value);
+    return value && typeof value === 'object' && !Array.isArray(value); // extra truthy check of value is required because typeof null is 'object'
   },
 };

@@ -1544,7 +1544,7 @@
       return Promise.resolve(results);
     },
     isPlainObject: function isPlainObject(value) {
-      return _typeof(value) === 'object' && !Array.isArray(value);
+      return value && _typeof(value) === 'object' && !Array.isArray(value); // extra truthy check of value is required because typeof null is 'object'
     }
   };
 
