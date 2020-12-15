@@ -687,6 +687,37 @@ describe('value === false', () => {
     expect(getWrapperInstance(inputs.at(1)).getValue()).toEqual(true);
   });
 
+  it('should be able to set a deep value with updateInputsWithValue', () => {
+    class TestForm extends React.Component<{}, { valueBar: number; valueFoo: { valueBar: number }}> {
+      constructor(props) {
+        super(props);
+        this.state = {
+          valueFoo: { valueBar: 1 },
+          valueBar: 2,
+        };
+      }
+
+      render() {
+        return (
+          <Formsy>
+            <TestInput name="foo.bar" value={this.state.valueFoo.valueBar} />
+            <TestInput name="bar" value={this.state.valueBar} />
+            <button type="submit">Save</button>
+          </Formsy>
+        );
+      }
+    }
+
+    const form = mount(<TestForm />);
+    const inputs = form.find('Formsy(TestInput)');
+    const formsyForm = form.find(Formsy);
+    expect(getWrapperInstance(inputs.at(0)).getValue()).toEqual(1);
+    expect(getWrapperInstance(inputs.at(1)).getValue()).toEqual(2);
+    getFormInstance(formsyForm).updateInputsWithValue({ foo: { bar: 3 }, bar: 4 });
+    expect(getWrapperInstance(inputs.at(0)).getValue()).toEqual(3);
+    expect(getWrapperInstance(inputs.at(1)).getValue()).toEqual(4);
+  });
+
   it('should be able to reset the form using custom data', () => {
     class TestForm extends React.Component<{}, { value: number; valueDeep: number }> {
       constructor(props) {

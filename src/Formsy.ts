@@ -408,12 +408,11 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Set the value of components
-  public updateInputsWithValue: IUpdateInputsWithValue<any> = (values, validate) => {
-    Object.entries(values).forEach(([name, value]) => {
-      const input = this.inputs.find((component) => component.props.name === name);
-
-      if (input) {
-        input.setValue(value, validate);
+  public updateInputsWithValue: IUpdateInputsWithValue<any> = (data, validate) => {
+    this.inputs.forEach((component) => {
+      const { name } = component.props;
+      if (data && has(data, name)) {
+        component.setValue(get(data, name), validate);
       }
     });
   };
