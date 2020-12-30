@@ -1472,7 +1472,7 @@ var utils = {
       return !this.objectsDiffer(a, b);
     }
 
-    return a === b;
+    return Object.is(a, b);
   },
   find: function find(collection, fn) {
     for (var i = 0, l = collection.length; i < l; i += 1) {
