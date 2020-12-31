@@ -50,7 +50,7 @@ export default {
       return !this.objectsDiffer(a, b);
     }
 
-    return a === b;
+    return Object.is(a, b);
   },
 
   find<T>(collection: T[], fn: (item: T) => boolean): T {
