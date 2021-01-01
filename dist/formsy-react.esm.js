@@ -1,6 +1,9 @@
-import { isPlainObject, set, has, get } from 'lodash-es';
+import isPlainObject from 'lodash.isplainobject';
 import PropTypes from 'prop-types';
 import React from 'react';
+import get from 'lodash.get';
+import has from 'lodash.has';
+import set from 'lodash.set';
 
 function _extends() {
   _extends = Object.assign || function (target) {

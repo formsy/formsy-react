@@ -1083,16 +1083,12 @@ describe('onSubmit/onValidSubmit/onInvalidSubmit', () => {
 
 describe('<Formsy /> can render any tag or element with the props as', () => {
   it('as div', () => {
-    const form = mount(
-      <Formsy formElement="div" />
-    );
-    expect(form.find('div').length).toBe(1)
-  })
+    const form = mount(<Formsy formElement="div" />);
+    expect(form.find('div').length).toBe(1);
+  });
   it('as CustumElement', () => {
     const CustomElement = ({ children }) => <div>{children}</div>;
-    const form = mount(
-      <Formsy formElement={CustomElement} />
-    );
-    expect(form.find(CustomElement).length).toBe(1)
-  })
-})
+    const form = mount(<Formsy formElement={CustomElement} />);
+    expect(form.find(CustomElement).length).toBe(1);
+  });
+});
