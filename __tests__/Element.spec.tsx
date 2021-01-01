@@ -111,7 +111,7 @@ describe('Element', () => {
     mount(
       <Formsy action="/users">
         <Input name="foo" value="" />
-        <Input name="foo" value="" required  />
+        <Input name="foo" value="" required />
         <Input name="foo" value="foo" required="isLength:3" />
       </Formsy>,
     );

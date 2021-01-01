@@ -11,7 +11,6 @@ A form input builder and validator for React.
 | [Quick Start](#quick-start) | [API](/API.md) | [1.x API](https://github.com/formsy/formsy-react/blob/v1.x/API.md) |
 | --------------------------- | -------------- | ------------------------------------------------------------------ |
 
-
 ## Background
 
 [christianalfoni](https://github.com/christianalfoni/) wrote an article on forms and validation with React,
@@ -41,8 +40,8 @@ if you're looking for old issues.
 
 - [twisty/formsy-react-components](https://github.com/twisty/formsy-react-components) - Bootstrap components for a
   Formsy-React form.
-- [zabute/formsy-semantic-ui-react](https://github.com/zabute/formsy-semantic-ui-react) - Semantic-Ui-React components for a
-  Formsy-React form.
+- [zabute/formsy-semantic-ui-react](https://github.com/zabute/formsy-semantic-ui-react) - Semantic-Ui-React components
+  for a Formsy-React form.
 
 ## 1.x to 2.x Upgrade Guide
 

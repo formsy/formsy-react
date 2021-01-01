@@ -4,9 +4,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var lodash = require('lodash');
+var isPlainObject = _interopDefault(require('lodash.isplainobject'));
 var PropTypes = _interopDefault(require('prop-types'));
 var React = _interopDefault(require('react'));
+var get = _interopDefault(require('lodash.get'));
+var has = _interopDefault(require('lodash.has'));
+var set = _interopDefault(require('lodash.set'));
 
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -59,7 +62,7 @@ function isArray(value) {
   return Array.isArray(value);
 }
 function isObject(value) {
-  return lodash.isPlainObject(value);
+  return isPlainObject(value);
 }
 function isTypeUndefined(value) {
   return typeof value === 'undefined';
@@ -730,7 +733,7 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
 
       var returnModel = {};
       Object.keys(model).forEach(function (key) {
-        lodash.set(returnModel, key, model[key]);
+        set(returnModel, key, model[key]);
       });
       return returnModel;
     };
@@ -757,8 +760,8 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
       _this.inputs.forEach(function (component) {
         var name = component.props.name;
 
-        if (data && lodash.has(data, name)) {
-          component.setValue(lodash.get(data, name));
+        if (data && has(data, name)) {
+          component.setValue(get(data, name));
         } else {
           component.resetValue();
         }
