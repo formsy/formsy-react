@@ -17,6 +17,7 @@
   - [updateInputsWithError()](#updateInputsWithError)
   - [updateInputsWithValue()](#updateInputsWithValue)
   - [validationErrors](#validationErrors)
+  - [as](#as)
 - [withFormsy](#withFormsy)
   - [errorMessage](#errorMessage)
   - [errorMessages](#errorMessages)
@@ -292,6 +293,20 @@ class MyForm extends React.Component {
 
 With the `preventExternalInvalidation` the input will not be invalidated though it has an error when
 `updateInputsWithError()` or an `invalidate` callback is called.
+
+### <a id="as">as</a>
+By default Formy render the form with the HTML `form` element.
+If you want to override this behaviour, you can pass the element to render in the `as` props
+
+```jsx
+  <Formsy as="div">
+    ...
+  </Formsy>
+
+  <Formsy as={MyCustomFormElement}>
+    ...
+  </Formsy>
+```
 
 ### <a id="withFormsy">`withFormsy`</a>
 
