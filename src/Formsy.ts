@@ -28,7 +28,7 @@ type OnSubmitCallback = (
   event: React.SyntheticEvent<React.FormHTMLAttributes<any>>,
 ) => void;
 
-type AsType =
+type FormElementType =
   | string
   | React.ComponentType<{
       onReset?: (e: React.SyntheticEvent) => void;
@@ -50,7 +50,7 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
   preventDefaultSubmit?: boolean;
   preventExternalInvalidation?: boolean;
   validationErrors?: null | object;
-  as?: AsType;
+  formElement?: FormElementType;
 }
 
 export interface FormsyState {
@@ -76,7 +76,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
   public static propTypes = {
     disabled: PropTypes.bool,
     mapping: PropTypes.func,
-    as: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.func]),
+    formElement: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.func]),
     onChange: PropTypes.func,
     onInvalid: PropTypes.func,
     onInvalidSubmit: PropTypes.func,
@@ -102,7 +102,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     preventDefaultSubmit: true,
     preventExternalInvalidation: false,
     validationErrors: {},
-    as: 'form',
+    formElement: 'form',
   };
 
   private readonly throttledValidateForm: () => void;
@@ -489,7 +489,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
       preventExternalInvalidation,
       validationErrors,
       disabled,
-      as,
+      formElement,
       ...nonFormsyProps
     } = this.props;
     const { contextValue } = this.state;
@@ -500,7 +500,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
         value: contextValue,
       },
       React.createElement(
-        as,
+        formElement,
         {
           onReset: this.resetInternal,
           onSubmit: this.submit,
