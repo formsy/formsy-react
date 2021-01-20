@@ -28,6 +28,15 @@ type OnSubmitCallback = (
   event: React.SyntheticEvent<React.FormHTMLAttributes<any>>,
 ) => void;
 
+type FormElementType =
+  | string
+  | React.ComponentType<{
+      onReset?: (e: React.SyntheticEvent) => void;
+      onSubmit?: (e: React.SyntheticEvent) => void;
+      disabled?: boolean;
+      children?: React.ReactChildren;
+    }>;
+
 export interface FormsyProps extends FormHTMLAttributesCleaned {
   disabled: boolean;
   mapping: null | ((model: IModel) => IModel);
@@ -41,6 +50,7 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
   preventDefaultSubmit?: boolean;
   preventExternalInvalidation?: boolean;
   validationErrors?: null | object;
+  formElement?: FormElementType;
 }
 
 export interface FormsyState {
@@ -66,6 +76,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
   public static propTypes = {
     disabled: PropTypes.bool,
     mapping: PropTypes.func,
+    formElement: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.func]),
     onChange: PropTypes.func,
     onInvalid: PropTypes.func,
     onInvalidSubmit: PropTypes.func,
@@ -91,6 +102,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     preventDefaultSubmit: true,
     preventExternalInvalidation: false,
     validationErrors: {},
+    formElement: 'form',
   };
 
   private readonly throttledValidateForm: () => void;
@@ -476,7 +488,8 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
       preventDefaultSubmit,
       preventExternalInvalidation,
       validationErrors,
-      /* eslint-enable @typescript-eslint/no-unused-vars */
+      disabled,
+      formElement,
       ...nonFormsyProps
     } = this.props;
     const { contextValue } = this.state;
@@ -487,12 +500,12 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
         value: contextValue,
       },
       React.createElement(
-        'form',
+        formElement,
         {
           onReset: this.resetInternal,
           onSubmit: this.submit,
           ...nonFormsyProps,
-          disabled: false,
+          disabled,
         },
         children,
       ),
