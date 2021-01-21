@@ -1006,16 +1006,18 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
   _proto.render = function render() {
     var _this$props4 = this.props,
         children = _this$props4.children,
-        nonFormsyProps = _objectWithoutPropertiesLoose(_this$props4, ["children", "mapping", "onChange", "onInvalid", "onInvalidSubmit", "onReset", "onSubmit", "onValid", "onValidSubmit", "preventDefaultSubmit", "preventExternalInvalidation", "validationErrors"]);
+        disabled = _this$props4.disabled,
+        formElement = _this$props4.formElement,
+        nonFormsyProps = _objectWithoutPropertiesLoose(_this$props4, ["children", "mapping", "onChange", "onInvalid", "onInvalidSubmit", "onReset", "onSubmit", "onValid", "onValidSubmit", "preventDefaultSubmit", "preventExternalInvalidation", "validationErrors", "disabled", "formElement"]);
 
     var contextValue = this.state.contextValue;
     return React.createElement(FormsyContext.Provider, {
       value: contextValue
-    }, React.createElement('form', _extends({
+    }, React.createElement(formElement, _extends({
       onReset: this.resetInternal,
       onSubmit: this.submit
     }, nonFormsyProps, {
-      disabled: false
+      disabled: disabled
     }), children));
   };
 
@@ -1025,6 +1027,7 @@ Formsy.displayName = 'Formsy';
 Formsy.propTypes = {
   disabled: PropTypes.bool,
   mapping: PropTypes.func,
+  formElement: /*#__PURE__*/PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.func]),
   onChange: PropTypes.func,
   onInvalid: PropTypes.func,
   onInvalidSubmit: PropTypes.func,
@@ -1048,7 +1051,8 @@ Formsy.defaultProps = {
   onValidSubmit: noop,
   preventDefaultSubmit: true,
   preventExternalInvalidation: false,
-  validationErrors: {}
+  validationErrors: {},
+  formElement: 'form'
 };
 
 export default Formsy;

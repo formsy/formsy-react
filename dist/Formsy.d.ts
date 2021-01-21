@@ -4,6 +4,12 @@ import { FormsyContextInterface, IModel, InputComponent, IResetModel, IUpdateInp
 import { PassDownProps } from './withFormsy';
 declare type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 declare type OnSubmitCallback = (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError, event: React.SyntheticEvent<React.FormHTMLAttributes<any>>) => void;
+declare type FormElementType = string | React.ComponentType<{
+    onReset?: (e: React.SyntheticEvent) => void;
+    onSubmit?: (e: React.SyntheticEvent) => void;
+    disabled?: boolean;
+    children?: React.ReactChildren;
+}>;
 export interface FormsyProps extends FormHTMLAttributesCleaned {
     disabled: boolean;
     mapping: null | ((model: IModel) => IModel);
@@ -17,6 +23,7 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
     preventDefaultSubmit?: boolean;
     preventExternalInvalidation?: boolean;
     validationErrors?: null | object;
+    formElement?: FormElementType;
 }
 export interface FormsyState {
     canChange: boolean;
@@ -34,6 +41,7 @@ export declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     static propTypes: {
         disabled: PropTypes.Requireable<boolean>;
         mapping: PropTypes.Requireable<(...args: any[]) => any>;
+        formElement: PropTypes.Requireable<string | object>;
         onChange: PropTypes.Requireable<(...args: any[]) => any>;
         onInvalid: PropTypes.Requireable<(...args: any[]) => any>;
         onInvalidSubmit: PropTypes.Requireable<(...args: any[]) => any>;
