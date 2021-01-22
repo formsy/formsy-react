@@ -295,8 +295,9 @@ With the `preventExternalInvalidation` the input will not be invalidated though 
 `updateInputsWithError()` or an `invalidate` callback is called.
 
 ### <a id="formElement">formElement</a>
-By default Formsy render the form with the HTML `form` element.
-If you want to override this behaviour, you can pass the element to render in the `formElement` props
+
+By default Formsy render the form with the HTML `form` element. If you want to override this behaviour, you can pass the
+element to render in the `formElement` props
 
 ```jsx
   <Formsy formElement="div">
