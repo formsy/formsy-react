@@ -113,7 +113,8 @@ function getDisplayName(component: WrappedComponentClass) {
 export default function withFormsy<T, V>(
   WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
 ): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
-  class WithFormsyWrapper extends React.Component<T & WrapperProps<V> & FormsyContextInterface, WrapperState<V>>
+  class WithFormsyWrapper
+    extends React.Component<T & WrapperProps<V> & FormsyContextInterface, WrapperState<V>>
     implements WrapperInstanceMethods<V> {
     public validations?: Validations<V>;
 
