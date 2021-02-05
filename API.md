@@ -382,10 +382,9 @@ will bring back this value.
   isLength: 5
 }}/>
 <MyInput name="number" validations={{
-  myCustomIsFiveValidation: function (values, value) {
-    values; // Other current values in form {foo: 'bar', 'number': 5}
-    value; // 5
-    return 5 === value ? true : 'No five'; // You can return an error
+  myCustomIsFiveValidation: function (values) {
+    // values; Other current values in form {foo: 'bar', 'number': 5}
+    return 5 === values.number ? true : 'No five'; // You can return an error
   }
 }}/>
 ```
