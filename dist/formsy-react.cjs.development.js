@@ -4,12 +4,9 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var isPlainObject = _interopDefault(require('lodash.isplainobject'));
+var lodash = require('lodash');
 var PropTypes = _interopDefault(require('prop-types'));
 var React = _interopDefault(require('react'));
-var get = _interopDefault(require('lodash.get'));
-var has = _interopDefault(require('lodash.has'));
-var set = _interopDefault(require('lodash.set'));
 
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -62,7 +59,7 @@ function isArray(value) {
   return Array.isArray(value);
 }
 function isObject(value) {
-  return isPlainObject(value);
+  return lodash.isPlainObject(value);
 }
 function isTypeUndefined(value) {
   return typeof value === 'undefined';
@@ -733,7 +730,7 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
 
       var returnModel = {};
       Object.keys(model).forEach(function (key) {
-        set(returnModel, key, model[key]);
+        lodash.set(returnModel, key, model[key]);
       });
       return returnModel;
     };
@@ -760,8 +757,8 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
       _this.inputs.forEach(function (component) {
         var name = component.props.name;
 
-        if (data && has(data, name)) {
-          component.setValue(get(data, name));
+        if (data && lodash.has(data, name)) {
+          component.setValue(lodash.get(data, name));
         } else {
           component.resetValue();
         }
@@ -918,17 +915,12 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
     }; // Set the value of components
 
 
-    _this.updateInputsWithValue = function (values, validate) {
-      Object.entries(values).forEach(function (_ref2) {
-        var name = _ref2[0],
-            value = _ref2[1];
+    _this.updateInputsWithValue = function (data, validate) {
+      _this.inputs.forEach(function (component) {
+        var name = component.props.name;
 
-        var input = _this.inputs.find(function (component) {
-          return component.props.name === name;
-        });
-
-        if (input) {
-          input.setValue(value, validate);
+        if (data && lodash.has(data, name)) {
+          component.setValue(lodash.get(data, name), validate);
         }
       });
     }; // Use the binded values and the actual input value to

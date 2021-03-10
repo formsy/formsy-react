@@ -1,9 +1,6 @@
-import isPlainObject from 'lodash.isplainobject';
+import { isPlainObject, set, has, get } from 'lodash-es';
 import PropTypes from 'prop-types';
 import React from 'react';
-import get from 'lodash.get';
-import has from 'lodash.has';
-import set from 'lodash.set';
 
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -912,17 +909,12 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
     }; // Set the value of components
 
 
-    _this.updateInputsWithValue = function (values, validate) {
-      Object.entries(values).forEach(function (_ref2) {
-        var name = _ref2[0],
-            value = _ref2[1];
+    _this.updateInputsWithValue = function (data, validate) {
+      _this.inputs.forEach(function (component) {
+        var name = component.props.name;
 
-        var input = _this.inputs.find(function (component) {
-          return component.props.name === name;
-        });
-
-        if (input) {
-          input.setValue(value, validate);
+        if (data && has(data, name)) {
+          component.setValue(get(data, name), validate);
         }
       });
     }; // Use the binded values and the actual input value to
