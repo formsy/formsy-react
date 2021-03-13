@@ -1,4 +1,4 @@
-import { isPlainObject, set, has, get } from 'lodash-es';
+import { isPlainObject, set, has, get } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
