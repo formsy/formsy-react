@@ -37,7 +37,7 @@
     "preversion": "npm run lint",
     "start": "tsdx watch",
     "test": "tsdx test --passWithNoTests",
-    "version": "npm run build && git add dist && npm run changelog && git add CHANGELOG.md"
+    "version": "npm run build && git add dist && npm run changelog -- -p && git add CHANGELOG.md"
   },
   "dependencies": {
     "lodash": "^4.17.20",
