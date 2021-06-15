@@ -224,8 +224,7 @@ export default function<T>(
     public setValidations = (validations: string | Validations, required: RequiredValidation) => {
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
-      this.requiredValidations =
-        required === true ? { isDefaultRequiredValue: required } : convertValidationsToObject(required);
+      this.requiredValidations = required === true ? { isRequired: required } : convertValidationsToObject(required);
     };
 
     // By default, we validate after the value has been set.

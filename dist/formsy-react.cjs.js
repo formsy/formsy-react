@@ -1561,7 +1561,7 @@ var isEmptyArray = function isEmptyArray(value) {
 };
 
 var validations = {
-  isDefaultRequiredValue: function isDefaultRequiredValue(_values, value) {
+  isRequired: function isRequired(_values, value) {
     return value === undefined || value === null || value === '' || isEmptyArray(value);
   },
   isExisty: function isExisty(_values, value) {
@@ -1721,7 +1721,7 @@ function Wrapper (WrappedComponent) {
         // Add validations to the store itself as the props object can not be modified
         _this.validations = convertValidationsToObject(validations) || {};
         _this.requiredValidations = required === true ? {
-          isDefaultRequiredValue: required
+          isRequired: required
         } : convertValidationsToObject(required);
       };
 
