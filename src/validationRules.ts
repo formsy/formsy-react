@@ -5,7 +5,7 @@ const isEmpty = (value: Value) => value === '';
 const isEmptyArray = (value: Value) => Array.isArray(value) && value.length === 0;
 
 const validations: { [key: string]: ValidationFunction } = {
-  isDefaultRequiredValue(_values: Values, value: Value) {
+  isRequired(_values: Values, value: Value) {
     return value === undefined || value === null || value === '' || isEmptyArray(value);
   },
   isExisty(_values: Values, value: Value) {
