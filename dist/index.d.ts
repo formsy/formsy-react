@@ -88,11 +88,12 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         };
     };
     componentDidMount: () => void;
-    componentDidUpdate: () => void;
+    componentDidUpdate: (prevProps: any) => void;
     getCurrentValues: () => any;
     getModel: () => any;
     getPristineValues: () => any;
     setFormPristine: (isPristine: boolean) => void;
+    onValidationComplete: () => void;
     setInputValidationErrors: (errors: any) => void;
     setFormValidState: (allIsValid: boolean) => void;
     isValidValue: (component: any, value: any) => Promise<boolean>;

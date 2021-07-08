@@ -29,6 +29,14 @@ export default {
     return isDifferent;
   },
 
+  isExisty(value: unknown) {
+    return value !== null && value !== undefined && value !== '';
+  },
+
+  isPlainObject(value: unknown) {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value); // extra truthy check of value is required because typeof null is 'object'
+  },
+
   isSame(a: unknown, b: unknown) {
     if (typeof a !== typeof b) {
       return false;
@@ -46,7 +54,7 @@ export default {
       return a.toString() === b.toString();
     }
 
-    if (typeof a === 'object' && typeof b === 'object' && a !== null && b !== null) {
+    if (this.isPlainObject(a) && this.isPlainObject(b)) {
       return !this.objectsDiffer(a, b);
     }
 
@@ -117,9 +125,5 @@ export default {
     }
 
     return Promise.resolve(results);
-  },
-
-  isPlainObject(value: unknown) {
-    return Boolean(value) && typeof value === 'object' && !Array.isArray(value); // extra truthy check of value is required because typeof null is 'object'
   },
 };
