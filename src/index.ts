@@ -136,7 +136,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     setValue: () => {},
     showError: () => {},
     showRequired: () => {},
-    validationErrors: null,
   };
 
   public constructor(props: FormsyProps) {
@@ -165,10 +164,10 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.validateForm();
   };
 
-  public componentDidUpdate = () => {
+  public componentDidUpdate = prevProps => {
     const { validationErrors } = this.props;
 
-    if (validationErrors && typeof validationErrors === 'object' && Object.keys(validationErrors).length > 0) {
+    if (!utils.isSame(validationErrors, prevProps.validationErrors)) {
       this.setInputValidationErrors(validationErrors);
     }
 
@@ -214,23 +213,38 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     });
   };
 
+  // We need this callback as we are validating all inputs again and it is run when the last component has set its state
+  onValidationComplete = () => {
+    const allIsValid = this.inputs.every(component => component.state.isValid);
+
+    this.setFormValidState(allIsValid);
+
+    // Tell the form that it can start to trigger change events
+    this.setState({
+      canChange: true,
+    });
+  };
+
   public setInputValidationErrors = errors => {
     const { preventExternalInvalidation } = this.props;
     const { isValid } = this.state;
 
-    this.inputs.forEach(component => {
+    this.inputs.forEach((component, index) => {
       const { name } = component.props;
+      // is valid when errors passed is not an object empty or falsy value value set against name property
+      const isValid = utils.isPlainObject(errors) ? !utils.isExisty(errors[name]) : true;
       const args = [
         {
-          isValid: !(name in errors),
-          validationError: typeof errors[name] === 'string' ? [errors[name]] : errors[name],
+          isValid,
+          validationError: isValid ? undefined : typeof errors[name] === 'string' ? [errors[name]] : errors[name],
         },
       ];
-      component.setState(...args);
+      // run onValidationComplete to re-validate Form based on new valid status of inputs
+      component.setState(
+        ...args,
+        index === this.inputs.length - 1 && !preventExternalInvalidation ? this.onValidationComplete : null,
+      );
     });
-    if (!preventExternalInvalidation && isValid) {
-      this.setFormValidState(false);
-    }
   };
 
   public setFormValidState = (allIsValid: boolean) => {
@@ -472,19 +486,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // Validate the form by going through all child input components
   // and check their state
   public validateForm = () => {
-    // We need a callback as we are validating all inputs again. This will
-    // run when the last component has set its state
-    const onValidationComplete = () => {
-      const allIsValid = this.inputs.every(component => component.state.isValid);
-
-      this.setFormValidState(allIsValid);
-
-      // Tell the form that it can start to trigger change events
-      this.setState({
-        canChange: true,
-      });
-    };
-
     // Run validation again in case affected by other inputs. The
     // last component validated will run the onValidationComplete callback
     this.inputs.forEach((component, index) => {
@@ -499,7 +500,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
             validationError: validation.error,
             externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null,
           },
-          index === this.inputs.length - 1 ? onValidationComplete : null,
+          index === this.inputs.length - 1 ? this.onValidationComplete : null,
         );
       });
     });

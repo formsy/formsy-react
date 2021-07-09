@@ -1457,6 +1457,12 @@
 
       return isDifferent;
     },
+    isExisty: function isExisty(value) {
+      return value !== null && value !== undefined && value !== '';
+    },
+    isPlainObject: function isPlainObject(value) {
+      return Boolean(value) && _typeof(value) === 'object' && !Array.isArray(value); // extra truthy check of value is required because typeof null is 'object'
+    },
     isSame: function isSame(a, b) {
       if (_typeof(a) !== _typeof(b)) {
         return false;
@@ -1474,7 +1480,7 @@
         return a.toString() === b.toString();
       }
 
-      if (_typeof(a) === 'object' && _typeof(b) === 'object' && a !== null && b !== null) {
+      if (this.isPlainObject(a) && this.isPlainObject(b)) {
         return !this.objectsDiffer(a, b);
       }
 
@@ -1542,9 +1548,6 @@
       }
 
       return Promise.resolve(results);
-    },
-    isPlainObject: function isPlainObject(value) {
-      return Boolean(value) && _typeof(value) === 'object' && !Array.isArray(value); // extra truthy check of value is required because typeof null is 'object'
     }
   };
 
@@ -1964,10 +1967,10 @@
         _this.validateForm();
       };
 
-      _this.componentDidUpdate = function () {
+      _this.componentDidUpdate = function (prevProps) {
         var validationErrors = _this.props.validationErrors;
 
-        if (validationErrors && _typeof(validationErrors) === 'object' && Object.keys(validationErrors).length > 0) {
+        if (!utils.isSame(validationErrors, prevProps.validationErrors)) {
           _this.setInputValidationErrors(validationErrors);
         }
 
@@ -2022,22 +2025,33 @@
         });
       };
 
+      _this.onValidationComplete = function () {
+        var allIsValid = _this.inputs.every(function (component) {
+          return component.state.isValid;
+        });
+
+        _this.setFormValidState(allIsValid); // Tell the form that it can start to trigger change events
+
+
+        _this.setState({
+          canChange: true
+        });
+      };
+
       _this.setInputValidationErrors = function (errors) {
         var preventExternalInvalidation = _this.props.preventExternalInvalidation;
         var isValid = _this.state.isValid;
 
-        _this.inputs.forEach(function (component) {
-          var name = component.props.name;
-          var args = [{
-            isValid: !(name in errors),
-            validationError: typeof errors[name] === 'string' ? [errors[name]] : errors[name]
-          }];
-          component.setState.apply(component, args);
-        });
+        _this.inputs.forEach(function (component, index) {
+          var name = component.props.name; // is valid when errors passed is not an object empty or falsy value value set against name property
 
-        if (!preventExternalInvalidation && isValid) {
-          _this.setFormValidState(false);
-        }
+          var isValid = utils.isPlainObject(errors) ? !utils.isExisty(errors[name]) : true;
+          var args = [{
+            isValid: isValid,
+            validationError: isValid ? undefined : typeof errors[name] === 'string' ? [errors[name]] : errors[name]
+          }];
+          component.setState.apply(component, args.concat([index === _this.inputs.length - 1 && !preventExternalInvalidation ? _this.onValidationComplete : null]));
+        });
       };
 
       _this.setFormValidState = function (allIsValid) {
@@ -2272,23 +2286,8 @@
       };
 
       _this.validateForm = function () {
-        // We need a callback as we are validating all inputs again. This will
-        // run when the last component has set its state
-        var onValidationComplete = function onValidationComplete() {
-          var allIsValid = _this.inputs.every(function (component) {
-            return component.state.isValid;
-          });
-
-          _this.setFormValidState(allIsValid); // Tell the form that it can start to trigger change events
-
-
-          _this.setState({
-            canChange: true
-          });
-        }; // Run validation again in case affected by other inputs. The
+        // Run validation again in case affected by other inputs. The
         // last component validated will run the onValidationComplete callback
-
-
         _this.inputs.forEach(function (component, index) {
           _this.runValidation(component).then(function (validation) {
             if (validation.isValid && component.state.externalError) {
@@ -2300,7 +2299,7 @@
               isRequired: validation.isRequired,
               validationError: validation.error,
               externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null
-            }, index === _this.inputs.length - 1 ? onValidationComplete : null);
+            }, index === _this.inputs.length - 1 ? _this.onValidationComplete : null);
           });
         }); // If there are no inputs, set state where form is ready to trigger
         // change event. New inputs might be added later
@@ -2423,8 +2422,7 @@
     setValidations: function setValidations() {},
     setValue: function setValue() {},
     showError: function showError() {},
-    showRequired: function showRequired() {},
-    validationErrors: null
+    showRequired: function showRequired() {}
   };
 
   var addValidationRule = function addValidationRule(name, func) {
