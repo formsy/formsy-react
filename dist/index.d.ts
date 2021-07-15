@@ -114,6 +114,10 @@ declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     submit: (event: any) => void;
     updateInputsWithError: IUpdateInputsWithError;
     validate: (component: InputComponent) => void;
+    /**
+     * returns validations array after async validation on each input is resolved
+     */
+    runValidationOnAllInputs: () => Promise<any[]>;
     validateForm: () => void;
     render: () => React.DetailedReactHTMLElement<{
         disabled: boolean;
