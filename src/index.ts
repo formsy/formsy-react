@@ -483,13 +483,25 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     });
   };
 
+  /**
+   * returns validations array after async validation on each input is resolved
+   */
+  runValidationOnAllInputs = () => {
+    const validationPromises = [];
+    this.inputs.forEach((component, index) => {
+      validationPromises.push(this.runValidation(component));
+    });
+    return Promise.all(validationPromises);
+  };
+
   // Validate the form by going through all child input components
   // and check their state
   public validateForm = () => {
-    // Run validation again in case affected by other inputs. The
+    // Run validation again in case affected by other inputs.
     // last component validated will run the onValidationComplete callback
-    this.inputs.forEach((component, index) => {
-      this.runValidation(component).then(validation => {
+    this.runValidationOnAllInputs().then(validationResults => {
+      this.inputs.forEach((component, index) => {
+        const validation = validationResults[index];
         if (validation.isValid && component.state.externalError) {
           validation.isValid = false;
         }

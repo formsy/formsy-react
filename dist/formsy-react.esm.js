@@ -2021,6 +2021,7 @@ function (_React$Component) {
 
     _this.onValidationComplete = function () {
       var allIsValid = _this.inputs.every(function (component) {
+        console.log("inside onValidationComplete ".concat(component.props.name, " with value ").concat(component.getValue(), " is ").concat(component.state.isValid));
         return component.state.isValid;
       });
 
@@ -2043,7 +2044,8 @@ function (_React$Component) {
         var args = [{
           isValid: isValid,
           validationError: isValid ? undefined : typeof errors[name] === 'string' ? [errors[name]] : errors[name]
-        }];
+        }]; // run onValidationComplete to re-validate Form based on new valid status of inputs
+
         component.setState.apply(component, args.concat([index === _this.inputs.length - 1 && !preventExternalInvalidation ? _this.onValidationComplete : null]));
       });
     };
@@ -2279,11 +2281,23 @@ function (_React$Component) {
       });
     };
 
-    _this.validateForm = function () {
-      // Run validation again in case affected by other inputs. The
-      // last component validated will run the onValidationComplete callback
+    _this.runValidationOnAllInputs = function () {
+      var validationPromises = [];
+
       _this.inputs.forEach(function (component, index) {
-        _this.runValidation(component).then(function (validation) {
+        validationPromises.push(_this.runValidation(component));
+      });
+
+      return Promise.all(validationPromises);
+    };
+
+    _this.validateForm = function () {
+      // Run validation again in case affected by other inputs.
+      // last component validated will run the onValidationComplete callback
+      _this.runValidationOnAllInputs().then(function (validationResults) {
+        _this.inputs.forEach(function (component, index) {
+          var validation = validationResults[index];
+
           if (validation.isValid && component.state.externalError) {
             validation.isValid = false;
           }
