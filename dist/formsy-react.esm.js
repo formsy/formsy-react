@@ -2021,7 +2021,6 @@ function (_React$Component) {
 
     _this.onValidationComplete = function () {
       var allIsValid = _this.inputs.every(function (component) {
-        console.log("inside onValidationComplete ".concat(component.props.name, " with value ").concat(component.getValue(), " is ").concat(component.state.isValid));
         return component.state.isValid;
       });
 
