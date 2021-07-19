@@ -502,18 +502,21 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.runValidationOnAllInputs().then(validationResults => {
       this.inputs.forEach((component, index) => {
         const validation = validationResults[index];
-        if (validation.isValid && component.state.externalError) {
-          validation.isValid = false;
+        if (utils.isExisty(validation)) {
+          if (validation.isValid && component.state.externalError) {
+            validation.isValid = false;
+          }
+          component.setState(
+            {
+              isValid: validation.isValid,
+              isRequired: validation.isRequired,
+              validationError: validation.error,
+              externalError:
+                !validation.isValid && component.state.externalError ? component.state.externalError : null,
+            },
+            index === this.inputs.length - 1 ? this.onValidationComplete : null,
+          );
         }
-        component.setState(
-          {
-            isValid: validation.isValid,
-            isRequired: validation.isRequired,
-            validationError: validation.error,
-            externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null,
-          },
-          index === this.inputs.length - 1 ? this.onValidationComplete : null,
-        );
       });
     });
 

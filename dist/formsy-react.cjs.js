@@ -2303,16 +2303,18 @@ function (_React$Component) {
         _this.inputs.forEach(function (component, index) {
           var validation = validationResults[index];
 
-          if (validation.isValid && component.state.externalError) {
-            validation.isValid = false;
-          }
+          if (utils.isExisty(validation)) {
+            if (validation.isValid && component.state.externalError) {
+              validation.isValid = false;
+            }
 
-          component.setState({
-            isValid: validation.isValid,
-            isRequired: validation.isRequired,
-            validationError: validation.error,
-            externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null
-          }, index === _this.inputs.length - 1 ? _this.onValidationComplete : null);
+            component.setState({
+              isValid: validation.isValid,
+              isRequired: validation.isRequired,
+              validationError: validation.error,
+              externalError: !validation.isValid && component.state.externalError ? component.state.externalError : null
+            }, index === _this.inputs.length - 1 ? _this.onValidationComplete : null);
+          }
         });
       }); // If there are no inputs, set state where form is ready to trigger
       // change event. New inputs might be added later
