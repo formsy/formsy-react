@@ -1,6 +1,7 @@
 .babelrc
 .editorconfig
 .travis.yml
+.npmrc
 rollup.config.js
 __tests__/
 __test_utils__/
