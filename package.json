@@ -1,6 +1,6 @@
 {
-  "name": "formsy-react",
-  "version": "2.0.0-beta.6",
+  "name": "@rippling/formsy-react",
+  "version": "2.0.0-beta.7",
   "description": "A form input builder and validator for React",
   "keywords": [
     "form",
@@ -33,7 +33,7 @@
   "bugs": "https://github.com/formsy/formsy-react/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/formsy/formsy-react.git"
+    "url": "https://github.com/rippling/formsy-react.git"
   },
   "author": "Christian Alfoni and the Formsy Authors",
   "files": [
@@ -53,6 +53,7 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md}\"",
     "lint": "eslint src/**/*",
     "preversion": "npm run lint",
+    "prepublishOnly": "npm run build",
     "test": "jest",
     "version": "npm run build && git add dist && npm run changelog && git add CHANGELOG.md"
   },
@@ -108,5 +109,8 @@
   "peerDependencies": {
     "react": "^15.6.1 || ^16.0.0",
     "react-dom": "^15.6.1 || ^16.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   }
 }
