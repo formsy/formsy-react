@@ -98,8 +98,9 @@ export default {
 
           if (typeof validationsVal === 'function') {
             return Promise.resolve(validationsVal(currentValues, value)).then(validation => {
-              if (typeof validation === 'string') {
-                results.errors.push(validation);
+              const validationType = typeof validation;
+              if (validationType === 'string' || (validationType === 'object' && validation !== null)) {
+                results.errors.push(validation as any); // validation message could be react element/fragment
                 results.failed.push(validationMethod);
               } else if (!validation) {
                 results.failed.push(validationMethod);
