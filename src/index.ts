@@ -54,6 +54,7 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
   resetValue: any;
   setValidations: any;
   setValue: any;
+  shouldTriggerChangeOnInputUnmount: boolean;
   showError: any;
   showRequired: any;
   validationErrors?: null | object;
@@ -134,6 +135,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     resetValue: () => {},
     setValidations: () => {},
     setValue: () => {},
+    shouldTriggerChangeOnInputUnmount: false,
     showError: () => {},
     showRequired: () => {},
   };
@@ -391,7 +393,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // Method put on each input component to unregister
   // itself from the form
   public detachFromForm = (component: InputComponent) => {
-    const { onChange } = this.props;
+    const { onChange, shouldTriggerChangeOnInputUnmount } = this.props;
     const { canChange } = this.state;
     const componentPos = this.inputs.indexOf(component);
 
@@ -400,7 +402,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     }
 
     // Trigger onChange
-    if (canChange) {
+    if (shouldTriggerChangeOnInputUnmount && canChange) {
       onChange(this.getModel(), this.isChanged());
     }
 
