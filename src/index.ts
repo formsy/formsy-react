@@ -391,10 +391,17 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   // Method put on each input component to unregister
   // itself from the form
   public detachFromForm = (component: InputComponent) => {
+    const { onChange } = this.props;
+    const { canChange } = this.state;
     const componentPos = this.inputs.indexOf(component);
 
     if (componentPos !== -1) {
       this.inputs = this.inputs.slice(0, componentPos).concat(this.inputs.slice(componentPos + 1));
+    }
+
+    // Trigger onChange
+    if (canChange) {
+      onChange(this.getModel(), this.isChanged());
     }
 
     this.validateForm();
