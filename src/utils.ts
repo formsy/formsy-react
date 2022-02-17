@@ -74,10 +74,11 @@ export default {
   isPromiseFunction(validationFunction: unknown) {
     const isFunction = !!validationFunction && typeof validationFunction === 'function';
     if (isFunction) {
-      const promise = (validationFunction as Function)();
       /**
-       * https://stackoverflow.com/a/38510353/7029829
+       * https://stackoverflow.com/a/38510353/7029829.
+       * Intentional to call fn as it is required to detect as a promise fn in compiled code
        */
+      const promise = (validationFunction as Function)(undefined, {});
       return promise && promise[Symbol.toStringTag] === 'Promise' && typeof promise.then === 'function';
     }
     return false;
