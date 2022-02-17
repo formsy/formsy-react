@@ -71,6 +71,18 @@ export default {
     return null;
   },
 
+  isPromiseFunction(validationFunction: unknown) {
+    const isFunction = !!validationFunction && typeof validationFunction === 'function';
+    if (isFunction) {
+      const promise = (validationFunction as Function)();
+      /**
+       * https://stackoverflow.com/a/38510353/7029829
+       */
+      return promise && promise[Symbol.toStringTag] === 'Promise' && typeof promise.then === 'function';
+    }
+    return false;
+  },
+
   runRules(value: Value, currentValues: Values, validations: Validations, validationRules: Validations) {
     const results: {
       errors: string[];

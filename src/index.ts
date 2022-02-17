@@ -75,6 +75,10 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public prevInputNames: any[] | null = null;
 
+  public hasAsyncInputsValidation: Record<string, boolean>;
+
+  public latestFormValidationCounter: number;
+
   public static displayName = 'Formsy';
 
   public static propTypes = {
@@ -149,6 +153,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     };
     this.inputs = [];
     this.emptyArray = [];
+    this.hasAsyncInputsValidation = {};
+    this.latestFormValidationCounter = 0; // for async form validation, counter will help in discarding stale promises and use only latest request
   }
 
   public getChildContext = () => ({
@@ -158,6 +164,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       isFormDisabled: this.isFormDisabled(),
       isValidValue: this.isValidValue,
       validate: this.validate,
+      setInputHasAsyncValidation: this.setInputHasAsyncValidation,
     },
   });
 
@@ -216,7 +223,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // We need this callback as we are validating all inputs again and it is run when the last component has set its state
-  onValidationComplete = () => {
+  public onValidationComplete = () => {
     const allIsValid = this.inputs.every(component => component.state.isValid);
 
     this.setFormValidState(allIsValid);
@@ -229,7 +236,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public setInputValidationErrors = errors => {
     const { preventExternalInvalidation } = this.props;
-    const { isValid } = this.state;
 
     this.inputs.forEach((component, index) => {
       const { name } = component.props;
@@ -339,9 +345,14 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     ]).then(([validationResults, requiredResults]) => {
       const isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
       const isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
+      // reject stale promises
+      if (!utils.isSame(value, component.state.value)) {
+        return Promise.reject();
+      }
       return {
         isRequired,
         isValid: isRequired ? false : isValid,
+        isValidationInProgress: false,
         error: (() => {
           if (isValid && !isRequired) {
             return this.emptyArray;
@@ -465,6 +476,13 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     }
   };
 
+  public setInputHasAsyncValidation = (component: InputComponent, hasAsyncValidation: boolean) => {
+    this.hasAsyncInputsValidation = {
+      ...this.hasAsyncInputsValidation,
+      [component.props.name]: hasAsyncValidation,
+    };
+  };
+
   // Use the binded values and the actual input value to
   // validate the input and set its state. Then check the
   // state of the form itself
@@ -477,28 +495,43 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onChange(this.getModel(), this.isChanged());
     }
 
-    this.runValidation(component).then(validation => {
-      // Run through the validations, split them up and call
-      // the validator IF there is a value or it is required
-      component.setState(
-        {
-          externalError: null,
-          isRequired: validation.isRequired,
-          isValid: validation.isValid,
-          validationError: validation.error,
-        },
-        this.validateForm,
-      );
-    });
+    if (component.state.hasAsyncValidation) {
+      this.setFormValidState(false);
+    }
+
+    this.runValidation(component, component.state.value)
+      .then(validation => {
+        // Run through the validations, split them up and call
+        // the validator IF there is a value or it is required
+        component.setState(
+          {
+            externalError: null,
+            isRequired: validation.isRequired,
+            isValid: validation.isValid,
+            validationError: validation.error,
+            isValidationInProgress: validation.isValidationInProgress,
+          },
+          () => {
+            const isSyncInputWithAsynValidatorsOnForm =
+              !component.state.hasAsyncValidation && Object.values(this.hasAsyncInputsValidation).some(Boolean);
+            // If input is invalid avoid waiting until Form is async validated. This is done to avoid false clicks
+            if (isSyncInputWithAsynValidatorsOnForm && !component.state.isValid) {
+              this.setFormValidState(false);
+            }
+            this.validateForm(); // Run validation on all in case there are dependant inputs
+          },
+        );
+      })
+      .catch(() => {});
   };
 
   /**
    * returns validations array after async validation on each input is resolved
    */
-  runValidationOnAllInputs = () => {
+  public runValidationOnAllInputs = () => {
     const validationPromises = [];
-    this.inputs.forEach((component, index) => {
-      validationPromises.push(this.runValidation(component));
+    this.inputs.forEach(component => {
+      validationPromises.push(this.runValidation(component, component.state.value));
     });
     return Promise.all(validationPromises);
   };
@@ -508,26 +541,36 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public validateForm = () => {
     // Run validation again in case affected by other inputs.
     // last component validated will run the onValidationComplete callback
-    this.runValidationOnAllInputs().then(validationResults => {
-      this.inputs.forEach((component, index) => {
-        const validation = validationResults[index];
-        if (utils.isExisty(validation)) {
-          if (validation.isValid && component.state.externalError) {
-            validation.isValid = false;
-          }
-          component.setState(
-            {
-              isValid: validation.isValid,
-              isRequired: validation.isRequired,
-              validationError: validation.error,
-              externalError:
-                !validation.isValid && component.state.externalError ? component.state.externalError : null,
-            },
-            index === this.inputs.length - 1 ? this.onValidationComplete : null,
-          );
+    this.latestFormValidationCounter += 1;
+    const token = this.latestFormValidationCounter;
+    this.runValidationOnAllInputs()
+      .then(validationResults => {
+        // stale promise should not do setState operations
+        if (token !== this.latestFormValidationCounter) {
+          return;
         }
-      });
-    });
+        this.latestFormValidationCounter = 0;
+        this.inputs.forEach((component, index) => {
+          const validation = validationResults[index];
+          if (utils.isExisty(validation)) {
+            if (validation.isValid && component.state.externalError) {
+              validation.isValid = false;
+            }
+            component.setState(
+              {
+                isValid: validation.isValid,
+                isRequired: validation.isRequired,
+                validationError: validation.error,
+                externalError:
+                  !validation.isValid && component.state.externalError ? component.state.externalError : null,
+                isValidationInProgress: false,
+              },
+              index === this.inputs.length - 1 ? this.onValidationComplete : null,
+            );
+          }
+        });
+      })
+      .catch(() => {});
 
     // If there are no inputs, set state where form is ready to trigger
     // change event. New inputs might be added later

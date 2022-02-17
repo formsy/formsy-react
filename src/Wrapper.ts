@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import utils from './utils';
 import { Validations, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
+import validationRules from './validationRules';
 
 /* eslint-disable react/default-props-match-prop-types */
 
@@ -40,6 +41,23 @@ const convertValidationsToObject = (validations: string | false | Validations): 
   return validations || {};
 };
 
+// Returns true if any of input validation values is a promise function
+const checkHasAsyncValidation = (validations: Validations): boolean => {
+  return Object.keys(validations).some(validationKey => {
+    const validationsValue = validations[validationKey];
+    // when validationsValue is directly a function
+    if (utils.isPromiseFunction(validationsValue)) {
+      return true;
+    }
+    // checking if rule exists against validationKey
+    const validationRulesVal = validationRules[validationKey];
+    if (typeof validationsValue !== 'function' && utils.isPromiseFunction(validationRulesVal)) {
+      return true;
+    }
+    return false;
+  });
+};
+
 const propTypes = {
   innerRef: PropTypes.func,
   name: PropTypes.string.isRequired,
@@ -69,6 +87,8 @@ export interface WrapperState {
   pristineValue: any;
   validationError: any[];
   value: any;
+  isValidationInProgress: boolean;
+  hasAsyncValidation?: boolean;
 }
 
 export interface PassDownProps extends WrapperProps {
@@ -88,6 +108,8 @@ export interface PassDownProps extends WrapperProps {
   setValue: (value: Value, validate?: boolean, otherData?: Record<string, any>) => void;
   showError: boolean;
   showRequired: boolean;
+  isValidationInProgress: boolean;
+  hasAsyncValidation?: boolean;
 }
 
 export { propTypes };
@@ -137,6 +159,8 @@ export default function<T>(
         pristineValue: props.value,
         validationError: [],
         value: props.value,
+        isValidationInProgress: false,
+        hasAsyncValidation: undefined,
       };
     }
 
@@ -185,7 +209,7 @@ export default function<T>(
     }
 
     public componentDidUpdate(prevProps) {
-      const { value, validations, required: _required, isRequired } = this.props;
+      const { validations, required: _required, isRequired } = this.props;
       const required = isRequired || _required;
       const prevRequired = prevProps.isRequired || prevProps.required;
       const { formsy } = this.context;
@@ -218,19 +242,25 @@ export default function<T>(
       return [];
     };
 
-    // eslint-disable-next-line react/destructuring-assignment
     public getValue = () => this.state.value;
 
     public setValidations = (validations: string | Validations, required: RequiredValidation) => {
+      const { formsy } = this.context;
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations = required === true ? { isRequired: required } : convertValidationsToObject(required);
+      const hasAsyncValidation = checkHasAsyncValidation(this.validations);
+      this.setState({
+        hasAsyncValidation,
+      });
+      formsy.setInputHasAsyncValidation(this, hasAsyncValidation);
     };
 
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
     public setValue = (value, validate = true, { isPristine = false } = {}) => {
       const { formsy } = this.context;
+      const { hasAsyncValidation } = this.state;
 
       if (!validate) {
         this.setState({
@@ -241,6 +271,7 @@ export default function<T>(
           {
             value,
             isPristine,
+            isValidationInProgress: hasAsyncValidation,
           },
           () => {
             formsy.validate(this);
@@ -249,25 +280,18 @@ export default function<T>(
       }
     };
 
-    // eslint-disable-next-line react/destructuring-assignment
     public hasValue = () => this.state.value !== '';
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isFormDisabled = () => this.context.formsy.isFormDisabled;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = () => this.state.formSubmitted;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isPristine = () => this.state.isPristine;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isRequired = () => !!(this.props.required || this.props.isRequired);
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isValid = () => this.state.isValid;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isValidValue = value => this.context.formsy.isValidValue.call(null, this, value);
 
     public resetValue = () => {
@@ -287,7 +311,6 @@ export default function<T>(
 
     public showError = () => !this.showRequired() && !this.isValid();
 
-    // eslint-disable-next-line react/destructuring-assignment
     public showRequired = () => this.state.isRequired;
 
     public render() {
@@ -303,11 +326,13 @@ export default function<T>(
         isRequired: this.isRequired(),
         isValid: this.isValid(),
         isValidValue: this.isValidValue,
+        isValidationInProgress: this.state.isValidationInProgress,
         resetValue: this.resetValue,
         setValidations: this.setValidations,
         setValue: this.setValue,
         showError: this.showError(),
         showRequired: this.showRequired(),
+        hasAsyncValidation: this.state.hasAsyncValidation,
         getValue: this.getValue,
       };
 

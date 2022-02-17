@@ -68,10 +68,10 @@ const validations: { [key: string]: ValidationFunction } = {
     return !isExisty(value) || isEmpty(value) || value === eql;
   },
   equalsField(values: Values, value: Value, field: string) {
-    return value === values[field];
+    return !isExisty(value) || isEmpty(values) || value === values[field];
   },
   maxLength(_values: Values, value: Value, length: number) {
-    return !isExisty(value) || value.length <= length;
+    return !isExisty(value) || isEmpty(value) || value.length <= length;
   },
   minLength(_values: Values, value: Value, length: number) {
     return !isExisty(value) || isEmpty(value) || value.length >= length;
