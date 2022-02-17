@@ -333,14 +333,18 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   // Checks validation on current value or a passed value
-  public runValidation = (component: InputComponent, value = component.state.value) => {
+  public runValidation = (
+    component: InputComponent,
+    value = component.state.value,
+    setOnValidationProgress?: Function,
+  ) => {
     const { validationErrors } = this.props;
     const currentValues = this.getCurrentValues();
     const { validationErrors: componentValidationErrors } = component.props;
     const hasComponentValidationsErrors = utils.isPlainObject(componentValidationErrors);
 
     return Promise.all([
-      utils.runRules(value, currentValues, component.validations, validationRules),
+      utils.runRules(value, currentValues, component.validations, validationRules, setOnValidationProgress),
       utils.runRules(value, currentValues, component.requiredValidations, validationRules),
     ]).then(([validationResults, requiredResults]) => {
       const isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
@@ -495,11 +499,21 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       onChange(this.getModel(), this.isChanged());
     }
 
-    if (component.state.hasAsyncValidation) {
-      this.setFormValidState(false);
-    }
+    // calback fn triggered before running component validation rules
+    const setOnValidationProgress = (params: { isAsyncValidation: boolean }) => {
+      const { isAsyncValidation } = params;
+      component.setState({
+        hasAsyncValidation: isAsyncValidation,
+        isValidationInProgress: isAsyncValidation,
+      });
+      this.setInputHasAsyncValidation(component, isAsyncValidation);
+      // disable form till validations are resolved
+      if (isAsyncValidation) {
+        this.setFormValidState(false);
+      }
+    };
 
-    this.runValidation(component, component.state.value)
+    this.runValidation(component, component.state.value, setOnValidationProgress)
       .then(validation => {
         // Run through the validations, split them up and call
         // the validator IF there is a value or it is required
@@ -514,7 +528,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
           () => {
             const isSyncInputWithAsynValidatorsOnForm =
               !component.state.hasAsyncValidation && Object.values(this.hasAsyncInputsValidation).some(Boolean);
-            // If input is invalid avoid waiting until Form is async validated. This is done to avoid false clicks
+            // If input is invalid avoid waiting until Form is async validated. This is done to avoid false clicks on save btn
             if (isSyncInputWithAsynValidatorsOnForm && !component.state.isValid) {
               this.setFormValidState(false);
             }

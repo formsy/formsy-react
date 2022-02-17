@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import utils from './utils';
 import { Validations, WrappedComponentClass, RequiredValidation, Value } from './interfaces';
-import validationRules from './validationRules';
 
 /* eslint-disable react/default-props-match-prop-types */
 
@@ -39,23 +38,6 @@ const convertValidationsToObject = (validations: string | false | Validations): 
   }
 
   return validations || {};
-};
-
-// Returns true if any of input validation values is a promise function
-const checkHasAsyncValidation = (validations: Validations): boolean => {
-  return Object.keys(validations).some(validationKey => {
-    const validationsValue = validations[validationKey];
-    // when validationsValue is directly a function
-    if (utils.isPromiseFunction(validationsValue)) {
-      return true;
-    }
-    // checking if rule exists against validationKey
-    const validationRulesVal = validationRules[validationKey];
-    if (typeof validationsValue !== 'function' && utils.isPromiseFunction(validationRulesVal)) {
-      return true;
-    }
-    return false;
-  });
 };
 
 const propTypes = {
@@ -249,18 +231,12 @@ export default function<T>(
       // Add validations to the store itself as the props object can not be modified
       this.validations = convertValidationsToObject(validations) || {};
       this.requiredValidations = required === true ? { isRequired: required } : convertValidationsToObject(required);
-      const hasAsyncValidation = checkHasAsyncValidation(this.validations);
-      this.setState({
-        hasAsyncValidation,
-      });
-      formsy.setInputHasAsyncValidation(this, hasAsyncValidation);
     };
 
     // By default, we validate after the value has been set.
     // A user can override this and pass a second parameter of `false` to skip validation.
     public setValue = (value, validate = true, { isPristine = false } = {}) => {
       const { formsy } = this.context;
-      const { hasAsyncValidation } = this.state;
 
       if (!validate) {
         this.setState({
@@ -271,7 +247,6 @@ export default function<T>(
           {
             value,
             isPristine,
-            isValidationInProgress: hasAsyncValidation,
           },
           () => {
             formsy.validate(this);

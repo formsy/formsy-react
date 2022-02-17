@@ -71,20 +71,25 @@ export default {
     return null;
   },
 
-  isPromiseFunction(validationFunction: unknown) {
-    const isFunction = !!validationFunction && typeof validationFunction === 'function';
-    if (isFunction) {
-      /**
-       * https://stackoverflow.com/a/38510353/7029829.
-       * Intentional to call fn as it is required to detect as a promise fn in compiled code
-       */
-      const promise = (validationFunction as Function)(undefined, {});
-      return promise && promise[Symbol.toStringTag] === 'Promise' && typeof promise.then === 'function';
-    }
-    return false;
+  isCalledFunctionPromise<T>(functionReturnVal: unknown) {
+    /**
+     * https://stackoverflow.com/a/38510353/7029829.
+     * Intentional to check fn return value as it is required to detect a promise fn in compiled code
+     */
+    return (
+      functionReturnVal &&
+      functionReturnVal[Symbol.toStringTag] === 'Promise' &&
+      typeof (functionReturnVal as PromiseLike<T>).then === 'function'
+    );
   },
 
-  runRules(value: Value, currentValues: Values, validations: Validations, validationRules: Validations) {
+  runRules(
+    value: Value,
+    currentValues: Values,
+    validations: Validations,
+    validationRules: Validations,
+    setOnValidationProgress?: Function,
+  ) {
     const results: {
       errors: string[];
       failed: string[];
@@ -109,8 +114,20 @@ export default {
             throw new Error(`Formsy does not have the validation rule: ${validationMethod}`);
           }
 
+          // calls to inform on any async validations
+          const setAnyPendingState = (validationReturnValue: unknown) => {
+            if (setOnValidationProgress) {
+              const isPromise = this.isCalledFunctionPromise(validationReturnValue);
+              setOnValidationProgress({
+                isAsyncValidation: isPromise,
+              });
+            }
+          };
+
           if (typeof validationsVal === 'function') {
-            return Promise.resolve(validationsVal(currentValues, value)).then(validation => {
+            const validationReturnValue = validationsVal(currentValues, value);
+            setAnyPendingState(validationReturnValue);
+            return Promise.resolve(validationReturnValue).then(validation => {
               const validationType = typeof validation;
               if (validationType === 'string' || (validationType === 'object' && validation !== null)) {
                 results.errors.push(validation as any); // validation message could be react element/fragment
@@ -122,7 +139,9 @@ export default {
           }
 
           if (typeof validationsVal !== 'function' && typeof validationRulesVal === 'function') {
-            return Promise.resolve(validationRulesVal(currentValues, value, validationsVal)).then(validation => {
+            const validationReturnValue = validationRulesVal(currentValues, value, validationsVal);
+            setAnyPendingState(validationReturnValue);
+            return Promise.resolve(validationReturnValue).then(validation => {
               if (typeof validation === 'string') {
                 results.errors.push(validation);
                 results.failed.push(validationMethod);
