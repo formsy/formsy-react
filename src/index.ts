@@ -75,7 +75,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public prevInputNames: any[] | null = null;
 
-  public hasAsyncInputsValidation: Record<string, boolean>;
+  public hasAsyncInputsValidationMap: Record<string, boolean>;
 
   public latestFormValidationCounter: number;
 
@@ -153,7 +153,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     };
     this.inputs = [];
     this.emptyArray = [];
-    this.hasAsyncInputsValidation = {};
+    this.hasAsyncInputsValidationMap = {}; // to know any async validation rules/menthods on component. Used insise validate fn
     this.latestFormValidationCounter = 0; // for async form validation, counter will help in discarding stale promises and use only latest request
   }
 
@@ -164,7 +164,6 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       isFormDisabled: this.isFormDisabled(),
       isValidValue: this.isValidValue,
       validate: this.validate,
-      setInputHasAsyncValidation: this.setInputHasAsyncValidation,
     },
   });
 
@@ -481,8 +480,8 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   public setInputHasAsyncValidation = (component: InputComponent, hasAsyncValidation: boolean) => {
-    this.hasAsyncInputsValidation = {
-      ...this.hasAsyncInputsValidation,
+    this.hasAsyncInputsValidationMap = {
+      ...this.hasAsyncInputsValidationMap,
       [component.props.name]: hasAsyncValidation,
     };
   };
@@ -527,7 +526,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
           },
           () => {
             const isSyncInputWithAsynValidatorsOnForm =
-              !component.state.hasAsyncValidation && Object.values(this.hasAsyncInputsValidation).some(Boolean);
+              !component.state.hasAsyncValidation && Object.values(this.hasAsyncInputsValidationMap).some(Boolean);
             // If input is invalid avoid waiting until Form is async validated. This is done to avoid false clicks on save btn
             if (isSyncInputWithAsynValidatorsOnForm && !component.state.isValid) {
               this.setFormValidState(false);
