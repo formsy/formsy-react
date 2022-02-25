@@ -58,6 +58,7 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
   showError: any;
   showRequired: any;
   validationErrors?: null | object;
+  withNativeSupport?: boolean;
 }
 
 export interface FormsyState {
@@ -82,6 +83,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
   public static displayName = 'Formsy';
 
   public static propTypes = {
+    withNativeSupport: PropTypes.bool,
     disabled: PropTypes.bool,
     getErrorMessage: PropTypes.func,
     getErrorMessages: PropTypes.func,
@@ -142,6 +144,7 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
     shouldTriggerChangeOnInputUnmount: false,
     showError: () => {},
     showRequired: () => {},
+    withNativeSupport: false
   };
 
   public constructor(props: FormsyProps) {
@@ -622,9 +625,14 @@ class Formsy extends React.Component<FormsyProps, FormsyState> {
       showError,
       showRequired,
       validationErrors,
+      withNativeSupport,
       /* eslint-enable @typescript-eslint/no-unused-vars */
       ...nonFormsyProps
     } = this.props;
+
+    if(withNativeSupport) {
+      return this.props.children;
+    }
 
     return React.createElement(
       'form',
