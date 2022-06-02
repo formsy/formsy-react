@@ -1,6 +1,8 @@
 import React, { ComponentClass } from 'react';
 import { WrapperProps, WrapperState } from './Wrapper';
 
+type PromiseOrValue<T> = T | Promise<T>;
+
 export type Value = any;
 export interface Values {
   [key: string]: Value;
@@ -15,7 +17,7 @@ export type ValidationFunction = (
   values: Values,
   value: Value,
   extra?: any,
-) => boolean | Promise<boolean> | object | Promise<object>;
+) => PromiseOrValue<boolean | object | string>;
 
 export type Validation = string | boolean | ValidationFunction;
 
