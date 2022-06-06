@@ -1,5 +1,13 @@
 import { Validations, Value, Values } from './interfaces';
 
+function checkIfRegex(value: unknown): value is RegExp {
+  return value instanceof RegExp;
+}
+
+function checkIfDate(value: unknown): value is Date {
+  return value instanceof Date;
+}
+
 export default {
   arraysDiffer(a: unknown[], b: unknown[]) {
     let isDifferent = false;
@@ -51,6 +59,14 @@ export default {
     }
 
     if (a !== null && b !== null && a instanceof Date && b instanceof Date) {
+      return a.toString() === b.toString();
+    }
+
+    if (checkIfRegex(a) && checkIfRegex(b)) {
+      return a.toString() === b.toString();
+    }
+
+    if (checkIfDate(a) && checkIfDate(b)) {
       return a.toString() === b.toString();
     }
 
