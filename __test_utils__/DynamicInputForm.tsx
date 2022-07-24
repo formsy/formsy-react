@@ -18,7 +18,7 @@ class DynamicInputForm extends React.Component<DynamicInputFormProps, { input: a
   private addInput = () => {
     const { inputName } = this.props;
     this.setState({
-      input: <TestInput name={inputName} value="" />,
+      input: <TestInput name={inputName} value="" testId="test-input" />,
     });
   };
 
@@ -28,11 +28,11 @@ class DynamicInputForm extends React.Component<DynamicInputFormProps, { input: a
 
     return (
       <>
-        <Formsy onSubmit={onSubmit}>
+        <Formsy onSubmit={onSubmit} data-testid="form">
           {input}
           {children}
         </Formsy>
-        <button type="button" onClick={this.addInput}>
+        <button type="button" onClick={this.addInput} data-testid="add-input-btn">
           Add input
         </button>
       </>

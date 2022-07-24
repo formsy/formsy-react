@@ -1,50 +1,59 @@
-import { mount } from 'enzyme';
-import React from 'react';
-import { getFormInstance, getInputInstance, getWrapperInstance } from '../__test_utils__/getInput';
-import immediate from '../__test_utils__/immediate';
+import { fireEvent, render } from '@testing-library/react';
+import React, { useState } from 'react';
 import TestInput, { FormsyInputProps, InputFactory } from '../__test_utils__/TestInput';
 
 import Formsy, { withFormsy } from '../src';
 
 describe('Element', () => {
   it('should pass down correct value prop after using setValue()', () => {
-    const form = mount(
+    const screen = render(
       <Formsy>
-        <TestInput name="foo" value="foo" />
+        <TestInput name="foo" value="foo" testId="test-input" />
       </Formsy>,
     );
 
-    const input = form.find('input');
-    expect(getInputInstance(input).value).toEqual('foo');
-    input.simulate('change', { target: { value: 'foobar' } });
-    expect(getInputInstance(input).value).toEqual('foobar');
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
+    expect(input.value).toEqual('foo');
+
+    fireEvent.change(input, { target: { value: 'foobar' } });
+    expect(input.value).toEqual('foobar');
   });
 
   it('withFormsy: should only set the value and not validate when calling setValue(val, false)', () => {
     const Input = withFormsy(
       class NoValidateInput extends React.Component<FormsyInputProps> {
         updateValue = (event) => {
-          this.props.setValue(event.target.value, false);
+          this.props.setValue(event.target.value, false); // disables validation
         };
 
         render() {
-          return <input type="text" value={this.props.value || ''} onChange={this.updateValue} />;
+          return (
+            <input
+              type="text"
+              value={this.props.value || ''}
+              onChange={this.updateValue}
+              data-isvalid={this.props.isValid}
+              data-testid="test-input"
+            />
+          );
         }
       },
     );
-    const form = mount(
+
+    const screen = render(
       <Formsy>
-        <Input name="foo" value="foo" />
+        <Input name="foo" value="foo" required={true} />
       </Formsy>,
     );
-    const inputComponent = form.find('Formsy(NoValidateInput)');
-    const setStateSpy = jest.spyOn(getWrapperInstance(inputComponent) as any, 'setState');
-    const inputElement = form.find('input');
 
-    expect(setStateSpy).not.toHaveBeenCalled();
-    inputElement.simulate('change', { target: { value: 'foobar' } });
-    expect(setStateSpy).toHaveBeenCalledTimes(1);
-    expect(setStateSpy).toHaveBeenCalledWith({ value: 'foobar' });
+    const inputElement = screen.getByTestId('test-input') as HTMLInputElement;
+
+    expect(inputElement.dataset.isvalid).toEqual('true');
+
+    fireEvent.change(inputElement, { target: { value: '' } });
+
+    expect(inputElement.value).toEqual(''); // new value set
+    expect(inputElement.dataset.isvalid).toEqual('true'); // validation not changed;
   });
 
   it('should set back to pristine value when running reset', () => {
@@ -54,26 +63,27 @@ describe('Element', () => {
         reset = this.props.resetValue;
       },
     });
-    const form = mount(
+    const screen = render(
       <Formsy>
-        <Input name="foo" value="foo" />
+        <Input name="foo" value="foo" testId="test-input" />
       </Formsy>,
     );
 
-    const input = form.find('input');
-    input.simulate('change', { target: { value: 'foobar' } });
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'foobar' } });
     reset();
-    expect(getInputInstance(input).value).toEqual('foo');
+    expect(input.value).toEqual('foo');
   });
 
   it('should return error message passed when calling getErrorMessage()', () => {
-    let errorMessage = null;
+    let errorMessage;
     const Input = InputFactory({
       componentDidUpdate() {
         errorMessage = this.props.errorMessage;
       },
     });
-    mount(
+
+    render(
       <Formsy>
         <Input name="foo" value="foo" validations="isEmail" validationError="Has to be email" />
       </Formsy>,
@@ -82,33 +92,14 @@ describe('Element', () => {
     expect(errorMessage).toEqual('Has to be email');
   });
 
-  it('should return true or false when calling isValid() depending on valid state', () => {
-    let isValid = null;
-    const Input = InputFactory({
-      componentDidUpdate() {
-        isValid = this.props.isValid;
-      },
-    });
-    const form = mount(
-      <Formsy action="/users">
-        <Input name="foo" value="foo" validations="isEmail" />
-      </Formsy>,
-    );
-
-    expect(isValid).toEqual(false);
-    const input = form.find('input');
-    input.simulate('change', { target: { value: 'foo@foo.com' } });
-    expect(isValid).toEqual(true);
-  });
-
   it('should return true or false when calling isRequired() depending on passed required attribute', () => {
-    const isRequireds = [];
+    const isRequires = [];
     const Input = InputFactory({
       componentDidMount() {
-        isRequireds.push(this.props.isRequired);
+        isRequires.push(this.props.isRequired);
       },
     });
-    mount(
+    render(
       <Formsy action="/users">
         <Input name="foo" value="" />
         <Input name="foo" value="" required />
@@ -116,19 +107,19 @@ describe('Element', () => {
       </Formsy>,
     );
 
-    expect(isRequireds[0]).toEqual(false);
-    expect(isRequireds[1]).toEqual(true);
-    expect(isRequireds[2]).toEqual(true);
+    expect(isRequires[0]).toEqual(false);
+    expect(isRequires[1]).toEqual(true);
+    expect(isRequires[2]).toEqual(true);
   });
 
   it('should return true or false when calling showRequired() depending on input being empty and required is passed, or not', () => {
-    const showRequireds = [];
+    const showRequires = [];
     const Input = InputFactory({
       componentDidMount() {
-        showRequireds.push(this.props.showRequired);
+        showRequires.push(this.props.showRequired);
       },
     });
-    mount(
+    render(
       <Formsy action="/users">
         <Input name="A" value="foo" />
         <Input name="B" value="" required />
@@ -136,26 +127,30 @@ describe('Element', () => {
       </Formsy>,
     );
 
-    expect(showRequireds[0]).toEqual(false);
-    expect(showRequireds[1]).toEqual(true);
-    expect(showRequireds[2]).toEqual(false);
+    expect(showRequires[0]).toEqual(false);
+    expect(showRequires[1]).toEqual(true);
+    expect(showRequires[2]).toEqual(false);
   });
 
   it('should return true or false when calling isPristine() depending on input has been "touched" or not', () => {
     const Input = InputFactory({});
-    const form = mount(
+    const screen = render(
       <Formsy action="/users">
-        <Input name="A" value="foo" />
+        <Input name="A" value="foo" testId="test-input" />
       </Formsy>,
     );
 
-    expect(getFormInstance(form).inputs[0].isPristine()).toEqual(true);
-    const input = form.find('input');
-    input.simulate('change', { target: { value: 'foo' } });
-    expect(getFormInstance(form).inputs[0].isPristine()).toEqual(false);
+    const input = screen.getByTestId('test-input');
+    expect(input.dataset.isPristine).toEqual('true');
+
+    fireEvent.change(input, { target: { value: 'foobar' } });
+
+    expect(input.dataset.isPristine).toEqual('false');
   });
 
   it('should allow an undefined value to be updated to a value', () => {
+    const newValue = 'foo';
+
     class TestForm extends React.Component<{}, { value?: string }> {
       constructor(props) {
         super(props);
@@ -166,42 +161,49 @@ describe('Element', () => {
 
       changeValue = () => {
         this.setState({
-          value: 'foo',
+          value: newValue,
         });
       };
 
       render() {
         return (
           <Formsy action="/users">
-            <TestInput name="A" value={this.state.value} />
+            <TestInput name="A" value={this.state.value} testId="test-input" />
+            <button onClick={this.changeValue} data-testid="btn">
+              change value
+            </button>
           </Formsy>
         );
       }
     }
 
-    const form = mount<TestForm>(<TestForm />);
+    const screen = render(<TestForm />);
+    const btn = screen.getByTestId('btn');
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
 
-    form.instance().changeValue();
-    const input = form.find('input');
-    immediate(() => {
-      expect(getInputInstance(input).value).toEqual('foo');
-    });
+    expect(input.value).toEqual('');
+
+    fireEvent.click(btn);
+
+    expect(input.value).toEqual(newValue);
   });
 
   it('should be able to test a values validity', () => {
     function TestForm() {
       return (
         <Formsy>
-          <TestInput name="A" validations="isEmail" />
+          <TestInput name="A" validations="isEmail" testId="test-input" />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
+    const input = screen.getByTestId('test-input');
 
-    const input = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(input).isValidValue('foo@bar.com')).toEqual(true);
-    expect(getWrapperInstance(input).isValidValue('foo@bar')).toEqual(false);
+    fireEvent.change(input, { target: { value: 'foo@bar.com' } });
+    expect(input.dataset.isValid).toEqual('true');
+    fireEvent.change(input, { target: { value: 'foo@bar' } });
+    expect(input.dataset.isValid).toEqual('false');
   });
 
   it('should be able to use an object as validations property', () => {
@@ -213,16 +215,19 @@ describe('Element', () => {
             validations={{
               isEmail: true,
             }}
+            testId="test-input"
           />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
+    const input = screen.getByTestId('test-input');
 
-    const input = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(input).isValidValue('foo@bar.com')).toEqual(true);
-    expect(getWrapperInstance(input).isValidValue('foo@bar')).toEqual(false);
+    fireEvent.change(input, { target: { value: 'foo@bar.com' } });
+    expect(input.dataset.isValid).toEqual('true');
+    fireEvent.change(input, { target: { value: 'foo@bar' } });
+    expect(input.dataset.isValid).toEqual('false');
   });
 
   it('should be able to pass complex values to a validation rule', () => {
@@ -234,19 +239,19 @@ describe('Element', () => {
             validations={{
               matchRegexp: /foo/,
             }}
-            value="foo"
+            testId="test-input"
           />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
+    const input = screen.getByTestId('test-input');
 
-    const inputComponent = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(inputComponent).isValid()).toEqual(true);
-    const input = form.find('input');
-    input.simulate('change', { target: { value: 'bar' } });
-    expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
+    fireEvent.change(input, { target: { value: 'foo' } });
+    expect(input.dataset.isValid).toEqual('true');
+    fireEvent.change(input, { target: { value: 'bar' } });
+    expect(input.dataset.isValid).toEqual('false');
   });
 
   it('should be able to run a function to validate', () => {
@@ -267,6 +272,7 @@ describe('Element', () => {
               custom: customValidationA,
             }}
             value="foo"
+            testId="text-input-1"
           />
           <TestInput
             name="B"
@@ -274,20 +280,24 @@ describe('Element', () => {
               custom: customValidationB,
             }}
             value="foo"
+            testId="text-input-2"
           />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
 
-    const inputComponent = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(inputComponent.at(0)).isValid()).toEqual(true);
-    expect(getWrapperInstance(inputComponent.at(1)).isValid()).toEqual(true);
-    const input = form.find('input');
-    input.at(0).simulate('change', { target: { value: 'bar' } });
-    expect(getWrapperInstance(inputComponent.at(0)).isValid()).toEqual(false);
-    expect(getWrapperInstance(inputComponent.at(1)).isValid()).toEqual(false);
+    const input1 = screen.getByTestId('text-input-1');
+    const input2 = screen.getByTestId('text-input-2');
+
+    expect(input1.dataset.isValid).toEqual('true');
+    expect(input2.dataset.isValid).toEqual('true');
+
+    fireEvent.change(input1, { target: { value: 'bar' } });
+
+    expect(input1.dataset.isValid).toEqual('false');
+    expect(input2.dataset.isValid).toEqual('false');
   });
 
   it('should not override error messages with error messages passed by form if passed error messages is an empty object', () => {
@@ -302,15 +312,16 @@ describe('Element', () => {
             validationError="bar2"
             validationErrors={{ isEmail: 'bar3' }}
             value="foo"
+            testId="test-input"
           />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
+    const input = screen.getByTestId('test-input');
 
-    const inputComponent = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar3');
+    expect(input.dataset.errorMessage).toEqual('bar3');
   });
 
   it('should handle multiple validation error messages passed from validators', () => {
@@ -324,7 +335,7 @@ describe('Element', () => {
 
     function TestForm() {
       return (
-        <Formsy>
+        <Formsy data-testid="form">
           <TestInput
             name="A"
             validations={{
@@ -332,19 +343,20 @@ describe('Element', () => {
               customValidationB,
             }}
             value="foo"
+            testId="test-input"
           />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
-    const inputComponent = form.find('Formsy(TestInput)');
+    const screen = render(<TestForm />);
+    const input = screen.getByTestId('test-input');
 
-    const formEl = form.find('form');
-    formEl.simulate('submit');
+    const form = screen.getByTestId('form');
+    fireEvent.submit(form);
 
-    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('error message one');
-    expect(getWrapperInstance(inputComponent).getErrorMessages()).toEqual(['error message one', 'error message two']);
+    expect(input.dataset.errorMessage).toEqual('error message one');
+    expect(input.dataset.errorMessages.split(';')).toEqual(['error message one', 'error message two']);
   });
 
   it('should override all error messages with error messages passed by form', () => {
@@ -359,15 +371,16 @@ describe('Element', () => {
             validationError="bar2"
             validationErrors={{ isEmail: 'bar3' }}
             value="foo"
+            testId="test-input"
           />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
 
-    const inputComponent = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar');
+    const input = screen.getByTestId('test-input');
+    expect(input.dataset.errorMessage).toEqual('bar');
   });
 
   it('should override validation rules with required rules', () => {
@@ -385,15 +398,16 @@ describe('Element', () => {
             required={{
               isLength: 1,
             }}
+            testId="test-input"
           />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
+    const input = screen.getByTestId('test-input');
 
-    const inputComponent = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar3');
+    expect(input.dataset.errorMessage).toEqual('bar3');
   });
 
   it('should fall back to default error message when non exist in validationErrors map', () => {
@@ -408,46 +422,47 @@ describe('Element', () => {
             validationError="bar1"
             validationErrors={{ foo: 'bar2' }}
             value="foo"
+            testId="test-input"
           />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
+    const input = screen.getByTestId('test-input');
 
-    const inputComponent = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('bar1');
+    expect(input.dataset.errorMessage).toEqual('bar1');
   });
 
   it('should not be valid if it is required and required rule is true', () => {
     function TestForm() {
       return (
         <Formsy>
-          <TestInput name="A" required />
+          <TestInput name="A" required testId="test-input" />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
 
-    const inputComponent = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
+    const input = screen.getByTestId('test-input');
+    expect(input.dataset.isValid).toEqual('false');
   });
 
   it('should return the validationError if the field is invalid and required rule is true', () => {
     function TestForm() {
       return (
         <Formsy>
-          <TestInput name="A" validationError="Field is required" required />
+          <TestInput name="A" validationError="Field is required" required testId="test-input" />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
 
-    const inputComponent = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
-    expect(getWrapperInstance(inputComponent).getErrorMessage()).toEqual('Field is required');
+    const input = screen.getByTestId('test-input');
+    expect(input.dataset.isValid).toEqual('false');
+    expect(input.dataset.errorMessage).toEqual('Field is required');
   });
 
   it('should handle objects and arrays as values', () => {
@@ -460,26 +475,33 @@ describe('Element', () => {
         };
       }
 
+      changeData = () => {
+        this.setState({
+          foo: { foo: 'foo' },
+          bar: ['bar'],
+        });
+      };
+
       render() {
         return (
           <Formsy>
-            <TestInput name="foo" value={this.state.foo} />
-            <TestInput name="bar" value={this.state.bar} />
+            <TestInput name="foo" value={this.state.foo} testId="test-input1" />
+            <TestInput name="bar" value={this.state.bar} testId="test-input2" />
+            <button type="button" data-testid="btn" onClick={this.changeData} />
           </Formsy>
         );
       }
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
+    const input1 = screen.getByTestId('test-input1') as HTMLInputElement;
+    const input2 = screen.getByTestId('test-input2') as HTMLInputElement;
+    const btn = screen.getByTestId('btn');
 
-    form.setState({
-      foo: { foo: 'foo' },
-      bar: ['bar'],
-    });
+    fireEvent.click(btn);
 
-    const inputs = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(inputs.at(0)).getValue()).toEqual({ foo: 'foo' });
-    expect(getWrapperInstance(inputs.at(1)).getValue()).toEqual(['bar']);
+    expect(JSON.parse(input1.dataset.value)).toEqual({ foo: 'foo' });
+    expect(JSON.parse(input2.dataset.value)).toEqual(['bar']);
   });
 
   it('should handle isFormDisabled with dynamic inputs', () => {
@@ -500,29 +522,33 @@ describe('Element', () => {
       render() {
         return (
           <Formsy disabled={this.state.bool}>
-            {this.state.bool ? <TestInput name="foo" /> : <TestInput name="bar" />}
+            <TestInput name="foo" testId="test-input" />
+            <button type="button" data-testid="btn" onClick={this.flip} />
           </Formsy>
         );
       }
     }
 
-    const form = mount<TestForm>(<TestForm />);
+    const screen = render(<TestForm />);
+    const input = screen.getByTestId('test-input');
+    const btn = screen.getByTestId('btn');
 
-    const input = form.find('Formsy(TestInput)');
-    expect(getWrapperInstance(input).isFormDisabled()).toEqual(true);
-    form.instance().flip();
-    expect(getWrapperInstance(input).isFormDisabled()).toEqual(false);
+    expect(input.dataset.isFormDisabled).toEqual('true');
+    fireEvent.click(btn);
+    expect(input.dataset.isFormDisabled).toEqual('false');
   });
 
   it('should allow for dot notation in name which maps to a deep object', () => {
+    const spy = jest.fn();
+
     class TestForm extends React.Component {
       onSubmit(model) {
-        expect(model).toEqual({ foo: { bar: 'foo', test: 'test' } });
+        spy(model);
       }
 
       render() {
         return (
-          <Formsy onSubmit={this.onSubmit}>
+          <Formsy onSubmit={this.onSubmit} data-testid="form">
             <TestInput name="foo.bar" value="foo" />
             <TestInput name="foo.test" value="test" />
           </Formsy>
@@ -530,24 +556,24 @@ describe('Element', () => {
       }
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
+    const form = screen.getByTestId('form');
+    fireEvent.submit(form);
 
-    // TODO: Beef up this smoke test
-    expect(true).toBe(true);
-
-    const formEl = form.find('form');
-    formEl.simulate('submit');
+    expect(spy).toHaveBeenCalledWith({ foo: { bar: 'foo', test: 'test' } });
   });
 
   it('should allow for application/x-www-form-urlencoded syntax and convert to object', () => {
+    const spy = jest.fn();
+
     class TestForm extends React.Component {
       onSubmit(model) {
-        expect(model).toEqual({ foo: ['foo', 'bar'] });
+        spy(model);
       }
 
       render() {
         return (
-          <Formsy onSubmit={this.onSubmit}>
+          <Formsy onSubmit={this.onSubmit} data-testid="form">
             <TestInput name="foo[0]" value="foo" />
             <TestInput name="foo[1]" value="bar" />
           </Formsy>
@@ -555,13 +581,11 @@ describe('Element', () => {
       }
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
+    const form = screen.getByTestId('form');
+    fireEvent.submit(form);
 
-    // TODO: Beef up this smoke test
-    expect(true).toBe(true);
-
-    const formEl = form.find('form');
-    formEl.simulate('submit');
+    expect(spy).toHaveBeenCalledWith({ foo: ['foo', 'bar'] });
   });
 
   it('input should rendered once with PureRenderMixin', () => {
@@ -578,7 +602,7 @@ describe('Element', () => {
       },
     });
 
-    mount(
+    render(
       <Formsy>
         <Input name="foo" value="foo" />
       </Formsy>,
@@ -597,35 +621,51 @@ describe('Element', () => {
 
       render() {
         renderSpy();
-        return <input type={this.props.type} value={this.props.value} onChange={this.updateValue} />;
+        return (
+          <input type={this.props.type} value={this.props.value} onChange={this.updateValue} data-testid="test-input" />
+        );
       },
     });
 
-    const form = mount(
+    const screen = render(
       <Formsy>
         <Input name="foo" value="foo" />
       </Formsy>,
     );
-
-    const input = form.find('input');
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
 
     expect(renderSpy).toHaveBeenCalledTimes(1);
 
-    input.simulate('change', { target: { value: 'fooz' } });
-    expect(getInputInstance(input).value).toEqual('fooz');
+    const value = 'fooz';
+    fireEvent.change(input, { target: { value } });
+
+    expect(input.value).toEqual(value);
     expect(renderSpy).toHaveBeenCalledTimes(2);
   });
 
   it('unregisters on unmount', () => {
-    const TestComponent = ({ hasInput }) => <Formsy>{hasInput ? <TestInput name="foo" value="foo" /> : null}</Formsy>;
+    const submitSpy = jest.fn();
 
-    const wrapper = mount(<TestComponent hasInput />);
-    const formsy = getFormInstance(wrapper.find(Formsy));
+    const TestComponent = () => {
+      const [hasInput, setInput] = useState(true);
+      return (
+        <Formsy onSubmit={(model) => submitSpy(model)} data-testid="form">
+          {hasInput ? <TestInput name="foo" value="foo" /> : null}
+          <button type="button" data-testid="btn" onClick={() => setInput(false)} />
+        </Formsy>
+      );
+    };
 
-    expect(formsy.inputs).toHaveLength(1);
+    const screen = render(<TestComponent />);
+    const form = screen.getByTestId('form');
+    const btn = screen.getByTestId('btn');
 
-    wrapper.setProps({ hasInput: false });
+    fireEvent.submit(form);
+    expect(submitSpy).toHaveBeenCalledWith({ foo: 'foo' });
 
-    expect(formsy.inputs).toHaveLength(0);
+    fireEvent.click(btn);
+
+    fireEvent.submit(form);
+    expect(submitSpy).toHaveBeenCalledWith({});
   });
 });

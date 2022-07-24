@@ -45,7 +45,8 @@
     "prop-types": "^15.8.1"
   },
   "devDependencies": {
-    "@types/enzyme": "^3.10.3",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^12.1.5",
     "@types/jest": "^26.0.13",
     "@types/lodash": "^4.14.168",
     "@types/prop-types": "^15.7.1",
@@ -53,8 +54,6 @@
     "@types/react-dom": "^17.0.0",
     "auto-changelog": "^2.4.0",
     "coveralls": "^3.1.1",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.6",
     "eslint-plugin-prettier": "^3.4.1",
     "husky": "^4.2.1",
     "np": "^5.0.0",
@@ -91,9 +90,6 @@
     "collectCoverageFrom": [
       "src/**/*.tsx",
       "src/**/*.ts"
-    ],
-    "setupFilesAfterEnv": [
-      "./setupTests.ts"
     ]
   }
 }
