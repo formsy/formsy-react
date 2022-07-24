@@ -1,6 +1,6 @@
 {
   "name": "formsy-react",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "A form input builder and validator for React",
   "keywords": [
     "form",
