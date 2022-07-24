@@ -17,6 +17,7 @@ export type ValidationFunction<V> = (values: Values, value: V, extra?: any) => b
 export type Validation<V> = string | boolean | ValidationFunction<V>;
 
 export type Validations<V> = ValidationsStructure<V> | string | object;
+
 export interface ValidationsStructure<V> {
   [key: string]: Validation<V>;
 }
@@ -40,7 +41,9 @@ export interface FormsyContextInterface {
   isFormDisabled: boolean;
   isValidValue: (component: InputComponent<any>, value: any) => boolean;
   validate: (component: InputComponent<any>) => void;
-  runValidation: (
-    component: InputComponent<any>,
-  ) => { isRequired: boolean; isValid: boolean; validationError: ValidationError[] };
+  runValidation: (component: InputComponent<any>) => {
+    isRequired: boolean;
+    isValid: boolean;
+    validationError: ValidationError[];
+  };
 }

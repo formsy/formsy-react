@@ -7,7 +7,6 @@
     "jsx": "react",
     "lib": ["dom", "esnext"],
     "sourceMap": true,
-    "rootDir": "./src",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,

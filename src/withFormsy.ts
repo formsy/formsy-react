@@ -66,6 +66,7 @@ export interface WrapperProps<V> {
 
 export interface WrapperState<V> {
   [key: string]: unknown;
+
   formSubmitted: boolean;
   isPristine: boolean;
   isRequired: boolean;
@@ -115,7 +116,8 @@ export default function withFormsy<T, V>(
 ): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
   class WithFormsyWrapper
     extends React.Component<T & WrapperProps<V> & FormsyContextInterface, WrapperState<V>>
-    implements WrapperInstanceMethods<V> {
+    implements WrapperInstanceMethods<V>
+  {
     public validations?: Validations<V>;
 
     public requiredValidations?: Validations<V>;
