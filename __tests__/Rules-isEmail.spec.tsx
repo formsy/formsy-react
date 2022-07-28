@@ -8,28 +8,23 @@ describe('isEmail', () => {
   });
 
   it('should fail with "foo"', async () => {
-    expect(await getValidState(<ValidationForm validations="isEmail"
-                                               value="foo" />)).toEqual(false);
+    expect(await getValidState(<ValidationForm validations="isEmail" value="foo" />)).toEqual(false);
   });
 
   it('should pass with "foo@foo.com"', async () => {
-    expect(await getValidState(<ValidationForm validations="isEmail"
-                                               value="foo@foo.com" />)).toEqual(true);
+    expect(await getValidState(<ValidationForm validations="isEmail" value="foo@foo.com" />)).toEqual(true);
   });
 
   it('should pass with new long domains', async () => {
-    expect(await getValidState(<ValidationForm validations="isEmail"
-                                               value="tickets@now.diamonds" />)).toEqual(true);
+    expect(await getValidState(<ValidationForm validations="isEmail" value="tickets@now.diamonds" />)).toEqual(true);
   });
 
   it('should pass with an undefined', async () => {
-    expect(await getValidState(<ValidationForm validations="isEmail"
-                                               value={undefined} />)).toEqual(true);
+    expect(await getValidState(<ValidationForm validations="isEmail" value={undefined} />)).toEqual(true);
   });
 
   it('should pass with a null', async () => {
-    expect(await getValidState(<ValidationForm validations="isEmail"
-                                               value={null} />)).toEqual(true);
+    expect(await getValidState(<ValidationForm validations="isEmail" value={null} />)).toEqual(true);
   });
 
   it('should pass with an empty string', async () => {
