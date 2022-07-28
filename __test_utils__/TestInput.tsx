@@ -4,7 +4,8 @@ import React from 'react';
 import { withFormsy } from '../src';
 import { PassDownProps } from '../src/withFormsy';
 
-export type FormsyInputProps = Omit<React.HTMLProps<HTMLInputElement>, 'required' | 'value'> & PassDownProps<string>;
+export type FormsyInputProps = Omit<React.HTMLProps<HTMLInputElement>, 'required' | 'value'> &
+  PassDownProps<string> & { testId?: string };
 
 class TestInput extends React.Component<FormsyInputProps> {
   updateValue = (event) => {
@@ -12,7 +13,21 @@ class TestInput extends React.Component<FormsyInputProps> {
   };
 
   render() {
-    return <input type={this.props.type || 'text'} value={this.props.value || ''} onChange={this.updateValue} />;
+    return (
+      <input
+        type={this.props.type || 'text'}
+        value={this.props.value || ''}
+        onChange={this.updateValue}
+        data-is-valid={this.props.isValid}
+        data-is-pristine={this.props.isPristine}
+        data-error-message={this.props.errorMessage}
+        data-error-messages={this.props.errorMessages.join(';')}
+        data-is-form-disabled={this.props.isFormDisabled}
+        data-is-form-submitted={this.props.isFormSubmitted}
+        data-value={JSON.stringify(this.props.value)}
+        data-testid={this.props.testId}
+      />
+    );
   }
 }
 

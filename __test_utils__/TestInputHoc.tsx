@@ -1,10 +1,14 @@
 import React from 'react';
 import { withFormsy } from '../src';
+import { PassDownProps } from '../src/withFormsy';
 
-class TestComponent extends React.Component {
+type TestComponentProps = { testId?: string; name?: string } & PassDownProps<string>;
+
+class TestComponent extends React.Component<TestComponentProps> {
   render() {
-    return <input />;
+    const { testId, name } = this.props;
+    return <input data-testid={testId} name={name} />;
   }
 }
 
-export default withFormsy(TestComponent as any);
+export default withFormsy<TestComponentProps, any>(TestComponent);

@@ -65,9 +65,17 @@ describe('Utils', () => {
       success: [],
     });
 
-    expect(utils.runRules('', {}, { rule: () => true }, {})).toEqual({ errors: [], failed: [], success: ['rule'] });
+    expect(utils.runRules('', {}, { rule: () => true }, {})).toEqual({
+      errors: [],
+      failed: [],
+      success: ['rule'],
+    });
 
-    expect(utils.runRules('', {}, { rule: () => false }, {})).toEqual({ errors: [], failed: ['rule'], success: [] });
+    expect(utils.runRules('', {}, { rule: () => false }, {})).toEqual({
+      errors: [],
+      failed: ['rule'],
+      success: [],
+    });
     expect(utils.runRules('', {}, { rule: true }, { rule: () => false })).toEqual({
       errors: [],
       failed: ['rule'],

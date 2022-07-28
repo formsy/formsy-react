@@ -1,13 +1,13 @@
-import { mount } from 'enzyme';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { getFormInstance, getWrapperInstance } from '../__test_utils__/getInput';
-import immediate from '../__test_utils__/immediate';
 import { InputFactory } from '../__test_utils__/TestInput';
 
 import Formsy, { withFormsy } from '../src';
 import { PassDownProps } from '../src/withFormsy';
 
-class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> {
+type MyTestProps = { type?: string; testId?: string };
+
+class MyTest extends React.Component<MyTestProps & PassDownProps<string>> {
   public static defaultProps = { type: 'text' };
 
   handleChange = (event) => {
@@ -16,61 +16,69 @@ class MyTest extends React.Component<{ type?: string } & PassDownProps<string>> 
   };
 
   render() {
-    const { type, value } = this.props;
-    return <input type={type} value={value || ''} onChange={this.handleChange} />;
+    const { type, value, testId, errorMessage, isValid } = this.props;
+    return (
+      <input
+        type={type}
+        value={value || ''}
+        onChange={this.handleChange}
+        data-is-valid={isValid}
+        data-error-message={errorMessage}
+        data-testid={testId}
+      />
+    );
   }
 }
 
-const FormsyTest = withFormsy<{ type?: string }, string>(MyTest);
+const FormsyTest = withFormsy<MyTestProps, string>(MyTest);
 
 describe('Validation', () => {
   it('should reset only changed form element when external error is passed', () => {
-    const form = mount(
-      <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar', bar: 'foo' })}>
-        <FormsyTest name="foo" />
-        <FormsyTest name="bar" />
+    const screen = render(
+      <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar', bar: 'foo' })} data-testid="form">
+        <FormsyTest name="foo" testId="test-input1" />
+        <FormsyTest name="bar" testId="test-input2" />
       </Formsy>,
     );
 
-    const input = form.find('input').at(0);
-    const inputComponents = form.find('Formsy(MyTest)');
+    const form = screen.getByTestId('form');
+    const input1 = screen.getByTestId('test-input1');
+    const input2 = screen.getByTestId('test-input2');
 
-    getFormInstance(form).submit();
-    expect(getWrapperInstance(inputComponents.at(0)).isValid()).toEqual(false);
-    expect(getWrapperInstance(inputComponents.at(1)).isValid()).toEqual(false);
+    fireEvent.submit(form);
 
-    input.simulate('change', { target: { value: 'bar' } });
-    immediate(() => {
-      expect(getWrapperInstance(inputComponents.at(0)).isValid()).toEqual(true);
-      expect(getWrapperInstance(inputComponents).isValid()).toEqual(false);
-    });
+    expect(input1.dataset.isValid).toEqual('false');
+    expect(input2.dataset.isValid).toEqual('false');
+
+    fireEvent.change(input1, { target: { value: 'bar' } });
+
+    expect(input1.dataset.isValid).toEqual('true');
   });
 
   it('should let normal validation take over when component with external error is changed', () => {
-    const form = mount(
-      <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
-        <FormsyTest name="foo" validations="isEmail" />
+    const screen = render(
+      <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })} data-testid="form">
+        <FormsyTest name="foo" validations="isEmail" testId="test-input" />
       </Formsy>,
     );
 
-    const input = form.find('input');
-    const inputComponent = form.find('Formsy(MyTest)');
+    const form = screen.getByTestId('form');
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
 
-    getFormInstance(form).submit();
-    expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
+    fireEvent.submit(form);
+    expect(input.dataset.isValid).toEqual('false');
 
-    input.simulate('change', { target: { value: 'bar' } });
-    immediate(() => {
-      expect(getWrapperInstance(inputComponent).getValue()).toEqual('bar');
-      expect(getWrapperInstance(inputComponent).isValid()).toEqual(false);
-    });
+    fireEvent.change(input, { target: { value: 'bar' } });
+
+    expect(input.value).toEqual('bar');
+    expect(input.dataset.isValid).toEqual('false');
   });
 
   it('should trigger an onValid handler, if passed, when form is valid', () => {
     const onValid = jest.fn();
     const onInvalid = jest.fn();
 
-    mount(
+    render(
       <Formsy onValid={onValid} onInvalid={onInvalid}>
         <FormsyTest name="foo" value="bar" required />
       </Formsy>,
@@ -84,7 +92,7 @@ describe('Validation', () => {
     const onValid = jest.fn();
     const onInvalid = jest.fn();
 
-    mount(
+    render(
       <Formsy onValid={onValid} onInvalid={onInvalid}>
         <FormsyTest name="foo" required />
       </Formsy>,
@@ -98,7 +106,7 @@ describe('Validation', () => {
     const onValid = jest.fn();
     const onInvalid = jest.fn();
 
-    mount(
+    render(
       <Formsy onValid={onValid} onInvalid={onInvalid}>
         <FormsyTest value={null} name="foo" required />
       </Formsy>,
@@ -115,7 +123,8 @@ describe('Validation', () => {
         isValid = this.props.isValid;
       },
     });
-    mount(
+
+    render(
       <Formsy>
         <CustomInput name="foo" value="foo" required />
       </Formsy>,
@@ -127,66 +136,77 @@ describe('Validation', () => {
   it('should provide invalidate callback on onValidSubmit', () => {
     function TestForm() {
       return (
-        <Formsy onValidSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
-          <FormsyTest name="foo" value="foo" />
+        <Formsy onValidSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })} data-testid="form">
+          <FormsyTest name="foo" value="foo" testId="test-input" />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
+    const screen = render(<TestForm />);
 
-    const formEl = form.find('form');
-    const input = form.find('Formsy(MyTest)');
-    formEl.simulate('submit');
-    expect(getWrapperInstance(input).isValid()).toEqual(false);
+    const form = screen.getByTestId('form');
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
+
+    fireEvent.submit(form);
+
+    expect(input.dataset.isValid).toEqual('false');
   });
 
   it('should provide invalidate callback on onInvalidSubmit', () => {
     function TestForm() {
       return (
-        <Formsy onInvalidSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
-          <FormsyTest name="foo" value="foo" validations="isEmail" />
+        <Formsy onInvalidSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })} data-testid="form">
+          <FormsyTest name="foo" value="foo" validations="isEmail" testId="test-input" />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
-    const formEl = form.find('form');
-    const input = form.find('Formsy(MyTest)');
-    formEl.simulate('submit');
-    expect(getWrapperInstance(input).getErrorMessage()).toEqual('bar');
+    const screen = render(<TestForm />);
+    const form = screen.getByTestId('form');
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
+
+    fireEvent.submit(form);
+
+    expect(input.dataset.errorMessage).toEqual('bar');
   });
 
   it('should not invalidate inputs on external errors with preventExternalInvalidation prop', () => {
     function TestForm() {
       return (
-        <Formsy preventExternalInvalidation onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
-          <FormsyTest name="foo" value="foo" />
+        <Formsy
+          preventExternalInvalidation
+          onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}
+          data-testid="form"
+        >
+          <FormsyTest name="foo" value="foo" testId="test-input" />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
-    const formEl = form.find('form');
-    const input = form.find('Formsy(MyTest)');
-    formEl.simulate('submit');
-    expect(getWrapperInstance(input).isValid()).toEqual(true);
+    const screen = render(<TestForm />);
+    const form = screen.getByTestId('form');
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
+
+    fireEvent.submit(form);
+
+    expect(input.dataset.isValid).toEqual('true');
   });
 
   it('should invalidate inputs on external errors without preventExternalInvalidation prop', () => {
     function TestForm() {
       return (
-        <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })}>
-          <FormsyTest name="foo" value="foo" />
+        <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })} data-testid="form">
+          <FormsyTest name="foo" value="foo" testId="test-input" />
         </Formsy>
       );
     }
 
-    const form = mount(<TestForm />);
-    const formEl = form.find('form');
-    const input = form.find('Formsy(MyTest)');
-    formEl.simulate('submit');
-    expect(getWrapperInstance(input).isValid()).toEqual(false);
+    const screen = render(<TestForm />);
+    const form = screen.getByTestId('form');
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
+    fireEvent.submit(form);
+
+    expect(input.dataset.isValid).toEqual('false');
   });
 
   it('should throw errors on invalid validation string', () => {
@@ -203,7 +223,7 @@ describe('Validation', () => {
       );
     }
 
-    expect(() => mount(<TestForm />)).toThrow(
+    expect(() => render(<TestForm />)).toThrow(
       'Formsy does not support multiple args on string validations. Use object format of validations instead.',
     );
 
@@ -224,7 +244,7 @@ describe('Validation', () => {
       );
     }
 
-    expect(() => mount(<TestForm />)).toThrow('Form Input requires a name property when used');
+    expect(() => render(<TestForm />)).toThrow('Form Input requires a name property when used');
 
     mockConsoleError.mockRestore();
   });
