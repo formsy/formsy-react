@@ -312,7 +312,7 @@ export default function withFormsy<T, V>(
 
   // eslint-disable-next-line react/display-name
   return (props) =>
-    React.createElement(FormsyContext.Consumer, null, (contextValue) => {
+    React.createElement(FormsyContext.Consumer, null, ((contextValue) => {
       return React.createElement(WithFormsyWrapper, { ...props, ...contextValue });
-    });
+    }) as any);
 }
