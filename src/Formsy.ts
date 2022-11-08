@@ -23,7 +23,7 @@ type OnSubmitCallback = (
   model: IModel,
   resetModel: IResetModel,
   updateInputsWithError: IUpdateInputsWithError,
-  event: React.SyntheticEvent<React.FormHTMLAttributes<any>>,
+  event: React.SyntheticEvent<HTMLFormElement>,
 ) => void;
 
 type FormElementType =
@@ -356,7 +356,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
   public isChanged = () => !utils.isSame(this.getPristineValues(), this.getCurrentValues());
 
   // Update model, submit to url prop and send the model
-  public submit = (event?: React.SyntheticEvent) => {
+  public submit = (event?: React.SyntheticEvent<HTMLFormElement>) => {
     const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit } = this.props;
     const { isValid } = this.state;
 
