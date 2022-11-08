@@ -1,3 +1,4 @@
+import { PropsWithChildren } from 'react';
 import * as React from 'react';
 import Formsy from '../src';
 import TestInput from './TestInput';
@@ -7,7 +8,7 @@ interface DynamicInputFormProps {
   inputName?: string;
 }
 
-class DynamicInputForm extends React.Component<DynamicInputFormProps, { input: any }> {
+class DynamicInputForm extends React.Component<PropsWithChildren<DynamicInputFormProps>, { input: any }> {
   constructor(props) {
     super(props);
     this.state = {
