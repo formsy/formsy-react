@@ -59,19 +59,22 @@ describe('Element', () => {
   it('should set back to pristine value when running reset', () => {
     let reset = null;
     const Input = InputFactory({
-      componentDidUpdate() {
+      componentDidMount() {
         reset = this.props.resetValue;
       },
     });
     const screen = render(
       <Formsy>
         <Input name="foo" value="foo" testId="test-input" />
+        <button type="button" data-testid="resetBtn" onClick={() => reset()} />
       </Formsy>,
     );
 
     const input = screen.getByTestId('test-input') as HTMLInputElement;
+    const resetBtn = screen.getByTestId('resetBtn') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'foobar' } });
-    reset();
+    expect(input.value).toEqual('foobar');
+    fireEvent.click(resetBtn);
     expect(input.value).toEqual('foo');
   });
 
