@@ -1,6 +1,6 @@
 import React from 'react';
 
-import ValidationForm, { getValidState } from '../__test_utils__/getValidState';
+import ValidationForm, { getValidState } from '../../__test_utils__/getValidState';
 
 describe('isFalse', () => {
   it('should fail with a default value', async () => {

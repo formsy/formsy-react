@@ -1,8 +1,8 @@
 import React from 'react';
-import { getValidState } from '../__test_utils__/getValidState';
-import TestInput from '../__test_utils__/TestInput';
+import { getValidState } from '../../__test_utils__/getValidState';
+import TestInput from '../../__test_utils__/TestInput';
 
-import Formsy from '../src';
+import Formsy from '../../src';
 
 function ValidationForm(props: { validations: string; value?: any; other?: any }) {
   const { validations, value, other } = props;
