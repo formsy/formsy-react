@@ -3,7 +3,7 @@ import React from 'react';
 import { FormsyContextInterface, IModel, InputComponent, IResetModel, IUpdateInputsWithError, IUpdateInputsWithValue, ValidationError } from './interfaces';
 import { PassDownProps } from './withFormsy';
 declare type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
-declare type OnSubmitCallback = (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError, event: React.SyntheticEvent<React.FormHTMLAttributes<any>>) => void;
+declare type OnSubmitCallback = (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError, event: React.SyntheticEvent<HTMLFormElement>) => void;
 declare type FormElementType = string | React.ComponentType<{
     onReset?: (e: React.SyntheticEvent) => void;
     onSubmit?: (e: React.SyntheticEvent) => void;
@@ -78,7 +78,7 @@ export declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     attachToForm: (component: any) => void;
     detachFromForm: <V>(component: InputComponent<V>) => void;
     isChanged: () => boolean;
-    submit: (event?: React.SyntheticEvent) => void;
+    submit: (event?: React.SyntheticEvent<HTMLFormElement>) => void;
     updateInputsWithError: IUpdateInputsWithError;
     updateInputsWithValue: IUpdateInputsWithValue<any>;
     validate: <V>(component: InputComponent<V>) => void;
