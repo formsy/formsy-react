@@ -12,7 +12,7 @@ import {
   IUpdateInputsWithValue,
   ValidationError,
 } from './interfaces';
-import { throttle, isObject, isString } from './utils';
+import { debounce, isObject, isString } from './utils';
 import * as utils from './utils';
 import validationRules from './validationRules';
 import { PassDownProps } from './withFormsy';
@@ -103,7 +103,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     formElement: 'form',
   };
 
-  private readonly throttledValidateForm: () => void;
+  private readonly debouncedValidateForm: () => void;
 
   public constructor(props: FormsyProps) {
     super(props);
@@ -122,7 +122,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     };
     this.inputs = [];
     this.emptyArray = [];
-    this.throttledValidateForm = throttle(this.validateForm, ONE_RENDER_FRAME);
+    this.debouncedValidateForm = debounce(this.validateForm, ONE_RENDER_FRAME);
   }
 
   public componentDidMount = () => {
@@ -336,20 +336,15 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
       onChange(this.getModel(), this.isChanged());
     }
 
-    // Will be triggered immediately & every one frame rate
-    this.throttledValidateForm();
+    this.debouncedValidateForm();
   };
 
   // Method put on each input component to unregister
   // itself from the form
   public detachFromForm = <V>(component: InputComponent<V>) => {
-    const componentPos = this.inputs.indexOf(component);
+    this.inputs = this.inputs.filter((input) => input !== component);
 
-    if (componentPos !== -1) {
-      this.inputs = this.inputs.slice(0, componentPos).concat(this.inputs.slice(componentPos + 1));
-    }
-
-    this.throttledValidateForm();
+    this.debouncedValidateForm();
   };
 
   // Checks if the values have changed from their initial value
@@ -437,7 +432,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
   // and check their state
   public validateForm = () => {
     // We need a callback as we are validating all inputs again. This will
-    // run when the last component has set its state
+    // run when the last input has set its state
     const onValidationComplete = () => {
       const allIsValid = this.inputs.every((component) => component.state.isValid);
 
@@ -449,24 +444,17 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
       });
     };
 
-    // Run validation again in case affected by other inputs. The
-    // last component validated will run the onValidationComplete callback
-    this.inputs.forEach((component, index) => {
-      const validationState = this.runValidation(component);
-      const isFinalInput = index === this.inputs.length - 1;
-      const callback = isFinalInput ? onValidationComplete : null;
-      component.setState(validationState, callback);
-    });
-
-    // If there are no inputs, set state where form is ready to trigger
-    // change event. New inputs might be added later
-    if (!this.inputs.length) {
-      this.setState(
-        {
-          canChange: true,
-        },
-        onValidationComplete,
-      );
+    if (this.inputs.length === 0) {
+      onValidationComplete();
+    } else {
+      // Run validation again in case affected by other inputs. The
+      // last component validated will run the onValidationComplete callback
+      this.inputs.forEach((component, index) => {
+        const validationState = this.runValidation(component);
+        const isLastInput = index === this.inputs.length - 1;
+        const callback = isLastInput ? onValidationComplete : null;
+        component.setState(validationState, callback);
+      });
     }
   };
 

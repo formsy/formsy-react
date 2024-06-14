@@ -770,7 +770,13 @@ describe('value === false', () => {
   });
 
   it('should be able to set a deep value with updateInputsWithValue', () => {
-    class TestForm extends React.Component<{}, { valueBar: number; valueFoo: { valueBar: number } }> {
+    class TestForm extends React.Component<
+      {},
+      {
+        valueBar: number;
+        valueFoo: { valueBar: number };
+      }
+    > {
       formRef = React.createRef<Formsy>();
 
       constructor(props) {
@@ -1061,7 +1067,12 @@ describe('form valid state', () => {
   it('should be false when validationErrors is not empty', () => {
     let isValid = true;
 
-    class TestForm extends React.Component<{}, { validationErrors: { [key: string]: ValidationError } }> {
+    class TestForm extends React.Component<
+      {},
+      {
+        validationErrors: { [key: string]: ValidationError };
+      }
+    > {
       constructor(props) {
         super(props);
         this.state = {
@@ -1102,7 +1113,12 @@ describe('form valid state', () => {
   it('should be true when validationErrors is not empty and preventExternalInvalidation is true', () => {
     let isValid = true;
 
-    class TestForm extends React.Component<{}, { validationErrors: { [key: string]: ValidationError } }> {
+    class TestForm extends React.Component<
+      {},
+      {
+        validationErrors: { [key: string]: ValidationError };
+      }
+    > {
       constructor(props) {
         super(props);
         this.state = {
@@ -1197,7 +1213,45 @@ describe('form valid state', () => {
 
     render(<TestForm />);
 
-    expect(validSpy).toHaveBeenCalledTimes(1 + 1); // one for form mount & 1 for all attachToForm calls
+    expect(validSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should revalidate form once when unmounting multiple inputs', () => {
+    const Inputs = () => {
+      const [showInputs, setShowInputs] = useState(true);
+
+      return (
+        <>
+          <button type="button" onClick={() => setShowInputs(!showInputs)} data-testid="toggle-btn">
+            toggle inputs
+          </button>
+          {showInputs &&
+            Array.from({ length: 10 }, (_, index) => (
+              <TestInput key={index} name={`foo-${index}`} required={true} value={`${index}`} />
+            ))}
+        </>
+      );
+    };
+
+    const validSpy = jest.fn();
+
+    const TestForm = () => (
+      <Formsy onValid={validSpy}>
+        <Inputs />
+      </Formsy>
+    );
+
+    jest.useFakeTimers();
+    const screen = render(<TestForm />);
+    jest.runAllTimers();
+    const toggleBtn = screen.getByTestId('toggle-btn');
+
+    validSpy.mockClear();
+
+    fireEvent.click(toggleBtn);
+    jest.runAllTimers();
+
+    expect(validSpy).toHaveBeenCalledTimes(1);
   });
 });
 
