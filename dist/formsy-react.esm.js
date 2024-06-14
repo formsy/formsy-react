@@ -152,18 +152,17 @@ function runRules(value, currentValues, validations, validationRules) {
   });
   return results;
 }
-function throttle(callback, interval) {
-  var enableCall = true;
+function debounce(callback, timeout) {
+  var _this = this;
+  var timer;
   return function () {
-    if (!enableCall) return;
-    enableCall = false;
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
-    callback.apply(this, args);
-    setTimeout(function () {
-      return enableCall = true;
-    }, interval);
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      callback.apply(_this, args);
+    }, timeout);
   };
 }
 
@@ -714,17 +713,15 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
       if (canChange) {
         onChange(_this.getModel(), _this.isChanged());
       }
-      // Will be triggered immediately & every one frame rate
-      _this.throttledValidateForm();
+      _this.debouncedValidateForm();
     };
     // Method put on each input component to unregister
     // itself from the form
     _this.detachFromForm = function (component) {
-      var componentPos = _this.inputs.indexOf(component);
-      if (componentPos !== -1) {
-        _this.inputs = _this.inputs.slice(0, componentPos).concat(_this.inputs.slice(componentPos + 1));
-      }
-      _this.validateForm();
+      _this.inputs = _this.inputs.filter(function (input) {
+        return input !== component;
+      });
+      _this.debouncedValidateForm();
     };
     // Checks if the values have changed from their initial value
     _this.isChanged = function () {
@@ -805,7 +802,7 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
     // and check their state
     _this.validateForm = function () {
       // We need a callback as we are validating all inputs again. This will
-      // run when the last component has set its state
+      // run when the last input has set its state
       var onValidationComplete = function onValidationComplete() {
         var allIsValid = _this.inputs.every(function (component) {
           return component.state.isValid;
@@ -816,20 +813,17 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
           canChange: true
         });
       };
-      // Run validation again in case affected by other inputs. The
-      // last component validated will run the onValidationComplete callback
-      _this.inputs.forEach(function (component, index) {
-        var validationState = _this.runValidation(component);
-        var isFinalInput = index === _this.inputs.length - 1;
-        var callback = isFinalInput ? onValidationComplete : null;
-        component.setState(validationState, callback);
-      });
-      // If there are no inputs, set state where form is ready to trigger
-      // change event. New inputs might be added later
-      if (!_this.inputs.length) {
-        _this.setState({
-          canChange: true
-        }, onValidationComplete);
+      if (_this.inputs.length === 0) {
+        onValidationComplete();
+      } else {
+        // Run validation again in case affected by other inputs. The
+        // last component validated will run the onValidationComplete callback
+        _this.inputs.forEach(function (component, index) {
+          var validationState = _this.runValidation(component);
+          var isLastInput = index === _this.inputs.length - 1;
+          var callback = isLastInput ? onValidationComplete : null;
+          component.setState(validationState, callback);
+        });
       }
     };
     _this.state = {
@@ -847,7 +841,7 @@ var Formsy = /*#__PURE__*/function (_React$Component) {
     };
     _this.inputs = [];
     _this.emptyArray = [];
-    _this.throttledValidateForm = throttle(_this.validateForm, ONE_RENDER_FRAME);
+    _this.debouncedValidateForm = debounce(_this.validateForm, ONE_RENDER_FRAME);
     return _this;
   }
   var _proto = Formsy.prototype;

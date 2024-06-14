@@ -54,7 +54,7 @@ export declare class Formsy extends React.Component<FormsyProps, FormsyState> {
         validationErrors: PropTypes.Requireable<object>;
     };
     static defaultProps: Partial<FormsyProps>;
-    private readonly throttledValidateForm;
+    private readonly debouncedValidateForm;
     constructor(props: FormsyProps);
     componentDidMount: () => void;
     componentDidUpdate: (prevProps: FormsyProps) => void;
