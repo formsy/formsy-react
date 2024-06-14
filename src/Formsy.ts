@@ -349,7 +349,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
       this.inputs = this.inputs.slice(0, componentPos).concat(this.inputs.slice(componentPos + 1));
     }
 
-    this.validateForm();
+    this.throttledValidateForm();
   };
 
   // Checks if the values have changed from their initial value
