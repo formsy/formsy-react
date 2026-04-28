@@ -1,7 +1,6 @@
-/* eslint-disable max-classes-per-file, react/destructuring-assignment */
-import { createEvent, fireEvent, render } from '@testing-library/react';
+import { act, createEvent, fireEvent, render } from '@testing-library/react';
 import * as React from 'react';
-import { useRef, useState } from 'react';
+import { PropsWithChildren, useRef, useState } from 'react';
 
 import DynamicInputForm from '../__test_utils__/DynamicInputForm';
 import TestInput from '../__test_utils__/TestInput';
@@ -13,25 +12,20 @@ describe('Setting up a form', () => {
   it('should expose the users DOM node through an innerRef prop', () => {
     const refSpy = jest.fn();
 
-    class TestForm extends React.Component {
-      render() {
-        return (
-          <Formsy>
-            <TestInputHoc
-              name="name"
-              innerRef={(ref: any) => {
-                if (!ref) {
-                  return;
-                }
-
-                refSpy(ref.constructor.name);
-              }}
-              testId="test-input"
-            />
-          </Formsy>
-        );
-      }
-    }
+    const TestForm = () => (
+      <Formsy>
+        <TestInputHoc
+          name="name"
+          innerRef={(ref: any) => {
+            if (!ref) {
+              return;
+            }
+            refSpy(ref.constructor.name);
+          }}
+          testId="test-input"
+        />
+      </Formsy>
+    );
 
     render(<TestForm />);
 
@@ -81,8 +75,12 @@ describe('Setting up a form', () => {
     const form = screen.getByTestId('form');
     const addInputBtn = screen.getByTestId('add-input-btn');
 
-    fireEvent.click(addInputBtn);
-    fireEvent.submit(form);
+    act(() => {
+      fireEvent.click(addInputBtn);
+    });
+    act(() => {
+      fireEvent.submit(form);
+    });
 
     expect(submitSpy).toHaveBeenCalledWith({ test: '' });
   });
@@ -170,7 +168,7 @@ describe('mapModel', () => {
       { 'parent.child': 'test', testChange: true },
       expect.any(Function),
       expect.any(Function),
-      expect.any(Object),
+      expect.any(Object)
     );
   });
 });
@@ -186,7 +184,7 @@ describe('validations', () => {
     const screen = render(
       <Formsy>
         <TestInput name="one" validations="runRule" value="foo" testId="test-input" />
-      </Formsy>,
+      </Formsy>
     );
 
     const input = screen.getByTestId('test-input');
@@ -326,7 +324,7 @@ describe('validations', () => {
     const screen = render(
       <Formsy>
         <TestInput name="one" validations="ruleA,ruleB" value="foo" testId="test-input" />
-      </Formsy>,
+      </Formsy>
     );
 
     const input = screen.getByTestId('test-input');
@@ -355,7 +353,7 @@ describe('onChange', () => {
     const screen = render(
       <Formsy onChange={hasChanged}>
         <TestInput name="foo" value="" testId="test-input" />
-      </Formsy>,
+      </Formsy>
     );
 
     fireEvent.change(screen.getByTestId('test-input'), { target: { value: 'bar' } });
@@ -366,7 +364,7 @@ describe('onChange', () => {
   it('should trigger onChange once when new input is added to form', () => {
     const hasChanged = jest.fn();
 
-    class TestForm extends React.Component<{}, { showInput: boolean }> {
+    class TestForm extends React.Component<PropsWithChildren<{}>, { showInput: boolean }> {
       constructor(props) {
         super(props);
         this.state = {
@@ -611,7 +609,7 @@ describe('value === false', () => {
       { foo: false },
       expect.any(Function),
       expect.any(Function),
-      expect.any(Object),
+      expect.any(Object)
     );
   });
 
@@ -655,7 +653,7 @@ describe('value === false', () => {
       { foo: false },
       expect.any(Function),
       expect.any(Function),
-      expect.any(Object),
+      expect.any(Object)
     );
   });
 
@@ -943,7 +941,7 @@ describe('.isChanged()', () => {
     render(
       <Formsy onChange={hasOnChanged} ref={formRef}>
         <TestInput name="one" value="foo" />
-      </Formsy>,
+      </Formsy>
     );
 
     expect(formRef.current.isChanged()).toEqual(false);
@@ -955,7 +953,7 @@ describe('.isChanged()', () => {
     const screen = render(
       <Formsy onChange={hasOnChanged}>
         <TestInput name="one" value="foo" testId="test-input" />
-      </Formsy>,
+      </Formsy>
     );
     const input = screen.getByTestId('test-input');
     fireEvent.change(input, {
@@ -970,7 +968,7 @@ describe('.isChanged()', () => {
     const screen = render(
       <Formsy onChange={hasOnChanged}>
         <TestInput name="one" value="foo" testId="test-input" />
-      </Formsy>,
+      </Formsy>
     );
     const input = screen.getByTestId('test-input');
     fireEvent.change(input, {
@@ -1059,7 +1057,7 @@ describe('form valid state', () => {
     const form = screen.getByTestId('form');
     fireEvent.submit(form);
     expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('You are trying to update an input that does not exist'),
+      expect.stringContaining('You are trying to update an input that does not exist')
     );
     mockConsoleError.mockRestore();
   });
@@ -1180,14 +1178,13 @@ describe('form valid state', () => {
       );
     };
 
-    const TestForm = () => {
-      return (
-        <Formsy onInvalid={() => (isValid = false)} onValid={() => (isValid = true)}>
-          <Inputs />
-        </Formsy>
-      );
-    };
+    const TestForm = () => (
+      <Formsy onInvalid={() => (isValid = false)} onValid={() => (isValid = true)}>
+        <Inputs />
+      </Formsy>
+    );
     jest.useFakeTimers();
+
     const screen = render(<TestForm />);
     const plusButton = screen.getByTestId('add-btn');
 
@@ -1248,7 +1245,9 @@ describe('form valid state', () => {
 
     validSpy.mockClear();
 
-    fireEvent.click(toggleBtn);
+    act(() => {
+      fireEvent.click(toggleBtn);
+    });
     jest.runAllTimers();
 
     expect(validSpy).toHaveBeenCalledTimes(1);
@@ -1264,17 +1263,19 @@ describe('onSubmit/onValidSubmit/onInvalidSubmit', () => {
         <Formsy {...{ [key]: submitSpy }}>
           <button type="submit" data-testid="submit-btn" />
           {key === 'onInvalidSubmit' && <TestInput name="test" required={true} />}
-        </Formsy>,
+        </Formsy>
       );
       const button = screen.getByTestId('submit-btn');
 
-      fireEvent.click(button);
+      act(() => {
+        fireEvent.click(button);
+      });
 
       expect(submitSpy).toHaveBeenCalledWith(
         expect.any(Object),
         expect.any(Function),
         expect.any(Function),
-        expect.any(Object),
+        expect.any(Object)
       );
     });
   });

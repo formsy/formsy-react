@@ -6,6 +6,6 @@ export declare function matchRegexp<V>(_values: Values, value: V, regexp: RegExp
 interface Validations<V> {
     [key: string]: ValidationFunction<V>;
 }
-declare const validations: Validations<any>;
+export declare const validationRules: Validations<any>;
 export declare const addValidationRule: <V>(name: string, func: ValidationFunction<V>) => void;
-export default validations;
+export {};

@@ -47,7 +47,7 @@ const REGEX_PATTERNS = {
   WORDS: /^[A-Z\s]+$/i,
 };
 
-const validations: Validations<any> = {
+export const validationRules: Validations<any> = {
   equals: <V>(_values, value: V, eql: V) => !isExisty(value) || isEmpty(value) || value === eql,
   equalsField: <V>(values, value: V, field: string) => value === values[field],
   isAlpha: <V>(values, value: V) => matchRegexp(values, value, REGEX_PATTERNS.ALPHA),
@@ -72,7 +72,5 @@ const validations: Validations<any> = {
 };
 
 export const addValidationRule = <V>(name: string, func: ValidationFunction<V>) => {
-  validations[name] = func;
+  validationRules[name] = func;
 };
-
-export default validations;

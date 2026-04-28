@@ -18,7 +18,7 @@ function ValidationForm(props: { validations: string; value?: any; other?: any }
 describe('equalsField', () => {
   it('should pass when the value is equal', async () => {
     expect(await getValidState(<ValidationForm validations="equalsField:other" value="bar" other="bar" />)).toEqual(
-      true,
+      true
     );
   });
 
@@ -32,13 +32,13 @@ describe('equalsField', () => {
 
   it('should pass with an undefined', async () => {
     expect(
-      await getValidState(<ValidationForm validations="equalsField:other" value={undefined} other={undefined} />),
+      await getValidState(<ValidationForm validations="equalsField:other" value={undefined} other={undefined} />)
     ).toEqual(true);
   });
 
   it('should pass with a null', async () => {
     expect(await getValidState(<ValidationForm validations="equalsField:other" value={null} other={null} />)).toEqual(
-      true,
+      true
     );
   });
 
@@ -48,7 +48,7 @@ describe('equalsField', () => {
 
   it('should work with a number', async () => {
     expect(await getValidState(<ValidationForm validations="equalsField:other" value={42} other={10} />)).toEqual(
-      false,
+      false
     );
   });
 });

@@ -1,8 +1,6 @@
-/* eslint-disable react/no-unused-state, react/default-props-match-prop-types */
 import { get, has, set } from 'lodash';
-import PropTypes from 'prop-types';
-import React from 'react';
-import FormsyContext from './FormsyContext';
+import React, { PropsWithChildren } from 'react';
+import { FormsyContext } from './FormsyContext';
 import {
   FormsyContextInterface,
   IModel,
@@ -12,9 +10,9 @@ import {
   IUpdateInputsWithValue,
   ValidationError,
 } from './interfaces';
-import { debounce, isObject, isString } from './utils';
 import * as utils from './utils';
-import validationRules from './validationRules';
+import { debounce, isObject, isString } from './utils';
+import { validationRules } from './validationRules';
 import { PassDownProps } from './withFormsy';
 
 type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
@@ -23,17 +21,18 @@ type OnSubmitCallback = (
   model: IModel,
   resetModel: IResetModel,
   updateInputsWithError: IUpdateInputsWithError,
-  event: React.SyntheticEvent<HTMLFormElement>,
+  event: React.SyntheticEvent<HTMLFormElement>
 ) => void;
 
 type FormElementType =
   | string
-  | React.ComponentType<{
-      onReset?: (e: React.SyntheticEvent) => void;
-      onSubmit?: (e: React.SyntheticEvent) => void;
-      disabled?: boolean;
-      children?: React.ReactChildren;
-    }>;
+  | React.ComponentType<
+      PropsWithChildren<{
+        onReset?: (e: React.SyntheticEvent) => void;
+        onSubmit?: (e: React.SyntheticEvent) => void;
+        disabled?: boolean;
+      }>
+    >;
 
 export interface FormsyProps extends FormHTMLAttributesCleaned {
   disabled: boolean;
@@ -62,31 +61,8 @@ export interface FormsyState {
 
 const ONE_RENDER_FRAME = 66;
 
-export class Formsy extends React.Component<FormsyProps, FormsyState> {
-  public inputs: InstanceType<any & PassDownProps<any>>[];
-
-  public emptyArray: any[];
-
-  public prevInputNames: any[] | null = null;
-
+export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, FormsyState> {
   public static displayName = 'Formsy';
-
-  public static propTypes = {
-    disabled: PropTypes.bool,
-    mapping: PropTypes.func,
-    formElement: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.func]),
-    onChange: PropTypes.func,
-    onInvalid: PropTypes.func,
-    onInvalidSubmit: PropTypes.func,
-    onReset: PropTypes.func,
-    onSubmit: PropTypes.func,
-    onValid: PropTypes.func,
-    onValidSubmit: PropTypes.func,
-    preventDefaultSubmit: PropTypes.bool,
-    preventExternalInvalidation: PropTypes.bool,
-    validationErrors: PropTypes.object, // eslint-disable-line
-  };
-
   public static defaultProps: Partial<FormsyProps> = {
     disabled: false,
     mapping: null,
@@ -100,9 +76,10 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     preventDefaultSubmit: true,
     preventExternalInvalidation: false,
     validationErrors: {},
-    formElement: 'form',
   };
-
+  public inputs: InstanceType<any & PassDownProps<any>>[];
+  public emptyArray: any[];
+  public prevInputNames: any[] | null = null;
   private readonly debouncedValidateForm: () => void;
 
   public constructor(props: FormsyProps) {
@@ -131,7 +108,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
   };
 
   public componentDidUpdate = (prevProps: FormsyProps) => {
-    const { validationErrors, disabled } = this.props;
+    const { validationErrors, disabled = false } = this.props;
 
     if (validationErrors && isObject(validationErrors) && Object.keys(validationErrors).length > 0) {
       this.setInputValidationErrors(validationErrors);
@@ -145,7 +122,7 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
 
     // Keep the disabled value in state/context the same as from props
     if (disabled !== prevProps.disabled) {
-      // eslint-disable-next-line
+      // oxlint-disable-next-line react/no-did-update-set-state
       this.setState((state) => ({
         ...state,
         contextValue: {
@@ -162,7 +139,6 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
         props: { name },
         state: { value },
       } = component;
-      // eslint-disable-next-line no-param-reassign
       valueAccumulator[name] = utils.protectAgainstParamReassignment(value);
       return valueAccumulator;
     }, {});
@@ -177,7 +153,6 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
       const {
         props: { name, value },
       } = component;
-      // eslint-disable-next-line no-param-reassign
       valueAccumulator[name] = utils.protectAgainstParamReassignment(value);
       return valueAccumulator;
     }, {});
@@ -229,7 +204,6 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
 
   public isValidValue = (component, value) => this.runValidation(component, value).isValid;
 
-  // eslint-disable-next-line react/destructuring-assignment
   public isFormDisabled = () => this.props.disabled;
 
   public mapModel = (model: IModel): IModel => {
@@ -251,40 +225,19 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.resetModel(model);
   };
 
-  private resetInternal = (event) => {
-    const { onReset } = this.props;
-
-    event.preventDefault();
-    this.reset();
-    if (onReset) {
-      onReset();
-    }
-  };
-
-  // Reset each key in the model to the original / initial / specified value
-  private resetModel: IResetModel = (data) => {
-    this.inputs.forEach((component) => {
-      const { name } = component.props;
-      if (data && has(data, name)) {
-        component.setValue(get(data, name));
-      } else {
-        component.resetValue();
-      }
-    });
-    this.validateForm();
-  };
-
   // Checks validation on current value or a passed value
   public runValidation = <V>(
     component: InputComponent<V>,
-    value = component.state.value,
+    value = component.state.value
   ): { isRequired: boolean; isValid: boolean; validationError: ValidationError[] } => {
     const { validationErrors } = this.props;
     const { validationError, validationErrors: componentValidationErrors, name } = component.props;
     const currentValues = this.getCurrentValues();
-    const validationResults = utils.runRules(value, currentValues, component.validations, validationRules);
-    const requiredResults = utils.runRules(value, currentValues, component.requiredValidations, validationRules);
-    const isRequired = Object.keys(component.requiredValidations).length ? !!requiredResults.success.length : false;
+    const validationResults = utils.runRules(value, currentValues, component.validations || {}, validationRules);
+    const requiredResults = utils.runRules(value, currentValues, component.requiredValidations || {}, validationRules);
+    const isRequired = Object.keys(component.requiredValidations || {}).length
+      ? !!requiredResults.success.length
+      : false;
     const isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
 
     return {
@@ -304,13 +257,15 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
         }
 
         if (isRequired) {
-          const error = componentValidationErrors[requiredResults.success[0]] || validationError;
+          const error = (componentValidationErrors || {})[requiredResults.success[0]] || validationError;
           return error ? [error] : null;
         }
 
         if (validationResults.failed.length) {
           return validationResults.failed
-            .map((failed) => (componentValidationErrors[failed] ? componentValidationErrors[failed] : validationError))
+            .map((failed) =>
+              (componentValidationErrors || {})[failed] ? componentValidationErrors[failed] : validationError
+            )
             .filter((x, pos, arr) => arr.indexOf(x) === pos); // remove duplicates
         }
 
@@ -321,7 +276,6 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     };
   };
 
-  // Method put on each input component to register
   // itself to the form
   public attachToForm = (component) => {
     if (this.inputs.indexOf(component) === -1) {
@@ -339,7 +293,6 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.debouncedValidateForm();
   };
 
-  // Method put on each input component to unregister
   // itself from the form
   public detachFromForm = <V>(component: InputComponent<V>) => {
     this.inputs = this.inputs.filter((input) => input !== component);
@@ -347,12 +300,16 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     this.debouncedValidateForm();
   };
 
+  // Method put on each input component to register
+
   // Checks if the values have changed from their initial value
   public isChanged = () => !utils.isSame(this.getPristineValues(), this.getCurrentValues());
 
+  // Method put on each input component to unregister
+
   // Update model, submit to url prop and send the model
   public submit = (event?: React.SyntheticEvent<HTMLFormElement>) => {
-    const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit } = this.props;
+    const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit = false } = this.props;
     const { isValid } = this.state;
 
     if (preventDefaultSubmit && event && event.preventDefault) {
@@ -364,17 +321,15 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     // so validation becomes visible (if based on isPristine)
     this.setFormPristine(false);
     const model = this.getModel();
-    onSubmit(model, this.resetModel, this.updateInputsWithError, event);
+    onSubmit!(model, this.resetModel, this.updateInputsWithError, event);
 
     if (isValid) {
-      onValidSubmit(model, this.resetModel, this.updateInputsWithError, event);
+      onValidSubmit!(model, this.resetModel, this.updateInputsWithError, event);
     } else {
-      onInvalidSubmit(model, this.resetModel, this.updateInputsWithError, event);
+      onInvalidSubmit!(model, this.resetModel, this.updateInputsWithError, event);
     }
   };
 
-  // Go through errors from server and grab the components
-  // stored in the inputs map. Change their state to invalid
   // and set the serverError message
   public updateInputsWithError: IUpdateInputsWithError = (errors, invalidate) => {
     const { preventExternalInvalidation } = this.props;
@@ -385,8 +340,8 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
       if (!component) {
         throw new Error(
           `You are trying to update an input that does not exist. Verify errors object with input names. ${JSON.stringify(
-            errors,
-          )}`,
+            errors
+          )}`
         );
       }
       component.setState({
@@ -410,8 +365,9 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     });
   };
 
-  // Use the binded values and the actual input value to
-  // validate the input and set its state. Then check the
+  // Go through errors from server and grab the components
+  // stored in the inputs map. Change their state to invalid
+
   // state of the form itself
   public validate = <V>(component: InputComponent<V>) => {
     const { onChange } = this.props;
@@ -428,7 +384,6 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     component.setState(validationState, this.validateForm);
   };
 
-  // Validate the form by going through all child input components
   // and check their state
   public validateForm = () => {
     // We need a callback as we are validating all inputs again. This will
@@ -458,9 +413,10 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
     }
   };
 
+  // Use the binded values and the actual input value to
+  // validate the input and set its state. Then check the
   public render() {
     const {
-      /* eslint-disable @typescript-eslint/no-unused-vars */
       children,
       mapping,
       onChange,
@@ -473,8 +429,8 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
       preventDefaultSubmit,
       preventExternalInvalidation,
       validationErrors,
-      disabled,
-      formElement,
+      disabled = false,
+      formElement = 'form',
       ...nonFormsyProps
     } = this.props;
     const { contextValue } = this.state;
@@ -485,15 +441,40 @@ export class Formsy extends React.Component<FormsyProps, FormsyState> {
         value: contextValue,
       },
       React.createElement(
-        formElement,
+        formElement || 'form',
         {
           onReset: this.resetInternal,
           onSubmit: this.submit,
           ...nonFormsyProps,
           disabled,
         },
-        children,
-      ),
+        children
+      )
     );
   }
+
+  // Validate the form by going through all child input components
+
+  private resetInternal = (event) => {
+    const { onReset } = this.props;
+
+    event.preventDefault();
+    this.reset();
+    if (onReset) {
+      onReset();
+    }
+  };
+
+  // Reset each key in the model to the original / initial / specified value
+  private resetModel: IResetModel = (data) => {
+    this.inputs.forEach((component) => {
+      const { name } = component.props;
+      if (data && has(data, name)) {
+        component.setValue(get(data, name));
+      } else {
+        component.resetValue();
+      }
+    });
+    this.validateForm();
+  };
 }

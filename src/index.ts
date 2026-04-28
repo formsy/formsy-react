@@ -1,7 +1,7 @@
-import validationRules, { addValidationRule } from './validationRules';
-import withFormsy, { PassDownProps, propTypes } from './withFormsy';
+export { addValidationRule, validationRules } from './validationRules';
+import { withFormsy, PassDownProps } from './withFormsy';
 import { Formsy } from './Formsy';
 
-export { addValidationRule, propTypes, validationRules, withFormsy };
+export { withFormsy };
 export type { PassDownProps as FormsyInjectedProps };
 export default Formsy;

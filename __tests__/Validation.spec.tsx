@@ -38,7 +38,7 @@ describe('Validation', () => {
       <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar', bar: 'foo' })} data-testid="form">
         <FormsyTest name="foo" testId="test-input1" />
         <FormsyTest name="bar" testId="test-input2" />
-      </Formsy>,
+      </Formsy>
     );
 
     const form = screen.getByTestId('form');
@@ -59,7 +59,7 @@ describe('Validation', () => {
     const screen = render(
       <Formsy onSubmit={(_model, _reset, invalidate) => invalidate({ foo: 'bar' })} data-testid="form">
         <FormsyTest name="foo" validations="isEmail" testId="test-input" />
-      </Formsy>,
+      </Formsy>
     );
 
     const form = screen.getByTestId('form');
@@ -81,7 +81,7 @@ describe('Validation', () => {
     render(
       <Formsy onValid={onValid} onInvalid={onInvalid}>
         <FormsyTest name="foo" value="bar" required />
-      </Formsy>,
+      </Formsy>
     );
 
     expect(onValid).toHaveBeenCalled();
@@ -95,7 +95,7 @@ describe('Validation', () => {
     render(
       <Formsy onValid={onValid} onInvalid={onInvalid}>
         <FormsyTest name="foo" required />
-      </Formsy>,
+      </Formsy>
     );
 
     expect(onValid).not.toHaveBeenCalled();
@@ -109,7 +109,7 @@ describe('Validation', () => {
     render(
       <Formsy onValid={onValid} onInvalid={onInvalid}>
         <FormsyTest value={null} name="foo" required />
-      </Formsy>,
+      </Formsy>
     );
 
     expect(onValid).not.toHaveBeenCalled();
@@ -127,7 +127,7 @@ describe('Validation', () => {
     render(
       <Formsy>
         <CustomInput name="foo" value="foo" required />
-      </Formsy>,
+      </Formsy>
     );
 
     expect(isValid).toEqual(true);
@@ -224,7 +224,7 @@ describe('Validation', () => {
     }
 
     expect(() => render(<TestForm />)).toThrow(
-      'Formsy does not support multiple args on string validations. Use object format of validations instead.',
+      'Formsy does not support multiple args on string validations. Use object format of validations instead.'
     );
 
     mockConsoleError.mockRestore();

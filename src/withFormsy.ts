@@ -1,6 +1,5 @@
-import PropTypes from 'prop-types';
 import React from 'react';
-import FormsyContext from './FormsyContext';
+import { FormsyContext } from './FormsyContext';
 import {
   ComponentWithStaticAttributes,
   FormsyContextInterface,
@@ -14,25 +13,24 @@ import * as utils from './utils';
 import { isString } from './utils';
 import { isDefaultRequiredValue } from './validationRules';
 
-/* eslint-disable react/default-props-match-prop-types */
-
 const convertValidationsToObject = <V>(validations: false | Validations<V>): Validations<V> => {
   if (isString(validations)) {
     return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation) => {
       let args: string[] = validation.split(':');
-      const validateMethod: string = args.shift();
+      const validateMethod: string = args.shift() || '';
 
       args = args.map((arg) => {
         try {
           return JSON.parse(arg);
-        } catch (e) {
+          // oxlint-disable-next-line no-unused-vars
+        } catch (_e) {
           return arg; // It is a string if it can not parse it
         }
       });
 
       if (args.length > 1) {
         throw new Error(
-          'Formsy does not support multiple args on string validations. Use object format of validations instead.',
+          'Formsy does not support multiple args on string validations. Use object format of validations instead.'
         );
       }
 
@@ -44,14 +42,6 @@ const convertValidationsToObject = <V>(validations: false | Validations<V>): Val
   }
 
   return validations || {};
-};
-
-export const propTypes = {
-  innerRef: PropTypes.func,
-  name: PropTypes.string.isRequired,
-  required: PropTypes.oneOfType([PropTypes.bool, PropTypes.object, PropTypes.string]),
-  validations: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
-  value: PropTypes.any, // eslint-disable-line react/forbid-prop-types
 };
 
 export interface WrapperProps<V> {
@@ -111,8 +101,8 @@ function getDisplayName(component: WrappedComponentClass) {
   return component.displayName || component.name || (utils.isString(component) ? component : 'Component');
 }
 
-export default function withFormsy<T, V>(
-  WrappedComponent: React.ComponentType<T & PassDownProps<V>>,
+export function withFormsy<T, V>(
+  WrappedComponent: React.ComponentType<T & PassDownProps<V>>
 ): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>> {
   class WithFormsyWrapper
     extends React.Component<T & WrapperProps<V> & FormsyContextInterface, WrapperState<V>>
@@ -123,8 +113,6 @@ export default function withFormsy<T, V>(
     public requiredValidations?: Validations<V>;
 
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
-
-    public static propTypes: any = propTypes;
 
     public static defaultProps: any = {
       innerRef: null,
@@ -207,7 +195,6 @@ export default function withFormsy<T, V>(
       return [];
     };
 
-    // eslint-disable-next-line react/destructuring-assignment
     public getValue = (): V => this.state.value;
 
     public setValidations = (validations: Validations<V>, required: RequiredValidation<V>): void => {
@@ -232,33 +219,26 @@ export default function withFormsy<T, V>(
           },
           () => {
             validateForm(this);
-          },
+          }
         );
       }
     };
 
-    // eslint-disable-next-line react/destructuring-assignment
     public hasValue = () => {
       const { value } = this.state;
       return isDefaultRequiredValue(value);
     };
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isFormDisabled = (): boolean => this.props.isFormDisabled;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isFormSubmitted = (): boolean => this.state.formSubmitted;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isPristine = (): boolean => this.state.isPristine;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isRequired = (): boolean => !!this.props.required;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isValid = (): boolean => this.state.isValid;
 
-    // eslint-disable-next-line react/destructuring-assignment
     public isValidValue = (value: V) => this.props.isValidValue(this, value);
 
     public resetValue = () => {
@@ -272,13 +252,12 @@ export default function withFormsy<T, V>(
         },
         () => {
           validate(this);
-        },
+        }
       );
     };
 
     public showError = (): boolean => !this.showRequired() && !this.isValid();
 
-    // eslint-disable-next-line react/destructuring-assignment
     public showRequired = (): boolean => this.state.isRequired;
 
     public render() {
@@ -310,9 +289,7 @@ export default function withFormsy<T, V>(
     }
   }
 
-  // eslint-disable-next-line react/display-name
   return (props) =>
-    React.createElement(FormsyContext.Consumer, null, ((contextValue) => {
-      return React.createElement(WithFormsyWrapper, { ...props, ...contextValue });
-    }) as any);
+    React.createElement(FormsyContext.Consumer, null, ((contextValue) =>
+      React.createElement(WithFormsyWrapper, { ...props, ...contextValue })) as any);
 }
