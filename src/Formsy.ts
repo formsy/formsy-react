@@ -35,15 +35,15 @@ type FormElementType =
     >;
 
 export interface FormsyProps extends FormHTMLAttributesCleaned {
-  disabled: boolean;
-  mapping: null | ((model: IModel) => IModel);
-  onChange: (model: IModel, isChanged: boolean) => void;
-  onInvalid: () => void;
+  disabled?: boolean;
+  mapping?: null | ((model: IModel) => IModel);
+  onChange?: (model: IModel, isChanged: boolean) => void;
+  onInvalid?: () => void;
   onReset?: () => void;
   onSubmit?: OnSubmitCallback;
   onValidSubmit?: OnSubmitCallback;
-  onInvalidSubmit: OnSubmitCallback;
-  onValid: () => void;
+  onInvalidSubmit?: OnSubmitCallback;
+  onValid?: () => void;
   preventDefaultSubmit?: boolean;
   preventExternalInvalidation?: boolean;
   validationErrors?: null | object;
@@ -63,20 +63,6 @@ const ONE_RENDER_FRAME = 66;
 
 export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, FormsyState> {
   public static displayName = 'Formsy';
-  public static defaultProps: Partial<FormsyProps> = {
-    disabled: false,
-    mapping: null,
-    onChange: utils.noop,
-    onInvalid: utils.noop,
-    onInvalidSubmit: utils.noop,
-    onReset: utils.noop,
-    onSubmit: utils.noop,
-    onValid: utils.noop,
-    onValidSubmit: utils.noop,
-    preventDefaultSubmit: true,
-    preventExternalInvalidation: false,
-    validationErrors: {},
-  };
   public inputs: InstanceType<any & PassDownProps<any>>[];
   public emptyArray: any[];
   public prevInputNames: any[] | null = null;
@@ -91,7 +77,7 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
       contextValue: {
         attachToForm: this.attachToForm,
         detachFromForm: this.detachFromForm,
-        isFormDisabled: props.disabled,
+        isFormDisabled: props.disabled ?? false,
         isValidValue: this.isValidValue,
         validate: this.validate,
         runValidation: this.runValidation,
@@ -121,7 +107,7 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
     }
 
     // Keep the disabled value in state/context the same as from props
-    if (disabled !== prevProps.disabled) {
+    if ((disabled ?? false) !== (prevProps.disabled ?? false)) {
       // oxlint-disable-next-line react/no-did-update-set-state
       this.setState((state) => ({
         ...state,
@@ -134,14 +120,16 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
   };
 
   public getCurrentValues = () =>
-    this.inputs.reduce((valueAccumulator, component) => {
-      const {
-        props: { name },
-        state: { value },
-      } = component;
-      valueAccumulator[name] = utils.protectAgainstParamReassignment(value);
-      return valueAccumulator;
-    }, {});
+    Object.fromEntries(
+      this.inputs.map((component) => {
+        const {
+          props: { name },
+          state: { value },
+        } = component;
+
+        return [name, utils.protectAgainstParamReassignment(value)];
+      })
+    );
 
   public getModel = () => {
     const currentValues = this.getCurrentValues();
@@ -149,13 +137,15 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
   };
 
   public getPristineValues = () =>
-    this.inputs.reduce((valueAccumulator, component) => {
-      const {
-        props: { name, value },
-      } = component;
-      valueAccumulator[name] = utils.protectAgainstParamReassignment(value);
-      return valueAccumulator;
-    }, {});
+    Object.fromEntries(
+      this.inputs.map((component) => {
+        const {
+          props: { name, value },
+        } = component;
+
+        return [name, utils.protectAgainstParamReassignment(value)];
+      })
+    );
 
   public setFormPristine = (isPristine: boolean) => {
     this.setState({
@@ -173,7 +163,7 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
   };
 
   public setInputValidationErrors = (errors) => {
-    const { preventExternalInvalidation } = this.props;
+    const { preventExternalInvalidation = false } = this.props;
     const { isValid } = this.state;
 
     this.inputs.forEach((component) => {
@@ -189,27 +179,25 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
   };
 
   public setFormValidState = (allIsValid: boolean) => {
-    const { onValid, onInvalid } = this.props;
-
     this.setState({
       isValid: allIsValid,
     });
 
     if (allIsValid) {
-      onValid();
+      this.props.onValid?.();
     } else {
-      onInvalid();
+      this.props.onInvalid?.();
     }
   };
 
   public isValidValue = (component, value) => this.runValidation(component, value).isValid;
 
-  public isFormDisabled = () => this.props.disabled;
+  public isFormDisabled = () => this.props.disabled ?? false;
 
   public mapModel = (model: IModel): IModel => {
     const { mapping } = this.props;
 
-    if (mapping) {
+    if (typeof mapping === 'function') {
       return mapping(model);
     }
 
@@ -230,7 +218,7 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
     component: InputComponent<V>,
     value = component.state.value
   ): { isRequired: boolean; isValid: boolean; validationError: ValidationError[] } => {
-    const { validationErrors } = this.props;
+    const { validationErrors = {} } = this.props;
     const { validationError, validationErrors: componentValidationErrors, name } = component.props;
     const currentValues = this.getCurrentValues();
     const validationResults = utils.runRules(value, currentValues, component.validations || {}, validationRules);
@@ -282,12 +270,11 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
       this.inputs.push(component);
     }
 
-    const { onChange } = this.props;
     const { canChange } = this.state;
 
     // Trigger onChange
     if (canChange) {
-      onChange(this.getModel(), this.isChanged());
+      this.props.onChange?.(this.getModel(), this.isChanged());
     }
 
     this.debouncedValidateForm();
@@ -309,10 +296,10 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
 
   // Update model, submit to url prop and send the model
   public submit = (event?: React.SyntheticEvent<HTMLFormElement>) => {
-    const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit = false } = this.props;
+    const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit = true } = this.props;
     const { isValid } = this.state;
 
-    if (preventDefaultSubmit && event && event.preventDefault) {
+    if (preventDefaultSubmit && event?.preventDefault) {
       event.preventDefault();
     }
 
@@ -321,18 +308,18 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
     // so validation becomes visible (if based on isPristine)
     this.setFormPristine(false);
     const model = this.getModel();
-    onSubmit!(model, this.resetModel, this.updateInputsWithError, event);
+    onSubmit?.(model, this.resetModel, this.updateInputsWithError, event);
 
     if (isValid) {
-      onValidSubmit!(model, this.resetModel, this.updateInputsWithError, event);
+      onValidSubmit?.(model, this.resetModel, this.updateInputsWithError, event);
     } else {
-      onInvalidSubmit!(model, this.resetModel, this.updateInputsWithError, event);
+      onInvalidSubmit?.(model, this.resetModel, this.updateInputsWithError, event);
     }
   };
 
   // and set the serverError message
   public updateInputsWithError: IUpdateInputsWithError = (errors, invalidate) => {
-    const { preventExternalInvalidation } = this.props;
+    const { preventExternalInvalidation = false } = this.props;
     const { isValid } = this.state;
 
     Object.entries(errors).forEach(([name, error]) => {
@@ -375,7 +362,7 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
 
     // Trigger onChange
     if (canChange) {
-      onChange(this.getModel(), this.isChanged());
+      onChange?.(this.getModel(), this.isChanged());
     }
 
     const validationState = this.runValidation<V>(component);
@@ -460,9 +447,7 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
 
     event.preventDefault();
     this.reset();
-    if (onReset) {
-      onReset();
-    }
+    onReset?.();
   };
 
   // Reset each key in the model to the original / initial / specified value

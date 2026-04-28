@@ -9,15 +9,15 @@ type FormElementType = string | React.ComponentType<PropsWithChildren<{
     disabled?: boolean;
 }>>;
 export interface FormsyProps extends FormHTMLAttributesCleaned {
-    disabled: boolean;
-    mapping: null | ((model: IModel) => IModel);
-    onChange: (model: IModel, isChanged: boolean) => void;
-    onInvalid: () => void;
+    disabled?: boolean;
+    mapping?: null | ((model: IModel) => IModel);
+    onChange?: (model: IModel, isChanged: boolean) => void;
+    onInvalid?: () => void;
     onReset?: () => void;
     onSubmit?: OnSubmitCallback;
     onValidSubmit?: OnSubmitCallback;
-    onInvalidSubmit: OnSubmitCallback;
-    onValid: () => void;
+    onInvalidSubmit?: OnSubmitCallback;
+    onValid?: () => void;
     preventDefaultSubmit?: boolean;
     preventExternalInvalidation?: boolean;
     validationErrors?: null | object;
@@ -33,7 +33,6 @@ export interface FormsyState {
 }
 export declare class Formsy extends React.Component<PropsWithChildren<FormsyProps>, FormsyState> {
     static displayName: string;
-    static defaultProps: Partial<FormsyProps>;
     inputs: InstanceType<any & PassDownProps<any>>[];
     emptyArray: any[];
     prevInputNames: any[] | null;

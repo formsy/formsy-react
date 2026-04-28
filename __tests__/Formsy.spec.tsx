@@ -509,13 +509,11 @@ describe('Update a form', () => {
   });
 
   it('should prevent a default submit', () => {
-    function TestForm() {
-      return (
-        <Formsy data-testid="form">
-          <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
-        </Formsy>
-      );
-    }
+    const TestForm = () => (
+      <Formsy data-testid="form">
+        <TestInput name="foo" validations="isEmail" value="foo@bar.com" />
+      </Formsy>
+    );
 
     const screen = render(<TestForm />);
     const form = screen.getByTestId('form');

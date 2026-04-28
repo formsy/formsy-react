@@ -114,18 +114,14 @@ export function withFormsy<T, V>(
 
     public static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
 
-    public static defaultProps: any = {
-      innerRef: null,
-      required: false,
-      validationError: '',
-      validationErrors: {},
-      validations: null,
-      value: (WrappedComponent as ComponentWithStaticAttributes).defaultValue,
-    };
-
     public constructor(props) {
       super(props);
-      const { runValidation, validations, required, value } = props;
+      const {
+        runValidation,
+        validations,
+        required,
+        value = (WrappedComponent as ComponentWithStaticAttributes).defaultValue,
+      } = props;
 
       this.state = { value } as any;
 
@@ -134,9 +130,9 @@ export function withFormsy<T, V>(
       this.state = {
         formSubmitted: false,
         isPristine: true,
-        pristineValue: props.value,
-        value: props.value,
-        ...runValidation(this, props.value),
+        pristineValue: value,
+        value: value,
+        ...runValidation(this, value),
       };
     }
 

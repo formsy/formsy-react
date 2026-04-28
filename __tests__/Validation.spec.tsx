@@ -8,15 +8,13 @@ import { PassDownProps } from '../src/withFormsy';
 type MyTestProps = { type?: string; testId?: string };
 
 class MyTest extends React.Component<MyTestProps & PassDownProps<string>> {
-  public static defaultProps = { type: 'text' };
-
   handleChange = (event) => {
     const { setValue } = this.props;
     setValue(event.target.value);
   };
 
   render() {
-    const { type, value, testId, errorMessage, isValid } = this.props;
+    const { type = 'text', value, testId, errorMessage, isValid } = this.props;
     return (
       <input
         type={type}

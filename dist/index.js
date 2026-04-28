@@ -36,7 +36,6 @@ function isValueNullOrUndefined(value) {
 function isValueUndefined(value) {
     return void 0 === value;
 }
-function noop() {}
 function protectAgainstParamReassignment(value) {
     if (isObject(value)) return {
         ...value
@@ -185,17 +184,9 @@ function withFormsy(WrappedComponent) {
         validations;
         requiredValidations;
         static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
-        static defaultProps = {
-            innerRef: null,
-            required: false,
-            validationError: '',
-            validationErrors: {},
-            validations: null,
-            value: WrappedComponent.defaultValue
-        };
         constructor(props){
             super(props);
-            const { runValidation, validations, required, value } = props;
+            const { runValidation, validations, required, value = WrappedComponent.defaultValue } = props;
             this.state = {
                 value
             };
@@ -203,9 +194,9 @@ function withFormsy(WrappedComponent) {
             this.state = {
                 formSubmitted: false,
                 isPristine: true,
-                pristineValue: props.value,
-                value: props.value,
-                ...runValidation(this, props.value)
+                pristineValue: value,
+                value: value,
+                ...runValidation(this, value)
             };
         }
         componentDidMount() {
@@ -314,21 +305,6 @@ function withFormsy(WrappedComponent) {
 const ONE_RENDER_FRAME = 66;
 class Formsy extends react.Component {
     static displayName = 'Formsy';
-    static defaultProps = {
-        disabled: false,
-        mapping: null,
-        onChange: noop,
-        onInvalid: noop,
-        onInvalidSubmit: noop,
-        onReset: noop,
-        onSubmit: noop,
-        onValid: noop,
-        onValidSubmit: noop,
-        preventDefaultSubmit: true,
-        preventExternalInvalidation: false,
-        validationErrors: {},
-        formElement: 'form'
-    };
     inputs;
     emptyArray;
     prevInputNames = null;
@@ -342,7 +318,7 @@ class Formsy extends react.Component {
             contextValue: {
                 attachToForm: this.attachToForm,
                 detachFromForm: this.detachFromForm,
-                isFormDisabled: props.disabled,
+                isFormDisabled: props.disabled ?? false,
                 isValidValue: this.isValidValue,
                 validate: this.validate,
                 runValidation: this.runValidation
@@ -357,14 +333,14 @@ class Formsy extends react.Component {
         this.validateForm();
     };
     componentDidUpdate = (prevProps)=>{
-        const { validationErrors, disabled } = this.props;
+        const { validationErrors, disabled = false } = this.props;
         if (validationErrors && isObject(validationErrors) && Object.keys(validationErrors).length > 0) this.setInputValidationErrors(validationErrors);
         const newInputNames = this.inputs.map((component)=>component.props.name);
         if (this.prevInputNames && !isSame(this.prevInputNames, newInputNames)) {
             this.prevInputNames = newInputNames;
             this.validateForm();
         }
-        if (disabled !== prevProps.disabled) this.setState((state)=>({
+        if ((disabled ?? false) !== (prevProps.disabled ?? false)) this.setState((state)=>({
                 ...state,
                 contextValue: {
                     ...state.contextValue,
@@ -398,7 +374,7 @@ class Formsy extends react.Component {
         });
     };
     setInputValidationErrors = (errors)=>{
-        const { preventExternalInvalidation } = this.props;
+        const { preventExternalInvalidation = false } = this.props;
         const { isValid } = this.state;
         this.inputs.forEach((component)=>{
             const { name } = component.props;
@@ -412,18 +388,17 @@ class Formsy extends react.Component {
         if (!preventExternalInvalidation && isValid) this.setFormValidState(false);
     };
     setFormValidState = (allIsValid)=>{
-        const { onValid, onInvalid } = this.props;
         this.setState({
             isValid: allIsValid
         });
-        if (allIsValid) onValid();
-        else onInvalid();
+        if (allIsValid) this.props.onValid?.();
+        else this.props.onInvalid?.();
     };
     isValidValue = (component, value)=>this.runValidation(component, value).isValid;
-    isFormDisabled = ()=>this.props.disabled;
+    isFormDisabled = ()=>this.props.disabled ?? false;
     mapModel = (model)=>{
         const { mapping } = this.props;
-        if (mapping) return mapping(model);
+        if ('function' == typeof mapping) return mapping(model);
         const returnModel = {};
         Object.keys(model).forEach((key)=>{
             set(returnModel, key, model[key]);
@@ -435,7 +410,7 @@ class Formsy extends react.Component {
         this.resetModel(model);
     };
     runValidation = (component, value = component.state.value)=>{
-        const { validationErrors } = this.props;
+        const { validationErrors = {} } = this.props;
         const { validationError, validationErrors: componentValidationErrors, name } = component.props;
         const currentValues = this.getCurrentValues();
         const validationResults = runRules(value, currentValues, component.validations || {}, validationRules_validationRules);
@@ -463,9 +438,8 @@ class Formsy extends react.Component {
     };
     attachToForm = (component)=>{
         if (-1 === this.inputs.indexOf(component)) this.inputs.push(component);
-        const { onChange } = this.props;
         const { canChange } = this.state;
-        if (canChange) onChange(this.getModel(), this.isChanged());
+        if (canChange) this.props.onChange?.(this.getModel(), this.isChanged());
         this.debouncedValidateForm();
     };
     detachFromForm = (component)=>{
@@ -474,17 +448,17 @@ class Formsy extends react.Component {
     };
     isChanged = ()=>!isSame(this.getPristineValues(), this.getCurrentValues());
     submit = (event)=>{
-        const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit } = this.props;
+        const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit = true } = this.props;
         const { isValid } = this.state;
-        if (preventDefaultSubmit && event && event.preventDefault) event.preventDefault();
+        if (preventDefaultSubmit && event?.preventDefault) event.preventDefault();
         this.setFormPristine(false);
         const model = this.getModel();
-        onSubmit(model, this.resetModel, this.updateInputsWithError, event);
-        if (isValid) onValidSubmit(model, this.resetModel, this.updateInputsWithError, event);
-        else onInvalidSubmit(model, this.resetModel, this.updateInputsWithError, event);
+        onSubmit?.(model, this.resetModel, this.updateInputsWithError, event);
+        if (isValid) onValidSubmit?.(model, this.resetModel, this.updateInputsWithError, event);
+        else onInvalidSubmit?.(model, this.resetModel, this.updateInputsWithError, event);
     };
     updateInputsWithError = (errors, invalidate)=>{
-        const { preventExternalInvalidation } = this.props;
+        const { preventExternalInvalidation = false } = this.props;
         const { isValid } = this.state;
         Object.entries(errors).forEach(([name, error])=>{
             const component = this.inputs.find((input)=>input.props.name === name);
@@ -507,7 +481,7 @@ class Formsy extends react.Component {
     validate = (component)=>{
         const { onChange } = this.props;
         const { canChange } = this.state;
-        if (canChange) onChange(this.getModel(), this.isChanged());
+        if (canChange) onChange?.(this.getModel(), this.isChanged());
         const validationState = this.runValidation(component);
         component.setState(validationState, this.validateForm);
     };
@@ -528,7 +502,7 @@ class Formsy extends react.Component {
         });
     };
     render() {
-        const { children, mapping, onChange, onInvalid, onInvalidSubmit, onReset, onSubmit, onValid, onValidSubmit, preventDefaultSubmit, preventExternalInvalidation, validationErrors, disabled, formElement, ...nonFormsyProps } = this.props;
+        const { children, mapping, onChange, onInvalid, onInvalidSubmit, onReset, onSubmit, onValid, onValidSubmit, preventDefaultSubmit, preventExternalInvalidation, validationErrors, disabled = false, formElement = 'form', ...nonFormsyProps } = this.props;
         const { contextValue } = this.state;
         return react.createElement(FormsyContext.Provider, {
             value: contextValue
@@ -543,7 +517,7 @@ class Formsy extends react.Component {
         const { onReset } = this.props;
         event.preventDefault();
         this.reset();
-        if (onReset) onReset();
+        onReset?.();
     };
     resetModel = (data)=>{
         this.inputs.forEach((component)=>{
