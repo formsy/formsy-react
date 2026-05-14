@@ -227,7 +227,7 @@ class MyForm extends React.Component {
         email: 'This email is taken',
         'field[10]': 'Some error!',
       },
-      true,
+      true
     );
   };
   render() {

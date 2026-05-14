@@ -103,7 +103,7 @@ export function runRules<V>(
   value: V,
   currentValues: Values,
   validations: Validations<V>,
-  validationRules: Validations<V>,
+  validationRules: Validations<V>
 ) {
   const results: RulesResult = {
     errors: [],

@@ -17,4 +17,4 @@ const defaultValue = {
   runValidation: throwNoFormsyProvider,
 };
 
-export default React.createContext<FormsyContextInterface>(defaultValue);
+export const FormsyContext = React.createContext<FormsyContextInterface>(defaultValue);

@@ -1,25 +1,23 @@
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { FormsyContextInterface, IModel, InputComponent, IResetModel, IUpdateInputsWithError, IUpdateInputsWithValue, ValidationError } from './interfaces';
 import { PassDownProps } from './withFormsy';
-declare type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
-declare type OnSubmitCallback = (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError, event: React.SyntheticEvent<HTMLFormElement>) => void;
-declare type FormElementType = string | React.ComponentType<{
+type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
+type OnSubmitCallback = (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError, event: React.SyntheticEvent<HTMLFormElement>) => void;
+type FormElementType = string | React.ComponentType<PropsWithChildren<{
     onReset?: (e: React.SyntheticEvent) => void;
     onSubmit?: (e: React.SyntheticEvent) => void;
     disabled?: boolean;
-    children?: React.ReactChildren;
-}>;
+}>>;
 export interface FormsyProps extends FormHTMLAttributesCleaned {
-    disabled: boolean;
-    mapping: null | ((model: IModel) => IModel);
-    onChange: (model: IModel, isChanged: boolean) => void;
-    onInvalid: () => void;
+    disabled?: boolean;
+    mapping?: null | ((model: IModel) => IModel);
+    onChange?: (model: IModel, isChanged: boolean) => void;
+    onInvalid?: () => void;
     onReset?: () => void;
     onSubmit?: OnSubmitCallback;
     onValidSubmit?: OnSubmitCallback;
-    onInvalidSubmit: OnSubmitCallback;
-    onValid: () => void;
+    onInvalidSubmit?: OnSubmitCallback;
+    onValid?: () => void;
     preventDefaultSubmit?: boolean;
     preventExternalInvalidation?: boolean;
     validationErrors?: null | object;
@@ -33,27 +31,11 @@ export interface FormsyState {
     isSubmitting: boolean;
     isValid: boolean;
 }
-export declare class Formsy extends React.Component<FormsyProps, FormsyState> {
+export declare class Formsy extends React.Component<PropsWithChildren<FormsyProps>, FormsyState> {
+    static displayName: string;
     inputs: InstanceType<any & PassDownProps<any>>[];
     emptyArray: any[];
     prevInputNames: any[] | null;
-    static displayName: string;
-    static propTypes: {
-        disabled: PropTypes.Requireable<boolean>;
-        mapping: PropTypes.Requireable<(...args: any[]) => any>;
-        formElement: PropTypes.Requireable<string | object>;
-        onChange: PropTypes.Requireable<(...args: any[]) => any>;
-        onInvalid: PropTypes.Requireable<(...args: any[]) => any>;
-        onInvalidSubmit: PropTypes.Requireable<(...args: any[]) => any>;
-        onReset: PropTypes.Requireable<(...args: any[]) => any>;
-        onSubmit: PropTypes.Requireable<(...args: any[]) => any>;
-        onValid: PropTypes.Requireable<(...args: any[]) => any>;
-        onValidSubmit: PropTypes.Requireable<(...args: any[]) => any>;
-        preventDefaultSubmit: PropTypes.Requireable<boolean>;
-        preventExternalInvalidation: PropTypes.Requireable<boolean>;
-        validationErrors: PropTypes.Requireable<object>;
-    };
-    static defaultProps: Partial<FormsyProps>;
     private readonly debouncedValidateForm;
     constructor(props: FormsyProps);
     componentDidMount: () => void;
@@ -68,8 +50,6 @@ export declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     isFormDisabled: () => boolean;
     mapModel: (model: IModel) => IModel;
     reset: (model?: IModel) => void;
-    private resetInternal;
-    private resetModel;
     runValidation: <V>(component: InputComponent<V>, value?: V) => {
         isRequired: boolean;
         isValid: boolean;
@@ -84,5 +64,7 @@ export declare class Formsy extends React.Component<FormsyProps, FormsyState> {
     validate: <V>(component: InputComponent<V>) => void;
     validateForm: () => void;
     render(): React.FunctionComponentElement<React.ProviderProps<FormsyContextInterface>>;
+    private resetInternal;
+    private resetModel;
 }
 export {};

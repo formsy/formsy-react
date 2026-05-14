@@ -9,7 +9,7 @@ describe('Element', () => {
     const screen = render(
       <Formsy>
         <TestInput name="foo" value="foo" testId="test-input" />
-      </Formsy>,
+      </Formsy>
     );
 
     const input = screen.getByTestId('test-input') as HTMLInputElement;
@@ -37,13 +37,13 @@ describe('Element', () => {
             />
           );
         }
-      },
+      }
     );
 
     const screen = render(
       <Formsy>
         <Input name="foo" value="foo" required={true} />
-      </Formsy>,
+      </Formsy>
     );
 
     const inputElement = screen.getByTestId('test-input') as HTMLInputElement;
@@ -67,7 +67,7 @@ describe('Element', () => {
       <Formsy>
         <Input name="foo" value="foo" testId="test-input" />
         <button type="button" data-testid="resetBtn" onClick={() => reset()} />
-      </Formsy>,
+      </Formsy>
     );
 
     const input = screen.getByTestId('test-input') as HTMLInputElement;
@@ -89,7 +89,7 @@ describe('Element', () => {
     render(
       <Formsy>
         <Input name="foo" value="foo" validations="isEmail" validationError="Has to be email" />
-      </Formsy>,
+      </Formsy>
     );
 
     expect(errorMessage).toEqual('Has to be email');
@@ -107,7 +107,7 @@ describe('Element', () => {
         <Input name="foo" value="" />
         <Input name="foo" value="" required />
         <Input name="foo" value="foo" required="isLength:3" />
-      </Formsy>,
+      </Formsy>
     );
 
     expect(isRequires[0]).toEqual(false);
@@ -127,7 +127,7 @@ describe('Element', () => {
         <Input name="A" value="foo" />
         <Input name="B" value="" required />
         <Input name="C" value="" />
-      </Formsy>,
+      </Formsy>
     );
 
     expect(showRequires[0]).toEqual(false);
@@ -140,7 +140,7 @@ describe('Element', () => {
     const screen = render(
       <Formsy action="/users">
         <Input name="A" value="foo" testId="test-input" />
-      </Formsy>,
+      </Formsy>
     );
 
     const input = screen.getByTestId('test-input');
@@ -608,7 +608,7 @@ describe('Element', () => {
     render(
       <Formsy>
         <Input name="foo" value="foo" />
-      </Formsy>,
+      </Formsy>
     );
 
     expect(renderSpy).toHaveBeenCalledTimes(1);
@@ -633,7 +633,7 @@ describe('Element', () => {
     const screen = render(
       <Formsy>
         <Input name="foo" value="foo" />
-      </Formsy>,
+      </Formsy>
     );
     const input = screen.getByTestId('test-input') as HTMLInputElement;
 

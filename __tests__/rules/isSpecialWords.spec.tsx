@@ -17,7 +17,7 @@ describe('isSpecialWords', () => {
 
   it('should pass with special charachters', async () => {
     expect(
-      await getValidState(<ValidationForm validations="isSpecialWords" value="including special letters az ú ø æ å" />),
+      await getValidState(<ValidationForm validations="isSpecialWords" value="including special letters az ú ø æ å" />)
     ).toEqual(true);
   });
 

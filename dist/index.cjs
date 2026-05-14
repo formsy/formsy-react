@@ -1,13 +1,50 @@
-import isPlainObject from "lodash/isPlainObject";
-import react from "react";
-import set from "lodash/set";
-import has from "lodash/has";
-import get from "lodash/get";
+"use strict";
+var __webpack_require__ = {};
+(()=>{
+    __webpack_require__.n = (module)=>{
+        var getter = module && module.__esModule ? ()=>module['default'] : ()=>module;
+        __webpack_require__.d(getter, {
+            a: getter
+        });
+        return getter;
+    };
+})();
+(()=>{
+    __webpack_require__.d = (exports1, definition)=>{
+        for(var key in definition)if (__webpack_require__.o(definition, key) && !__webpack_require__.o(exports1, key)) Object.defineProperty(exports1, key, {
+            enumerable: true,
+            get: definition[key]
+        });
+    };
+})();
+(()=>{
+    __webpack_require__.o = (obj, prop)=>Object.prototype.hasOwnProperty.call(obj, prop);
+})();
+(()=>{
+    __webpack_require__.r = (exports1)=>{
+        if ("u" > typeof Symbol && Symbol.toStringTag) Object.defineProperty(exports1, Symbol.toStringTag, {
+            value: 'Module'
+        });
+        Object.defineProperty(exports1, '__esModule', {
+            value: true
+        });
+    };
+})();
+var __webpack_exports__ = {};
+__webpack_require__.r(__webpack_exports__);
+__webpack_require__.d(__webpack_exports__, {
+    addValidationRule: ()=>addValidationRule,
+    default: ()=>src,
+    withFormsy: ()=>withFormsy,
+    validationRules: ()=>validationRules_validationRules
+});
+const isPlainObject_namespaceObject = require("lodash/isPlainObject");
+var isPlainObject_default = /*#__PURE__*/ __webpack_require__.n(isPlainObject_namespaceObject);
 function isArray(value) {
     return Array.isArray(value);
 }
 function isObject(value) {
-    return isPlainObject(value);
+    return isPlainObject_default()(value);
 }
 function isTypeUndefined(value) {
     return void 0 === value;
@@ -136,13 +173,15 @@ const validationRules_validationRules = {
     isUndefined: (_values, value)=>isValueUndefined(value),
     isUrl: (values, value)=>matchRegexp(values, value, REGEX_PATTERNS.URL),
     isWords: (values, value)=>matchRegexp(values, value, REGEX_PATTERNS.WORDS),
-    matchRegexp: matchRegexp,
+    matchRegexp,
     maxLength: (_values, value, length)=>!isExisty(value) || value.length <= length,
     minLength: (_values, value, length)=>!isExisty(value) || isEmpty(value) || value.length >= length
 };
 const addValidationRule = (name, func)=>{
     validationRules_validationRules[name] = func;
 };
+const external_react_namespaceObject = require("react");
+var external_react_default = /*#__PURE__*/ __webpack_require__.n(external_react_namespaceObject);
 const noFormsyErrorMessage = 'Could not find Formsy Context Provider. Did you use withFormsy outside <Formsy />?';
 const throwNoFormsyProvider = ()=>{
     throw new Error(noFormsyErrorMessage);
@@ -155,7 +194,7 @@ const defaultValue = {
     validate: throwNoFormsyProvider,
     runValidation: throwNoFormsyProvider
 };
-const FormsyContext = react.createContext(defaultValue);
+const FormsyContext = external_react_default().createContext(defaultValue);
 const convertValidationsToObject = (validations)=>{
     if (isString(validations)) return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation)=>{
         let args = validation.split(':');
@@ -180,7 +219,7 @@ function getDisplayName(component) {
     return component.displayName || component.name || (isString(component) ? component : 'Component');
 }
 function withFormsy(WrappedComponent) {
-    class WithFormsyWrapper extends react.Component {
+    class WithFormsyWrapper extends external_react_default().Component {
         validations;
         requiredValidations;
         static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
@@ -294,16 +333,22 @@ function withFormsy(WrappedComponent) {
                 value: this.getValue()
             };
             if (innerRef) propsForElement.ref = innerRef;
-            return react.createElement(WrappedComponent, propsForElement);
+            return external_react_default().createElement(WrappedComponent, propsForElement);
         }
     }
-    return (props)=>react.createElement(FormsyContext.Consumer, null, (contextValue)=>react.createElement(WithFormsyWrapper, {
+    return (props)=>external_react_default().createElement(FormsyContext.Consumer, null, (contextValue)=>external_react_default().createElement(WithFormsyWrapper, {
                 ...props,
                 ...contextValue
             }));
 }
+const set_namespaceObject = require("lodash/set");
+var set_default = /*#__PURE__*/ __webpack_require__.n(set_namespaceObject);
+const has_namespaceObject = require("lodash/has");
+var has_default = /*#__PURE__*/ __webpack_require__.n(has_namespaceObject);
+const get_namespaceObject = require("lodash/get");
+var get_default = /*#__PURE__*/ __webpack_require__.n(get_namespaceObject);
 const ONE_RENDER_FRAME = 66;
-class Formsy extends react.Component {
+class Formsy extends external_react_default().Component {
     static displayName = 'Formsy';
     inputs;
     emptyArray;
@@ -401,7 +446,7 @@ class Formsy extends react.Component {
         if ('function' == typeof mapping) return mapping(model);
         const returnModel = {};
         Object.keys(model).forEach((key)=>{
-            set(returnModel, key, model[key]);
+            set_default()(returnModel, key, model[key]);
         });
         return returnModel;
     };
@@ -475,7 +520,7 @@ class Formsy extends react.Component {
     updateInputsWithValue = (data, validate)=>{
         this.inputs.forEach((component)=>{
             const { name } = component.props;
-            if (data && has(data, name)) component.setValue(get(data, name), validate);
+            if (data && has_default()(data, name)) component.setValue(get_default()(data, name), validate);
         });
     };
     validate = (component)=>{
@@ -504,9 +549,9 @@ class Formsy extends react.Component {
     render() {
         const { children, mapping, onChange, onInvalid, onInvalidSubmit, onReset, onSubmit, onValid, onValidSubmit, preventDefaultSubmit, preventExternalInvalidation, validationErrors, disabled = false, formElement = 'form', ...nonFormsyProps } = this.props;
         const { contextValue } = this.state;
-        return react.createElement(FormsyContext.Provider, {
+        return external_react_default().createElement(FormsyContext.Provider, {
             value: contextValue
-        }, react.createElement(formElement || 'form', {
+        }, external_react_default().createElement(formElement || 'form', {
             onReset: this.resetInternal,
             onSubmit: this.submit,
             ...nonFormsyProps,
@@ -522,12 +567,23 @@ class Formsy extends react.Component {
     resetModel = (data)=>{
         this.inputs.forEach((component)=>{
             const { name } = component.props;
-            if (data && has(data, name)) component.setValue(get(data, name));
+            if (data && has_default()(data, name)) component.setValue(get_default()(data, name));
             else component.resetValue();
         });
         this.validateForm();
     };
 }
 const src = Formsy;
-export default src;
-export { addValidationRule, validationRules_validationRules as validationRules, withFormsy };
+exports.addValidationRule = __webpack_exports__.addValidationRule;
+exports["default"] = __webpack_exports__["default"];
+exports.validationRules = __webpack_exports__.validationRules;
+exports.withFormsy = __webpack_exports__.withFormsy;
+for(var __rspack_i in __webpack_exports__)if (-1 === [
+    "addValidationRule",
+    "default",
+    "validationRules",
+    "withFormsy"
+].indexOf(__rspack_i)) exports[__rspack_i] = __webpack_exports__[__rspack_i];
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});

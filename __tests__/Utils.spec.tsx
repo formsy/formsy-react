@@ -54,7 +54,7 @@ describe('Utils', () => {
     expect(utils.runRules('', {}, {}, {})).toEqual({ errors: [], failed: [], success: [] });
 
     expect(() => utils.runRules('', {}, { rule: utils.noop }, { rule: utils.noop })).toThrow(
-      'Formsy does not allow you to override default validations: rule',
+      'Formsy does not allow you to override default validations: rule'
     );
 
     expect(() => utils.runRules('', {}, { rule: true }, {})).toThrow('Formsy does not have the validation rule: rule');
