@@ -40,7 +40,7 @@
     "format": "oxfmt --write --ignore-path=.oxlintignore",
     "lint": "oxlint --ignore-path=.oxlintignore",
     "test": "jest --passWithNoTests",
-    "release": "bumpp --execute \"auto-changelog && git add CHANGELOG.md\""
+    "release": "bumpp --all --execute \"auto-changelog && git add CHANGELOG.md\""
   },
   "dependencies": {
     "lodash": "^4.17.21"
@@ -58,7 +58,7 @@
     "@types/lodash": "4.14.188",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
-    "auto-changelog": "^2.4.0",
+    "auto-changelog": "^2.5.1",
     "bumpp": "^11.1.0",
     "coveralls": "^3.1.1",
     "husky": "^4.2.1",
