@@ -37,10 +37,11 @@
     "build": "rslib",
     "build:watch": "rslib --watch",
     "start": "rslib --watch",
-    "format": "oxfmt --write --ignore-path=.oxlintignore",
-    "lint": "oxlint --ignore-path=.oxlintignore",
+    "format": "oxfmt --write",
+    "lint": "oxlint",
     "test": "jest --passWithNoTests",
-    "release": "bumpp --all --execute \"auto-changelog && git add CHANGELOG.md\""
+    "version": "auto-changelog && git add CHANGELOG.md",
+    "release": "bumpp --all"
   },
   "dependencies": {
     "lodash": "^4.17.21"

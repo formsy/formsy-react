@@ -4,5 +4,5 @@
   "trailingComma": "es5",
   "singleQuote": true,
   "sortPackageJson": true,
-  "ignorePatterns": ["dist/**", "node_modules/**", "coverage/**"]
+  "ignorePatterns": ["dist/**", "node_modules/**", "coverage/**", "CHANGELOG.md"]
 }
