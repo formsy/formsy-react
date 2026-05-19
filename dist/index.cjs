@@ -38,13 +38,13 @@ __webpack_require__.d(__webpack_exports__, {
     withFormsy: ()=>withFormsy,
     validationRules: ()=>validationRules_validationRules
 });
-const isPlainObject_namespaceObject = require("lodash/isPlainObject");
-var isPlainObject_default = /*#__PURE__*/ __webpack_require__.n(isPlainObject_namespaceObject);
+const isPlainObject_js_namespaceObject = require("lodash/isPlainObject.js");
+var isPlainObject_js_default = /*#__PURE__*/ __webpack_require__.n(isPlainObject_js_namespaceObject);
 function isArray(value) {
     return Array.isArray(value);
 }
 function isObject(value) {
-    return isPlainObject_default()(value);
+    return isPlainObject_js_default()(value);
 }
 function isTypeUndefined(value) {
     return void 0 === value;
@@ -341,12 +341,12 @@ function withFormsy(WrappedComponent) {
                 ...contextValue
             }));
 }
-const set_namespaceObject = require("lodash/set");
-var set_default = /*#__PURE__*/ __webpack_require__.n(set_namespaceObject);
-const has_namespaceObject = require("lodash/has");
-var has_default = /*#__PURE__*/ __webpack_require__.n(has_namespaceObject);
-const get_namespaceObject = require("lodash/get");
-var get_default = /*#__PURE__*/ __webpack_require__.n(get_namespaceObject);
+const set_js_namespaceObject = require("lodash/set.js");
+var set_js_default = /*#__PURE__*/ __webpack_require__.n(set_js_namespaceObject);
+const has_js_namespaceObject = require("lodash/has.js");
+var has_js_default = /*#__PURE__*/ __webpack_require__.n(has_js_namespaceObject);
+const get_js_namespaceObject = require("lodash/get.js");
+var get_js_default = /*#__PURE__*/ __webpack_require__.n(get_js_namespaceObject);
 const ONE_RENDER_FRAME = 66;
 class Formsy extends external_react_default().Component {
     static displayName = 'Formsy';
@@ -393,20 +393,24 @@ class Formsy extends external_react_default().Component {
                 }
             }));
     };
-    getCurrentValues = ()=>this.inputs.reduce((valueAccumulator, component)=>{
+    getCurrentValues = ()=>Object.fromEntries(this.inputs.map((component)=>{
             const { props: { name }, state: { value } } = component;
-            valueAccumulator[name] = protectAgainstParamReassignment(value);
-            return valueAccumulator;
-        }, {});
+            return [
+                name,
+                protectAgainstParamReassignment(value)
+            ];
+        }));
     getModel = ()=>{
         const currentValues = this.getCurrentValues();
         return this.mapModel(currentValues);
     };
-    getPristineValues = ()=>this.inputs.reduce((valueAccumulator, component)=>{
+    getPristineValues = ()=>Object.fromEntries(this.inputs.map((component)=>{
             const { props: { name, value } } = component;
-            valueAccumulator[name] = protectAgainstParamReassignment(value);
-            return valueAccumulator;
-        }, {});
+            return [
+                name,
+                protectAgainstParamReassignment(value)
+            ];
+        }));
     setFormPristine = (isPristine)=>{
         this.setState({
             formSubmitted: !isPristine
@@ -446,7 +450,7 @@ class Formsy extends external_react_default().Component {
         if ('function' == typeof mapping) return mapping(model);
         const returnModel = {};
         Object.keys(model).forEach((key)=>{
-            set_default()(returnModel, key, model[key]);
+            set_js_default()(returnModel, key, model[key]);
         });
         return returnModel;
     };
@@ -520,7 +524,7 @@ class Formsy extends external_react_default().Component {
     updateInputsWithValue = (data, validate)=>{
         this.inputs.forEach((component)=>{
             const { name } = component.props;
-            if (data && has_default()(data, name)) component.setValue(get_default()(data, name), validate);
+            if (data && has_js_default()(data, name)) component.setValue(get_js_default()(data, name), validate);
         });
     };
     validate = (component)=>{
@@ -567,7 +571,7 @@ class Formsy extends external_react_default().Component {
     resetModel = (data)=>{
         this.inputs.forEach((component)=>{
             const { name } = component.props;
-            if (data && has_default()(data, name)) component.setValue(get_default()(data, name));
+            if (data && has_js_default()(data, name)) component.setValue(get_js_default()(data, name));
             else component.resetValue();
         });
         this.validateForm();

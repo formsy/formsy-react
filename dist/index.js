@@ -1,8 +1,8 @@
-import isPlainObject from "lodash/isPlainObject";
+import isPlainObject from "lodash/isPlainObject.js";
 import react from "react";
-import set from "lodash/set";
-import has from "lodash/has";
-import get from "lodash/get";
+import set from "lodash/set.js";
+import has from "lodash/has.js";
+import get from "lodash/get.js";
 function isArray(value) {
     return Array.isArray(value);
 }
@@ -348,20 +348,24 @@ class Formsy extends react.Component {
                 }
             }));
     };
-    getCurrentValues = ()=>this.inputs.reduce((valueAccumulator, component)=>{
+    getCurrentValues = ()=>Object.fromEntries(this.inputs.map((component)=>{
             const { props: { name }, state: { value } } = component;
-            valueAccumulator[name] = protectAgainstParamReassignment(value);
-            return valueAccumulator;
-        }, {});
+            return [
+                name,
+                protectAgainstParamReassignment(value)
+            ];
+        }));
     getModel = ()=>{
         const currentValues = this.getCurrentValues();
         return this.mapModel(currentValues);
     };
-    getPristineValues = ()=>this.inputs.reduce((valueAccumulator, component)=>{
+    getPristineValues = ()=>Object.fromEntries(this.inputs.map((component)=>{
             const { props: { name, value } } = component;
-            valueAccumulator[name] = protectAgainstParamReassignment(value);
-            return valueAccumulator;
-        }, {});
+            return [
+                name,
+                protectAgainstParamReassignment(value)
+            ];
+        }));
     setFormPristine = (isPristine)=>{
         this.setState({
             formSubmitted: !isPristine
