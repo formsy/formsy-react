@@ -67,6 +67,7 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
   public emptyArray: any[];
   public prevInputNames: any[] | null = null;
   private readonly debouncedValidateForm: () => void;
+  private mounted: boolean = false;
 
   public constructor(props: FormsyProps) {
     super(props);
@@ -85,13 +86,22 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
     };
     this.inputs = [];
     this.emptyArray = [];
-    this.debouncedValidateForm = debounce(this.validateForm, ONE_RENDER_FRAME);
+    this.debouncedValidateForm = debounce(() => {
+      if (this.mounted) {
+        this.validateForm();
+      }
+    }, ONE_RENDER_FRAME);
   }
 
   public componentDidMount = () => {
+    this.mounted = true;
     this.prevInputNames = this.inputs.map((component) => component.props.name);
     this.validateForm();
   };
+
+  public componentWillUnmount = () => {
+    this.mounted = false;
+  }
 
   public componentDidUpdate = (prevProps: FormsyProps) => {
     const { validationErrors, disabled = false } = this.props;
