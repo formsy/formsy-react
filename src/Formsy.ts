@@ -101,7 +101,7 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
 
   public componentWillUnmount = () => {
     this.mounted = false;
-  }
+  };
 
   public componentDidUpdate = (prevProps: FormsyProps) => {
     const { validationErrors, disabled = false } = this.props;
