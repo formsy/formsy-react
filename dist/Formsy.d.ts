@@ -37,8 +37,10 @@ export declare class Formsy extends React.Component<PropsWithChildren<FormsyProp
     emptyArray: any[];
     prevInputNames: any[] | null;
     private readonly debouncedValidateForm;
+    private unmounted;
     constructor(props: FormsyProps);
     componentDidMount: () => void;
+    componentWillUnmount: () => void;
     componentDidUpdate: (prevProps: FormsyProps) => void;
     getCurrentValues: () => any;
     getModel: () => any;

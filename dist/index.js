@@ -309,6 +309,7 @@ class Formsy extends react.Component {
     emptyArray;
     prevInputNames = null;
     debouncedValidateForm;
+    unmounted = false;
     constructor(props){
         super(props);
         this.state = {
@@ -331,6 +332,9 @@ class Formsy extends react.Component {
     componentDidMount = ()=>{
         this.prevInputNames = this.inputs.map((component)=>component.props.name);
         this.validateForm();
+    };
+    componentWillUnmount = ()=>{
+        this.unmounted = true;
     };
     componentDidUpdate = (prevProps)=>{
         const { validationErrors, disabled = false } = this.props;
@@ -490,6 +494,7 @@ class Formsy extends react.Component {
         component.setState(validationState, this.validateForm);
     };
     validateForm = ()=>{
+        if (this.unmounted) return;
         const onValidationComplete = ()=>{
             const allIsValid = this.inputs.every((component)=>component.state.isValid);
             this.setFormValidState(allIsValid);

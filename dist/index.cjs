@@ -10,11 +10,15 @@ var __webpack_require__ = {};
     };
 })();
 (()=>{
-    __webpack_require__.d = (exports1, definition)=>{
-        for(var key in definition)if (__webpack_require__.o(definition, key) && !__webpack_require__.o(exports1, key)) Object.defineProperty(exports1, key, {
-            enumerable: true,
-            get: definition[key]
-        });
+    __webpack_require__.d = (exports1, getters, values)=>{
+        var define = (defs, kind)=>{
+            for(var key in defs)if (__webpack_require__.o(defs, key) && !__webpack_require__.o(exports1, key)) Object.defineProperty(exports1, key, {
+                enumerable: true,
+                [kind]: defs[key]
+            });
+        };
+        define(getters, "get");
+        define(values, "value");
     };
 })();
 (()=>{
@@ -35,8 +39,8 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
     addValidationRule: ()=>addValidationRule,
     default: ()=>src,
-    withFormsy: ()=>withFormsy,
-    validationRules: ()=>validationRules_validationRules
+    validationRules: ()=>validationRules_validationRules,
+    withFormsy: ()=>withFormsy
 });
 const isPlainObject_js_namespaceObject = require("lodash/isPlainObject.js");
 var isPlainObject_js_default = /*#__PURE__*/ __webpack_require__.n(isPlainObject_js_namespaceObject);
@@ -354,6 +358,7 @@ class Formsy extends external_react_default().Component {
     emptyArray;
     prevInputNames = null;
     debouncedValidateForm;
+    unmounted = false;
     constructor(props){
         super(props);
         this.state = {
@@ -376,6 +381,9 @@ class Formsy extends external_react_default().Component {
     componentDidMount = ()=>{
         this.prevInputNames = this.inputs.map((component)=>component.props.name);
         this.validateForm();
+    };
+    componentWillUnmount = ()=>{
+        this.unmounted = true;
     };
     componentDidUpdate = (prevProps)=>{
         const { validationErrors, disabled = false } = this.props;
@@ -535,6 +543,7 @@ class Formsy extends external_react_default().Component {
         component.setState(validationState, this.validateForm);
     };
     validateForm = ()=>{
+        if (this.unmounted) return;
         const onValidationComplete = ()=>{
             const allIsValid = this.inputs.every((component)=>component.state.isValid);
             this.setFormValidState(allIsValid);
