@@ -1295,3 +1295,36 @@ describe('<Formsy /> can render any tag or element with the props as', () => {
     expect(customElement.tagName.toLowerCase()).toBe('div');
   });
 });
+
+describe('Debounced validateForm on unmount', () => {
+  it('should not call setState after unmount when debounced validateForm is pending', () => {
+    jest.useFakeTimers();
+
+    const setStateSpy = jest.spyOn(React.Component.prototype, 'setState');
+
+    const { unmount } = render(
+      <Formsy>
+        <TestInput name="test" value="foo" />
+      </Formsy>
+    );
+
+    // Clear any setState calls from mount lifecycle (componentDidMount -> validateForm)
+    setStateSpy.mockClear();
+
+    // Unmount triggers: input unmount -> detachFromForm -> debouncedValidateForm()
+    // then Formsy unmount -> componentWillUnmount -> sets unmounted flag
+    unmount();
+
+    // Clear any incidental calls during the unmount lifecycle itself
+    setStateSpy.mockClear();
+
+    // Advance past the 66ms debounce delay to trigger any pending callback.
+    // The unmounted flag should prevent validateForm from calling setState.
+    jest.advanceTimersByTime(100);
+
+    expect(setStateSpy).not.toHaveBeenCalled();
+
+    setStateSpy.mockRestore();
+    jest.useRealTimers();
+  });
+});

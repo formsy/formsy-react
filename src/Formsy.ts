@@ -67,7 +67,7 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
   public emptyArray: any[];
   public prevInputNames: any[] | null = null;
   private readonly debouncedValidateForm: () => void;
-  private mounted: boolean = false;
+  private unmounted = false;
 
   public constructor(props: FormsyProps) {
     super(props);
@@ -86,21 +86,16 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
     };
     this.inputs = [];
     this.emptyArray = [];
-    this.debouncedValidateForm = debounce(() => {
-      if (this.mounted) {
-        this.validateForm();
-      }
-    }, ONE_RENDER_FRAME);
+    this.debouncedValidateForm = debounce(this.validateForm, ONE_RENDER_FRAME);
   }
 
   public componentDidMount = () => {
-    this.mounted = true;
     this.prevInputNames = this.inputs.map((component) => component.props.name);
     this.validateForm();
   };
 
   public componentWillUnmount = () => {
-    this.mounted = false;
+    this.unmounted = true;
   };
 
   public componentDidUpdate = (prevProps: FormsyProps) => {
@@ -383,6 +378,10 @@ export class Formsy extends React.Component<PropsWithChildren<FormsyProps>, Form
 
   // and check their state
   public validateForm = () => {
+    if (this.unmounted) {
+      return;
+    }
+
     // We need a callback as we are validating all inputs again. This will
     // run when the last input has set its state
     const onValidationComplete = () => {
