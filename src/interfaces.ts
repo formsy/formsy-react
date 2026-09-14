@@ -14,7 +14,7 @@ export type ValidationError = string | React.ReactNode;
 
 export type ValidationFunction<V> = (values: Values, value: V, extra?: any) => boolean | ValidationError;
 
-export type Validation<V> = string | boolean | ValidationFunction<V>;
+export type Validation<V> = any | ValidationFunction<V>;
 
 export type Validations<V> = ValidationsStructure<V> | string | object;
 
