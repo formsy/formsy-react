@@ -2327,9 +2327,9 @@ bser@2.1.1:
     node-int64 "^0.4.0"
 
 bumpp@^12.1.1:
-  version "12.2.2"
-  resolved "https://registry.yarnpkg.com/bumpp/-/bumpp-12.2.2.tgz#e4765adc119c6a2e6ea3bf26ddf2fec267329741"
-  integrity sha512-tS7KZs+e1mRpN+N9mQU2greqHbqMLZrjBA0iQ4qVS/UB8yFPUgcvQHps4dVvRe37AEMNSOyNlnGuhnoklKlacg==
+  version "12.3.0"
+  resolved "https://registry.yarnpkg.com/bumpp/-/bumpp-12.3.0.tgz#b55c0deab956adde7e21d6bdc8fdb664dc81bc77"
+  integrity sha512-YgW09sgbIGQmAD/Jk7FEGP0tm0PeDz+Zgk+IAk+MOHhb/98pj/l3CgkxSjd7C1O99JPxTNwS+bPOTNaHuNh6lQ==
   dependencies:
     args-tokenizer "^0.3.0"
     cac "^7.0.0"
@@ -2338,7 +2338,7 @@ bumpp@^12.1.1:
     tinyexec "^1.3.0"
     tinyglobby "^0.2.17"
     unconfig "^7.5.0"
-    verkit "^0.3.2"
+    verkit "^0.4.0"
     yaml "^2.9.0"
 
 bundle-name@^4.1.0:
@@ -6043,10 +6043,10 @@ validate-npm-package-name@^5.0.0:
   resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-5.0.1.tgz#a316573e9b49f3ccd90dbb6eb52b3f06c6d604e8"
   integrity sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==
 
-verkit@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/verkit/-/verkit-0.3.2.tgz#0511ea63310551b62a20c010aa820350c5c350c6"
-  integrity sha512-zj/ob3UsvJGN0whEAKFp53REA5X66hvffVqoCtVQAakJKnKlH+/PcOfMoFwIG/o4rElqLv/ycAFlx8ZlXUorCg==
+verkit@^0.4.0:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/verkit/-/verkit-0.4.1.tgz#f8c00a63516c5ed3fe7dbbc82355c50579c42c61"
+  integrity sha512-mMVzj0TXExtVdlDEq+Mzp0eyOuyznNpFobNM3uAqe3HVm/Ps2c+u17BligMkZjZCA6EiXpoon8iRTer3iu40SQ==
 
 verror@1.10.0:
   version "1.10.0"
