@@ -9,8 +9,6 @@ export interface FormState {
     inputs: Map<string, InputRegistration>;
     formSubmitted: boolean;
     formIsValid: boolean;
-    isSubmitting: boolean;
-    canChange: boolean;
     externalValidationErrors: Map<string, any>;
     preventExternalInvalidation: boolean;
 }
@@ -38,9 +36,6 @@ export type FormAction = {
     type: 'SET_EXTERNAL_ERRORS';
     errors: Map<string, any>;
     preventInvalidation: boolean;
-} | {
-    type: 'SET_CAN_CHANGE';
-    canChange: boolean;
 } | {
     type: 'VALIDATE';
 } | {

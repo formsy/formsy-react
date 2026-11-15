@@ -1,4 +1,4 @@
-import { InputRegistration, ValidationError } from './interfaces';
+import { InputRegistration, Validations, ValidationError } from './interfaces';
 import * as utils from './utils';
 import { validationRules } from './validationRules';
 
@@ -12,8 +12,6 @@ export interface FormState {
   inputs: Map<string, InputRegistration>;
   formSubmitted: boolean;
   formIsValid: boolean;
-  isSubmitting: boolean;
-  canChange: boolean;
   externalValidationErrors: Map<string, any>;
   preventExternalInvalidation: boolean;
 }
@@ -25,18 +23,16 @@ export type FormAction =
   | { type: 'SET_VALUES'; values: Map<string, any>; validate: boolean }
   | { type: 'SET_SUBMITTED'; submitted: boolean }
   | { type: 'SET_EXTERNAL_ERRORS'; errors: Map<string, any>; preventInvalidation: boolean }
-  | { type: 'SET_CAN_CHANGE'; canChange: boolean }
   | { type: 'VALIDATE' }
   | { type: 'RESET'; values?: Map<string, any> }
   | { type: 'UPDATE_VALIDATIONS'; name: string; config: InputRegistration };
 
 function runSingleValidation(
   value: any,
-  allValues: Map<string, any>,
+  currentValues: Record<string, any>,
   input: InputRegistration,
   externalError?: ValidationError
 ): { isRequired: boolean; isValid: boolean; validationError: ValidationError[] } {
-  const currentValues = Object.fromEntries(allValues);
   const validationResults = utils.runRules(value, currentValues, input.validations || {}, validationRules);
   const requiredResults = utils.runRules(value, currentValues, input.requiredValidations || {}, validationRules);
   const isRequired = Object.keys(input.requiredValidations || {}).length ? !!requiredResults.success.length : false;
@@ -55,12 +51,12 @@ function runSingleValidation(
     }
 
     if (externalError) {
-      return utils.isString(externalError) ? [externalError] : [externalError];
+      return [externalError];
     }
 
     if (isRequired) {
       const error = validationErrors[requiredResults.success[0]] || componentValidationError;
-      return error ? [error] : (null as any);
+      return error ? [error] : [];
     }
 
     if (validationResults.failed.length) {
@@ -79,21 +75,31 @@ function runSingleValidation(
   };
 }
 
-function validateAll(state: FormState): FormState {
-  const newErrors = new Map<string, ValidationError[]>();
-  const newIsValid = new Map<string, boolean>();
-  const newIsRequired = new Map<string, boolean>();
+function validateFields(state: FormState, names: Iterable<string>): FormState {
+  const newErrors = new Map(state.errors);
+  const newIsValid = new Map(state.isValid);
+  const newIsRequired = new Map(state.isRequired);
   let formIsValid = true;
 
-  state.inputs.forEach((input, name) => {
-    const value = state.values.get(name);
-    const externalError = state.externalValidationErrors.get(name);
-    const result = runSingleValidation(value, state.values, input, externalError);
-    const prevented = state.preventExternalInvalidation && state.externalValidationErrors.has(name);
-    newErrors.set(name, result.validationError);
-    newIsValid.set(name, prevented ? true : result.isValid);
-    newIsRequired.set(name, result.isRequired);
-    if (!newIsValid.get(name)) {
+  if (state.inputs.size > 0) {
+    const currentValues = Object.fromEntries(state.values);
+    for (const name of names) {
+      const input = state.inputs.get(name);
+      if (!input) {
+        continue;
+      }
+      const value = state.values.get(name);
+      const externalError = state.externalValidationErrors.get(name);
+      const result = runSingleValidation(value, currentValues, input, externalError);
+      const prevented = state.preventExternalInvalidation && state.externalValidationErrors.has(name);
+      newErrors.set(name, result.validationError);
+      newIsValid.set(name, prevented ? true : result.isValid);
+      newIsRequired.set(name, result.isRequired);
+    }
+  }
+
+  state.inputs.forEach((_input, inputName) => {
+    if (newIsValid.get(inputName) === false) {
       formIsValid = false;
     }
   });
@@ -105,6 +111,68 @@ function validateAll(state: FormState): FormState {
     isRequired: newIsRequired,
     formIsValid,
   };
+}
+
+function validateAll(state: FormState): FormState {
+  return validateFields(state, state.inputs.keys());
+}
+
+/**
+ * Inputs whose validation results can depend on values other than their own:
+ * `equalsField`, custom function rules, and rules registered through
+ * `addValidationRule` (which may read the full values object) all receive the
+ * values object. Built-in rules otherwise only read the field's own value, so
+ * a change to one field does not require revalidating them.
+ */
+const BUILT_IN_RULES = new Set(Object.keys(validationRules));
+const dynamicInputCache = new WeakMap<InputRegistration, boolean>();
+
+function hasCrossFieldRules(validations: Validations<any>): boolean {
+  if (!validations || typeof validations !== 'object') {
+    return false;
+  }
+  return Object.keys(validations).some(
+    (ruleName) =>
+      ruleName === 'equalsField' ||
+      !BUILT_IN_RULES.has(ruleName) ||
+      utils.isFunction((validations as Record<string, unknown>)[ruleName])
+  );
+}
+
+function isDynamicInput(input: InputRegistration): boolean {
+  let dynamic = dynamicInputCache.get(input);
+  if (dynamic === undefined) {
+    dynamic = hasCrossFieldRules(input.validations) || hasCrossFieldRules(input.requiredValidations);
+    dynamicInputCache.set(input, dynamic);
+  }
+  return dynamic;
+}
+
+/** Names to revalidate after `changedNames` received new values. */
+function namesToValidate(state: FormState, changedNames: Iterable<string>): string[] {
+  const names = Array.from(changedNames);
+  const changed = new Set(names);
+  state.inputs.forEach((input, name) => {
+    if (!changed.has(name) && isDynamicInput(input)) {
+      names.push(name);
+    }
+  });
+  return names;
+}
+
+function isSameErrorsMap(a: Map<string, any>, b: Map<string, any>): boolean {
+  if (a === b) {
+    return true;
+  }
+  if (a.size !== b.size) {
+    return false;
+  }
+  for (const [key, value] of b) {
+    if (!a.has(key) || !utils.isSame(a.get(key), value)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function formsyReducer(state: FormState, action: FormAction): FormState {
@@ -166,18 +234,21 @@ export function formsyReducer(state: FormState, action: FormAction): FormState {
     case 'SET_VALUE': {
       const newValues = new Map(state.values).set(action.name, action.value);
       const newPristine = action.validate ? new Map(state.isPristine).set(action.name, false) : state.isPristine;
-      const newExternalErrors = new Map(state.externalValidationErrors);
-      newExternalErrors.delete(action.name);
-      let newState: FormState = {
+      let externalValidationErrors = state.externalValidationErrors;
+      if (externalValidationErrors.has(action.name)) {
+        externalValidationErrors = new Map(externalValidationErrors);
+        externalValidationErrors.delete(action.name);
+      }
+      const newState: FormState = {
         ...state,
         values: newValues,
         isPristine: newPristine,
-        externalValidationErrors: newExternalErrors,
+        externalValidationErrors,
       };
-      if (action.validate) {
-        newState = validateAll(newState);
+      if (!action.validate) {
+        return newState;
       }
-      return newState;
+      return validateFields(newState, namesToValidate(newState, [action.name]));
     }
 
     case 'SET_VALUES': {
@@ -186,7 +257,10 @@ export function formsyReducer(state: FormState, action: FormAction): FormState {
         newValues.set(name, value);
       });
       const newState = { ...state, values: newValues };
-      return action.validate ? validateAll(newState) : newState;
+      if (!action.validate) {
+        return newState;
+      }
+      return validateFields(newState, namesToValidate(newState, action.values.keys()));
     }
 
     case 'SET_SUBMITTED': {
@@ -195,15 +269,19 @@ export function formsyReducer(state: FormState, action: FormAction): FormState {
 
     case 'SET_EXTERNAL_ERRORS': {
       const { errors, preventInvalidation } = action;
+      if (
+        preventInvalidation === state.preventExternalInvalidation &&
+        isSameErrorsMap(state.externalValidationErrors, errors)
+      ) {
+        // Value-equal errors (e.g. from an inline object literal re-render)
+        // must not trigger a full revalidation pass.
+        return state;
+      }
       return validateAll({
         ...state,
         externalValidationErrors: errors,
         preventExternalInvalidation: preventInvalidation,
       });
-    }
-
-    case 'SET_CAN_CHANGE': {
-      return { ...state, canChange: action.canChange };
     }
 
     case 'VALIDATE': {
@@ -213,7 +291,9 @@ export function formsyReducer(state: FormState, action: FormAction): FormState {
     case 'RESET': {
       const newValues = new Map(state.values);
       const newPristine = new Map(state.isPristine);
+      let changedNames: Iterable<string> | undefined;
       if (action.values) {
+        changedNames = action.values.keys();
         action.values.forEach((value, name) => {
           newValues.set(name, value);
           newPristine.set(name, true);
@@ -224,18 +304,23 @@ export function formsyReducer(state: FormState, action: FormAction): FormState {
           newPristine.set(name, true);
         });
       }
-      let newState: FormState = {
+      const newState: FormState = {
         ...state,
         values: newValues,
         isPristine: newPristine,
         formSubmitted: action.values ? state.formSubmitted : false,
       };
-      newState = validateAll(newState);
-      return newState;
+      return changedNames ? validateFields(newState, namesToValidate(newState, changedNames)) : validateAll(newState);
     }
 
     case 'UPDATE_VALIDATIONS': {
-      if (!state.inputs.has(action.name)) {
+      const existing = state.inputs.get(action.name);
+      if (!existing) {
+        return state;
+      }
+      // Value-equal configs (e.g. from inline object literals on re-render)
+      // must not trigger a full revalidation pass.
+      if (utils.isSame(existing, action.config)) {
         return state;
       }
       const newInputs = new Map(state.inputs).set(action.name, action.config);

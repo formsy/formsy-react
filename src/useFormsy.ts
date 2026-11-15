@@ -81,6 +81,13 @@ const convertValidationsToObject = <V>(validations: false | Validations<V>): Val
   return validations || {};
 };
 
+const convertRequired = <V>(required: RequiredValidation<V>): Validations<V> => {
+  if (required === true) {
+    return { isDefaultRequiredValue: true };
+  }
+  return convertValidationsToObject(required);
+};
+
 function computeLocalValidation<V>(
   value: V,
   validations: Validations<V>,
@@ -137,13 +144,10 @@ export function useFormsy<V = any>(props: UseFormsyProps<V>): UseFormsyOutput<V>
   const prevExternalValue = useRef(externalValue);
   const previousSnapshot = useRef<InputSnapshot | null>(null);
   const registrationRef = useRef<InputRegistration>();
+  const localValCacheRef = useRef({ isRequired: false, isValid: true, errors: EMPTY_ERRORS });
 
-  const convertRequired = (required: RequiredValidation<V>): Validations<V> => {
-    if (required === true) {
-      return { isDefaultRequiredValue: true };
-    }
-    return convertValidationsToObject(required);
-  };
+  const parsedValidations = useMemo(() => convertValidationsToObject(validations), [validations]);
+  const parsedRequired = useMemo(() => convertRequired(required), [required]);
 
   if (!name) {
     throw new Error('Form Input requires a name property when used');
@@ -151,8 +155,8 @@ export function useFormsy<V = any>(props: UseFormsyProps<V>): UseFormsyOutput<V>
 
   if (!registrationRef.current) {
     registrationRef.current = {
-      validations: convertValidationsToObject(validations),
-      requiredValidations: convertRequired(required),
+      validations: parsedValidations,
+      requiredValidations: parsedRequired,
       validationError,
       validationErrors,
     };
@@ -205,22 +209,28 @@ export function useFormsy<V = any>(props: UseFormsyProps<V>): UseFormsyOutput<V>
 
   useLayoutEffect(() => {
     updateValidations(name, {
-      validations: convertValidationsToObject(validations),
-      requiredValidations: convertRequired(required),
+      validations: parsedValidations,
+      requiredValidations: parsedRequired,
       validationError,
       validationErrors,
     });
-  }, [updateValidations, name, validations, required, validationError, validationErrors]);
+  }, [updateValidations, name, parsedValidations, parsedRequired, validationError, validationErrors]);
 
+  // Only compute local validation while the input is not registered with the
+  // form yet; afterwards the reducer-driven snapshot is authoritative.
   const localVal = useMemo((): { isRequired: boolean; isValid: boolean; errors: ValidationError[] } => {
-    return computeLocalValidation(
+    if (fieldState) {
+      return localValCacheRef.current;
+    }
+    localValCacheRef.current = computeLocalValidation(
       externalValue,
-      convertValidationsToObject(validations),
-      convertRequired(required),
+      parsedValidations,
+      parsedRequired,
       validationError,
       validationErrors as Record<string, ValidationError>
     );
-  }, [externalValue, validations, required, validationError, validationErrors]);
+    return localValCacheRef.current;
+  }, [fieldState, externalValue, parsedValidations, parsedRequired, validationError, validationErrors]);
 
   const inputValue = fieldState ? fieldState.value : externalValue;
   const errors = fieldState ? fieldState.errors : localVal.errors;

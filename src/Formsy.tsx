@@ -69,8 +69,6 @@ function getInitialState(): FormState {
     inputs: new Map(),
     formSubmitted: false,
     formIsValid: true,
-    isSubmitting: false,
-    canChange: false,
     externalValidationErrors: new Map(),
     preventExternalInvalidation: false,
   };
@@ -204,7 +202,6 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
       }
 
       dispatch({ type: 'SET_SUBMITTED', submitted: true });
-      dispatch({ type: 'SET_CAN_CHANGE', canChange: true });
 
       const model = mapModel(Object.fromEntries(currentState.values));
       const submitEvent = event as React.SyntheticEvent<HTMLFormElement>;
@@ -370,7 +367,7 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
     ]
   );
 
-  const FormElement = formElement || 'form';
+  const FormElement = formElement;
   return (
     <FormsyActionsContext.Provider value={actions}>
       <FormsyStateStoreContext.Provider value={stateStore}>

@@ -179,6 +179,12 @@ const convertValidationsToObject = (validations)=>{
     }, {});
     return validations || {};
 };
+const convertRequired = (required)=>{
+    if (true === required) return {
+        isDefaultRequiredValue: true
+    };
+    return convertValidationsToObject(required);
+};
 function computeLocalValidation(value, validations, requiredValidations, validationError, validationErrors) {
     const currentValues = {};
     const validationResults = runRules(value, currentValues, validations || {}, validationRules_validationRules);
@@ -212,16 +218,21 @@ function useFormsy(props) {
     const prevExternalValue = useRef(externalValue);
     const previousSnapshot = useRef(null);
     const registrationRef = useRef();
-    const convertRequired = (required)=>{
-        if (true === required) return {
-            isDefaultRequiredValue: true
-        };
-        return convertValidationsToObject(required);
-    };
+    const localValCacheRef = useRef({
+        isRequired: false,
+        isValid: true,
+        errors: EMPTY_ERRORS
+    });
+    const parsedValidations = useMemo(()=>convertValidationsToObject(validations), [
+        validations
+    ]);
+    const parsedRequired = useMemo(()=>convertRequired(required), [
+        required
+    ]);
     if (!name) throw new Error('Form Input requires a name property when used');
     if (!registrationRef.current) registrationRef.current = {
-        validations: convertValidationsToObject(validations),
-        requiredValidations: convertRequired(required),
+        validations: parsedValidations,
+        requiredValidations: parsedRequired,
         validationError,
         validationErrors
     };
@@ -269,23 +280,28 @@ function useFormsy(props) {
     ]);
     useLayoutEffect(()=>{
         updateValidations(name, {
-            validations: convertValidationsToObject(validations),
-            requiredValidations: convertRequired(required),
+            validations: parsedValidations,
+            requiredValidations: parsedRequired,
             validationError,
             validationErrors
         });
     }, [
         updateValidations,
         name,
-        validations,
-        required,
+        parsedValidations,
+        parsedRequired,
         validationError,
         validationErrors
     ]);
-    const localVal = useMemo(()=>computeLocalValidation(externalValue, convertValidationsToObject(validations), convertRequired(required), validationError, validationErrors), [
+    const localVal = useMemo(()=>{
+        if (fieldState) return localValCacheRef.current;
+        localValCacheRef.current = computeLocalValidation(externalValue, parsedValidations, parsedRequired, validationError, validationErrors);
+        return localValCacheRef.current;
+    }, [
+        fieldState,
         externalValue,
-        validations,
-        required,
+        parsedValidations,
+        parsedRequired,
         validationError,
         validationErrors
     ]);
@@ -360,8 +376,7 @@ function withFormsy(WrappedComponent) {
     WithFormsy.displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
     return WithFormsy;
 }
-function runSingleValidation(value, allValues, input, externalError) {
-    const currentValues = Object.fromEntries(allValues);
+function runSingleValidation(value, currentValues, input, externalError) {
     const validationResults = runRules(value, currentValues, input.validations || {}, validationRules_validationRules);
     const requiredResults = runRules(value, currentValues, input.requiredValidations || {}, validationRules_validationRules);
     const isRequired = Object.keys(input.requiredValidations || {}).length ? !!requiredResults.success.length : false;
@@ -372,16 +387,14 @@ function runSingleValidation(value, allValues, input, externalError) {
     const validationError = (()=>{
         if (isValid && !isRequired) return [];
         if (validationResults.errors.length) return validationResults.errors;
-        if (externalError) return isString(externalError) ? [
-            externalError
-        ] : [
+        if (externalError) return [
             externalError
         ];
         if (isRequired) {
             const error = validationErrors[requiredResults.success[0]] || componentValidationError;
             return error ? [
                 error
-            ] : null;
+            ] : [];
         }
         if (validationResults.failed.length) return validationResults.failed.map((failed)=>validationErrors[failed] ? validationErrors[failed] : componentValidationError).filter((x, pos, arr)=>arr.indexOf(x) === pos);
         return [];
@@ -392,20 +405,27 @@ function runSingleValidation(value, allValues, input, externalError) {
         validationError: validationError || []
     };
 }
-function validateAll(state) {
-    const newErrors = new Map();
-    const newIsValid = new Map();
-    const newIsRequired = new Map();
+function validateFields(state, names) {
+    const newErrors = new Map(state.errors);
+    const newIsValid = new Map(state.isValid);
+    const newIsRequired = new Map(state.isRequired);
     let formIsValid = true;
-    state.inputs.forEach((input, name)=>{
-        const value = state.values.get(name);
-        const externalError = state.externalValidationErrors.get(name);
-        const result = runSingleValidation(value, state.values, input, externalError);
-        const prevented = state.preventExternalInvalidation && state.externalValidationErrors.has(name);
-        newErrors.set(name, result.validationError);
-        newIsValid.set(name, prevented ? true : result.isValid);
-        newIsRequired.set(name, result.isRequired);
-        if (!newIsValid.get(name)) formIsValid = false;
+    if (state.inputs.size > 0) {
+        const currentValues = Object.fromEntries(state.values);
+        for (const name of names){
+            const input = state.inputs.get(name);
+            if (!input) continue;
+            const value = state.values.get(name);
+            const externalError = state.externalValidationErrors.get(name);
+            const result = runSingleValidation(value, currentValues, input, externalError);
+            const prevented = state.preventExternalInvalidation && state.externalValidationErrors.has(name);
+            newErrors.set(name, result.validationError);
+            newIsValid.set(name, prevented ? true : result.isValid);
+            newIsRequired.set(name, result.isRequired);
+        }
+    }
+    state.inputs.forEach((_input, inputName)=>{
+        if (false === newIsValid.get(inputName)) formIsValid = false;
     });
     return {
         ...state,
@@ -414,6 +434,37 @@ function validateAll(state) {
         isRequired: newIsRequired,
         formIsValid
     };
+}
+function validateAll(state) {
+    return validateFields(state, state.inputs.keys());
+}
+const BUILT_IN_RULES = new Set(Object.keys(validationRules_validationRules));
+const dynamicInputCache = new WeakMap();
+function hasCrossFieldRules(validations) {
+    if (!validations || 'object' != typeof validations) return false;
+    return Object.keys(validations).some((ruleName)=>'equalsField' === ruleName || !BUILT_IN_RULES.has(ruleName) || isFunction(validations[ruleName]));
+}
+function isDynamicInput(input) {
+    let dynamic = dynamicInputCache.get(input);
+    if (void 0 === dynamic) {
+        dynamic = hasCrossFieldRules(input.validations) || hasCrossFieldRules(input.requiredValidations);
+        dynamicInputCache.set(input, dynamic);
+    }
+    return dynamic;
+}
+function namesToValidate(state, changedNames) {
+    const names = Array.from(changedNames);
+    const changed = new Set(names);
+    state.inputs.forEach((input, name)=>{
+        if (!changed.has(name) && isDynamicInput(input)) names.push(name);
+    });
+    return names;
+}
+function isSameErrorsMap(a, b) {
+    if (a === b) return true;
+    if (a.size !== b.size) return false;
+    for (const [key, value] of b)if (!a.has(key) || !isSame(a.get(key), value)) return false;
+    return true;
 }
 function formsyReducer(state, action) {
     switch(action.type){
@@ -469,16 +520,21 @@ function formsyReducer(state, action) {
             {
                 const newValues = new Map(state.values).set(action.name, action.value);
                 const newPristine = action.validate ? new Map(state.isPristine).set(action.name, false) : state.isPristine;
-                const newExternalErrors = new Map(state.externalValidationErrors);
-                newExternalErrors.delete(action.name);
-                let newState = {
+                let externalValidationErrors = state.externalValidationErrors;
+                if (externalValidationErrors.has(action.name)) {
+                    externalValidationErrors = new Map(externalValidationErrors);
+                    externalValidationErrors.delete(action.name);
+                }
+                const newState = {
                     ...state,
                     values: newValues,
                     isPristine: newPristine,
-                    externalValidationErrors: newExternalErrors
+                    externalValidationErrors
                 };
-                if (action.validate) newState = validateAll(newState);
-                return newState;
+                if (!action.validate) return newState;
+                return validateFields(newState, namesToValidate(newState, [
+                    action.name
+                ]));
             }
         case 'SET_VALUES':
             {
@@ -490,7 +546,8 @@ function formsyReducer(state, action) {
                     ...state,
                     values: newValues
                 };
-                return action.validate ? validateAll(newState) : newState;
+                if (!action.validate) return newState;
+                return validateFields(newState, namesToValidate(newState, action.values.keys()));
             }
         case 'SET_SUBMITTED':
             return {
@@ -500,43 +557,43 @@ function formsyReducer(state, action) {
         case 'SET_EXTERNAL_ERRORS':
             {
                 const { errors, preventInvalidation } = action;
+                if (preventInvalidation === state.preventExternalInvalidation && isSameErrorsMap(state.externalValidationErrors, errors)) return state;
                 return validateAll({
                     ...state,
                     externalValidationErrors: errors,
                     preventExternalInvalidation: preventInvalidation
                 });
             }
-        case 'SET_CAN_CHANGE':
-            return {
-                ...state,
-                canChange: action.canChange
-            };
         case 'VALIDATE':
             return validateAll(state);
         case 'RESET':
             {
                 const newValues = new Map(state.values);
                 const newPristine = new Map(state.isPristine);
-                if (action.values) action.values.forEach((value, name)=>{
-                    newValues.set(name, value);
-                    newPristine.set(name, true);
-                });
-                else state.inputs.forEach((_input, name)=>{
+                let changedNames;
+                if (action.values) {
+                    changedNames = action.values.keys();
+                    action.values.forEach((value, name)=>{
+                        newValues.set(name, value);
+                        newPristine.set(name, true);
+                    });
+                } else state.inputs.forEach((_input, name)=>{
                     newValues.set(name, state.initialValues.get(name));
                     newPristine.set(name, true);
                 });
-                let newState = {
+                const newState = {
                     ...state,
                     values: newValues,
                     isPristine: newPristine,
                     formSubmitted: action.values ? state.formSubmitted : false
                 };
-                newState = validateAll(newState);
-                return newState;
+                return changedNames ? validateFields(newState, namesToValidate(newState, changedNames)) : validateAll(newState);
             }
         case 'UPDATE_VALIDATIONS':
             {
-                if (!state.inputs.has(action.name)) return state;
+                const existing = state.inputs.get(action.name);
+                if (!existing) return state;
+                if (isSame(existing, action.config)) return state;
                 const newInputs = new Map(state.inputs).set(action.name, action.config);
                 return validateAll({
                     ...state,
@@ -558,8 +615,6 @@ function getInitialState() {
         inputs: new Map(),
         formSubmitted: false,
         formIsValid: true,
-        isSubmitting: false,
-        canChange: false,
         externalValidationErrors: new Map(),
         preventExternalInvalidation: false
     };
@@ -656,10 +711,6 @@ function FormsyInner(props, ref) {
         dispatch({
             type: 'SET_SUBMITTED',
             submitted: true
-        });
-        dispatch({
-            type: 'SET_CAN_CHANGE',
-            canChange: true
         });
         const model = mapModel(Object.fromEntries(currentState.values));
         const submitEvent = event;
@@ -825,7 +876,7 @@ function FormsyInner(props, ref) {
         handleUnregisterInput,
         handleUpdateValidations
     ]);
-    const FormElement = formElement || 'form';
+    const FormElement = formElement;
     return /*#__PURE__*/ jsx(FormsyActionsContext.Provider, {
         value: actions,
         children: /*#__PURE__*/ jsx(FormsyStateStoreContext.Provider, {

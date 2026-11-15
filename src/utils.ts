@@ -142,13 +142,3 @@ export function runRules<V>(
 
   return results;
 }
-
-export function debounce(callback, timeout: number) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      callback.apply(this, args);
-    }, timeout);
-  };
-}
