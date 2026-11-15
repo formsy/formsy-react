@@ -1211,6 +1211,24 @@ describe('form valid state', () => {
     expect(validSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('should call onValid when the form has no inputs', () => {
+    jest.useFakeTimers();
+    const validSpy = jest.fn();
+    const invalidSpy = jest.fn();
+
+    render(<Formsy onValid={validSpy} onInvalid={invalidSpy} />);
+
+    // An empty form is valid. The check waits one tick so that inputs which
+    // register during the initial commit are not mistaken for an empty form.
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(validSpy).toHaveBeenCalledTimes(1);
+    expect(invalidSpy).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
   it('should revalidate form once when unmounting multiple inputs', () => {
     const Inputs = () => {
       const [showInputs, setShowInputs] = useState(true);

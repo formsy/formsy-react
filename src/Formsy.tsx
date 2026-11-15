@@ -239,6 +239,11 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
 
   const canChangeRef = useRef(false);
   const initialEventsFired = useRef(false);
+  // Mirrors the number of inputs the reducer has queued for registration,
+  // updated synchronously in the register/unregister callbacks. It lets the
+  // notification effect below distinguish "truly empty form" from "inputs that
+  // registered but have not committed yet" on the first pass.
+  const registeredInputsCountRef = useRef(0);
 
   // Set canChange after mount to prevent initial registrations from firing onChange.
   useEffect(() => {
@@ -255,7 +260,10 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
       } else {
         onInvalidRef.current?.();
       }
-    } else if (initialEventsFired.current) {
+    } else if (initialEventsFired.current || registeredInputsCountRef.current === 0) {
+      // Either inputs were removed (initialEventsFired) or the form is
+      // genuinely empty on its first pass, which is valid.
+      initialEventsFired.current = true;
       onValidRef.current?.();
     }
   }, [formState.inputs, formState.formIsValid]);
@@ -284,6 +292,11 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
 
   const handleRegisterInput = useCallback(
     (name: string, config: InputRegistration, initialValue: any) => {
+      // Mirror the reducer's no-op conditions and track the pending
+      // registration synchronously (see registeredInputsCountRef).
+      if (name && !formStateRef.current.inputs.has(name)) {
+        registeredInputsCountRef.current += 1;
+      }
       dispatch({ type: 'REGISTER', name, config, initialValue });
       if (canChangeRef.current && onChangeRef.current) {
         const state = formStateRef.current;
@@ -302,6 +315,10 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
 
   const handleUnregisterInput = useCallback(
     (name: string) => {
+      // Mirror the reducer's no-op condition; decrement only real removals.
+      if (formStateRef.current.inputs.has(name)) {
+        registeredInputsCountRef.current -= 1;
+      }
       dispatch({ type: 'UNREGISTER', name });
       if (canChangeRef.current && onChangeRef.current) {
         const newValues: Record<string, any> = Object.fromEntries(formStateRef.current.values);

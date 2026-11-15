@@ -581,6 +581,7 @@ function FormsyInner(props, ref) {
     ]);
     const canChangeRef = (0, external_react_namespaceObject.useRef)(false);
     const initialEventsFired = (0, external_react_namespaceObject.useRef)(false);
+    const registeredInputsCountRef = (0, external_react_namespaceObject.useRef)(0);
     (0, external_react_namespaceObject.useEffect)(()=>{
         canChangeRef.current = true;
     }, []);
@@ -589,7 +590,10 @@ function FormsyInner(props, ref) {
             initialEventsFired.current = true;
             if (formState.formIsValid) onValidRef.current?.();
             else onInvalidRef.current?.();
-        } else if (initialEventsFired.current) onValidRef.current?.();
+        } else if (initialEventsFired.current || 0 === registeredInputsCountRef.current) {
+            initialEventsFired.current = true;
+            onValidRef.current?.();
+        }
     }, [
         formState.inputs,
         formState.formIsValid
@@ -624,6 +628,7 @@ function FormsyInner(props, ref) {
         mapModel
     ]);
     const handleRegisterInput = (0, external_react_namespaceObject.useCallback)((name, config, initialValue)=>{
+        if (name && !formStateRef.current.inputs.has(name)) registeredInputsCountRef.current += 1;
         dispatch({
             type: 'REGISTER',
             name,
@@ -646,6 +651,7 @@ function FormsyInner(props, ref) {
         mapModel
     ]);
     const handleUnregisterInput = (0, external_react_namespaceObject.useCallback)((name)=>{
+        if (formStateRef.current.inputs.has(name)) registeredInputsCountRef.current -= 1;
         dispatch({
             type: 'UNREGISTER',
             name
