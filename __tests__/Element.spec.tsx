@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import React, { useState } from 'react';
 import TestInput, { FormsyInputProps, InputFactory } from '../__test_utils__/TestInput';
 
@@ -17,6 +17,70 @@ describe('Element', () => {
 
     fireEvent.change(input, { target: { value: 'foobar' } });
     expect(input.value).toEqual('foobar');
+  });
+
+  it('only rerenders the field whose state changed', () => {
+    const renderCounts: Record<string, number> = {};
+    const Input = withFormsy((props: FormsyInputProps) => {
+      renderCounts[props.name] = (renderCounts[props.name] || 0) + 1;
+      return (
+        <input
+          data-testid={props.name}
+          value={props.value || ''}
+          onChange={(event) => props.setValue(event.currentTarget.value)}
+        />
+      );
+    });
+
+    const screen = render(
+      <Formsy>
+        <Input name="first" value="one" />
+        <Input name="second" value="two" />
+      </Formsy>
+    );
+    const secondRenderCount = renderCounts.second;
+
+    fireEvent.change(screen.getByTestId('first'), { target: { value: 'updated' } });
+
+    expect(renderCounts.first).toBeGreaterThan(1);
+    expect(renderCounts.second).toBe(secondRenderCount);
+  });
+
+  it('clears external errors when validationErrors becomes empty', () => {
+    const FormWithErrors = () => {
+      const [validationErrors, setValidationErrors] = useState<Record<string, string>>({ foo: 'Server error' });
+      return (
+        <Formsy validationErrors={validationErrors}>
+          <TestInput name="foo" testId="test-input" />
+          <button type="button" data-testid="clear-errors" onClick={() => setValidationErrors({})} />
+        </Formsy>
+      );
+    };
+
+    const screen = render(<FormWithErrors />);
+    const input = screen.getByTestId('test-input');
+    expect(input.dataset.isValid).toBe('false');
+
+    fireEvent.click(screen.getByTestId('clear-errors'));
+
+    expect(input.dataset.isValid).toBe('true');
+  });
+
+  it('does not validate batch updates when validate is false', () => {
+    const formRef = React.createRef<React.ComponentRef<typeof Formsy>>();
+    const screen = render(
+      <Formsy ref={formRef}>
+        <TestInput name="foo" required={true} value="initial" testId="test-input" />
+      </Formsy>
+    );
+
+    act(() => {
+      formRef.current!.updateInputsWithValue({ foo: '' }, false);
+    });
+
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
+    expect(input.value).toBe('');
+    expect(input.dataset.isValid).toBe('true');
   });
 
   it('withFormsy: should only set the value and not validate when calling setValue(val, false)', () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { RequiredValidation, ValidationError, Validations } from './interfaces';
+import { ValidationError, Validations, RequiredValidation } from './interfaces';
 export interface WrapperProps<V> {
     innerRef?: (ref: React.Ref<any>) => void;
     name: string;
@@ -37,16 +37,6 @@ export interface InjectedProps<V> {
     setValue: (value: V, validate?: boolean) => void;
     showError: boolean;
     showRequired: boolean;
-}
-export interface WrapperInstanceMethods<V> {
-    getErrorMessage: () => null | ValidationError;
-    getErrorMessages: () => ValidationError[];
-    getValue: () => V;
-    isFormDisabled: () => boolean;
-    isFormSubmitted: () => boolean;
-    isValid: () => boolean;
-    isValidValue: (value: V) => boolean;
-    setValue: (value: V, validate?: boolean) => void;
 }
 export type PassDownProps<V> = WrapperProps<V> & InjectedProps<V>;
 export declare function withFormsy<T, V>(WrappedComponent: React.ComponentType<T & PassDownProps<V>>): React.ComponentType<Omit<T & WrapperProps<V>, keyof InjectedProps<V>>>;

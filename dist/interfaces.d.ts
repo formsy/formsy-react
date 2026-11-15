@@ -1,5 +1,4 @@
-import React, { ComponentClass } from 'react';
-import { WrapperProps, WrapperState } from './withFormsy';
+import React from 'react';
 export interface Values {
     [key: string]: any;
 }
@@ -19,23 +18,39 @@ export interface ValidationsStructure<V> {
     [key: string]: Validation<V>;
 }
 export type RequiredValidation<V> = boolean | Validations<V>;
-export interface ComponentWithStaticAttributes extends ComponentClass {
-    defaultValue?: any;
-}
-export type WrappedComponentClass = React.FC | ComponentWithStaticAttributes;
-export interface InputComponent<V> extends React.Component<WrapperProps<V>, WrapperState<V>> {
-    validations?: Validations<V>;
-    requiredValidations?: Validations<V>;
-}
-export interface FormsyContextInterface {
-    attachToForm: (component: InputComponent<any>) => void;
-    detachFromForm: (component: InputComponent<any>) => void;
-    isFormDisabled: boolean;
-    isValidValue: (component: InputComponent<any>, value: any) => boolean;
-    validate: (component: InputComponent<any>) => void;
-    runValidation: (component: InputComponent<any>) => {
-        isRequired: boolean;
-        isValid: boolean;
-        validationError: ValidationError[];
+export interface InputRegistration<V = any> {
+    validations: Validations<V>;
+    requiredValidations: Validations<V>;
+    validationError?: ValidationError;
+    validationErrors?: {
+        [key: string]: ValidationError;
     };
+}
+export interface FormsyContextValue {
+    values: Map<string, any>;
+    errors: Map<string, ValidationError[]>;
+    isPristine: Map<string, boolean>;
+    isValid: Map<string, boolean>;
+    isRequired: Map<string, boolean>;
+    formSubmitted: boolean;
+    formIsValid: boolean;
+    isFormDisabled: boolean;
+    inputs: Map<string, InputRegistration>;
+    setValue: (name: string, value: any, validate?: boolean) => void;
+    registerInput: (name: string, config: InputRegistration, initialValue: any) => void;
+    unregisterInput: (name: string) => void;
+    resetValue: (name: string) => void;
+    updateValidations: (name: string, config: InputRegistration) => void;
+    isValidValue: (name: string, value: any) => boolean;
+}
+export type FormsyActions = Omit<FormsyContextValue, 'values' | 'errors' | 'isPristine' | 'isValid' | 'isRequired' | 'formSubmitted' | 'formIsValid' | 'isFormDisabled' | 'inputs'>;
+export interface FormsyImperativeAPI {
+    submit: (event?: React.SyntheticEvent<HTMLFormElement>) => void;
+    reset: (model?: IModel) => void;
+    updateInputsWithValue: IUpdateInputsWithValue<any>;
+    updateInputsWithError: IUpdateInputsWithError;
+    isChanged: () => boolean;
+    getModel: () => IModel;
+    getPristineValues: () => Record<string, any>;
+    getCurrentValues: () => Record<string, any>;
 }
