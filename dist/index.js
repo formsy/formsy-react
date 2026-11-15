@@ -1,9 +1,9 @@
 import isPlainObject from "lodash/isPlainObject.js";
 import { jsx } from "react/jsx-runtime";
-import react, { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useSyncExternalStore } from "react";
 import set from "lodash/set.js";
 import has from "lodash/has.js";
 import get from "lodash/get.js";
+import react, { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useSyncExternalStore } from "react";
 function isArray(value) {
     return Array.isArray(value);
 }
@@ -155,227 +155,6 @@ const FormsyActionsContext = /*#__PURE__*/ react.createContext({
     }
 });
 const FormsyStateStoreContext = /*#__PURE__*/ react.createContext(defaultStore);
-const EMPTY_ERRORS = [];
-function areSnapshotsEqual(a, b) {
-    return Object.is(a.value, b.value) && a.isPristine === b.isPristine && a.isRequired === b.isRequired && a.isValid === b.isValid && a.isFormDisabled === b.isFormDisabled && a.isFormSubmitted === b.isFormSubmitted && a.errors.length === b.errors.length && a.errors.every((error, index)=>error === b.errors[index]);
-}
-const convertValidationsToObject = (validations)=>{
-    if (isString(validations)) return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation)=>{
-        let args = validation.split(':');
-        const validateMethod = args.shift() || '';
-        args = args.map((arg)=>{
-            try {
-                return JSON.parse(arg);
-            } catch  {
-                return arg;
-            }
-        });
-        if (args.length > 1) throw new Error('Formsy does not support multiple args on string validations. Use object format of validations instead.');
-        const validationsAccumulatorCopy = {
-            ...validationsAccumulator
-        };
-        validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
-        return validationsAccumulatorCopy;
-    }, {});
-    return validations || {};
-};
-const convertRequired = (required)=>{
-    if (true === required) return {
-        isDefaultRequiredValue: true
-    };
-    return convertValidationsToObject(required);
-};
-function computeLocalValidation(value, validations, requiredValidations, validationError, validationErrors) {
-    const currentValues = {};
-    const validationResults = runRules(value, currentValues, validations || {}, validationRules_validationRules);
-    const requiredResults = runRules(value, currentValues, requiredValidations || {}, validationRules_validationRules);
-    const isRequired = Object.keys(requiredValidations || {}).length ? !!requiredResults.success.length : false;
-    const isCustomValid = !validationResults.failed.length;
-    const isValid = isRequired ? false : isCustomValid;
-    const errors = (()=>{
-        if (isValid && !isRequired) return [];
-        if (validationResults.errors.length) return validationResults.errors;
-        if (isRequired) {
-            const error = (validationErrors || {})[requiredResults.success[0]] || validationError;
-            return error ? [
-                error
-            ] : [];
-        }
-        if (validationResults.failed.length) return validationResults.failed.map((failed)=>(validationErrors || {})[failed] || validationError).filter((x, pos, arr)=>arr.indexOf(x) === pos).filter(Boolean);
-        return [];
-    })();
-    return {
-        isRequired,
-        isValid,
-        errors
-    };
-}
-function useFormsy(props) {
-    const actions = useContext(FormsyActionsContext);
-    const stateStore = useContext(FormsyStateStoreContext);
-    const { isValidValue: validateValue, registerInput, resetValue: resetFieldValue, setValue: setFieldValue, unregisterInput, updateValidations } = actions;
-    const { name, value: externalValue, validations, required, validationError, validationErrors } = props;
-    const prevExternalValue = useRef(externalValue);
-    const previousSnapshot = useRef(null);
-    const registrationRef = useRef();
-    const localValCacheRef = useRef({
-        isRequired: false,
-        isValid: true,
-        errors: EMPTY_ERRORS
-    });
-    const parsedValidations = useMemo(()=>convertValidationsToObject(validations), [
-        validations
-    ]);
-    const parsedRequired = useMemo(()=>convertRequired(required), [
-        required
-    ]);
-    if (!name) throw new Error('Form Input requires a name property when used');
-    if (!registrationRef.current) registrationRef.current = {
-        validations: parsedValidations,
-        requiredValidations: parsedRequired,
-        validationError,
-        validationErrors
-    };
-    const getSnapshot = useCallback(()=>{
-        const state = stateStore.getState();
-        if (!state.inputs.has(name)) {
-            previousSnapshot.current = null;
-            return null;
-        }
-        const snapshot = {
-            value: state.values.get(name),
-            errors: state.errors.get(name) || EMPTY_ERRORS,
-            isPristine: state.isPristine.get(name) ?? true,
-            isRequired: state.isRequired.get(name) ?? false,
-            isValid: state.isValid.get(name) ?? true,
-            isFormDisabled: stateStore.getDisabled(),
-            isFormSubmitted: state.formSubmitted
-        };
-        if (previousSnapshot.current && areSnapshotsEqual(previousSnapshot.current, snapshot)) return previousSnapshot.current;
-        previousSnapshot.current = snapshot;
-        return snapshot;
-    }, [
-        name,
-        stateStore
-    ]);
-    const fieldState = useSyncExternalStore(stateStore.subscribe, getSnapshot, getSnapshot);
-    useLayoutEffect(()=>{
-        registerInput(name, registrationRef.current, prevExternalValue.current);
-        prevExternalValue.current = externalValue;
-        return ()=>{
-            unregisterInput(name);
-        };
-    }, [
-        name
-    ]);
-    useEffect(()=>{
-        if (!isSame(externalValue, prevExternalValue.current)) {
-            prevExternalValue.current = externalValue;
-            if (void 0 !== externalValue) setFieldValue(name, externalValue);
-        }
-    }, [
-        externalValue,
-        name,
-        setFieldValue
-    ]);
-    useLayoutEffect(()=>{
-        updateValidations(name, {
-            validations: parsedValidations,
-            requiredValidations: parsedRequired,
-            validationError,
-            validationErrors
-        });
-    }, [
-        updateValidations,
-        name,
-        parsedValidations,
-        parsedRequired,
-        validationError,
-        validationErrors
-    ]);
-    const localVal = useMemo(()=>{
-        if (fieldState) return localValCacheRef.current;
-        localValCacheRef.current = computeLocalValidation(externalValue, parsedValidations, parsedRequired, validationError, validationErrors);
-        return localValCacheRef.current;
-    }, [
-        fieldState,
-        externalValue,
-        parsedValidations,
-        parsedRequired,
-        validationError,
-        validationErrors
-    ]);
-    const inputValue = fieldState ? fieldState.value : externalValue;
-    const errors = fieldState ? fieldState.errors : localVal.errors;
-    const isPristine = fieldState ? fieldState.isPristine : true;
-    const isValid = fieldState ? fieldState.isValid : localVal.isValid;
-    const isRequired = fieldState ? fieldState.isRequired : localVal.isRequired;
-    const setValue = useCallback((value, validate = true)=>{
-        setFieldValue(name, value, validate);
-    }, [
-        name,
-        setFieldValue
-    ]);
-    const resetValue = useCallback(()=>{
-        resetFieldValue(name);
-    }, [
-        name,
-        resetFieldValue
-    ]);
-    const isValidValue = useCallback((value)=>validateValue(name, value), [
-        name,
-        validateValue
-    ]);
-    const setValidations = useCallback((validations, required)=>{
-        updateValidations(name, {
-            validations: convertValidationsToObject(validations),
-            requiredValidations: convertRequired(required),
-            validationError,
-            validationErrors
-        });
-    }, [
-        name,
-        updateValidations,
-        validationError,
-        validationErrors
-    ]);
-    return {
-        value: inputValue,
-        setValue,
-        errorMessage: errors.length ? errors[0] : null,
-        errorMessages: errors.length ? errors : EMPTY_ERRORS,
-        hasValue: !isDefaultRequiredValue(inputValue),
-        isFormDisabled: fieldState?.isFormDisabled ?? stateStore.getDisabled(),
-        isFormSubmitted: fieldState?.isFormSubmitted ?? false,
-        isPristine,
-        isRequired,
-        isValid,
-        isValidValue,
-        resetValue,
-        setValidations,
-        showError: !isRequired && !isValid,
-        showRequired: isRequired
-    };
-}
-function getDisplayName(component) {
-    return component.displayName || component.name || (isString(component) ? component : 'Component');
-}
-function withFormsy(WrappedComponent) {
-    const MemoizedWrappedComponent = /*#__PURE__*/ react.memo(WrappedComponent);
-    const WithFormsy = (props)=>{
-        const formsyProps = useFormsy(props);
-        const allProps = {
-            ...props,
-            ...formsyProps
-        };
-        if (props.innerRef) allProps.ref = props.innerRef;
-        return /*#__PURE__*/ jsx(MemoizedWrappedComponent, {
-            ...allProps
-        });
-    };
-    WithFormsy.displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
-    return WithFormsy;
-}
 function runSingleValidation(value, currentValues, input, externalError) {
     const validationResults = runRules(value, currentValues, input.validations || {}, validationRules_validationRules);
     const requiredResults = runRules(value, currentValues, input.requiredValidations || {}, validationRules_validationRules);
@@ -405,16 +184,23 @@ function runSingleValidation(value, currentValues, input, externalError) {
         validationError: validationError || []
     };
 }
+const EMPTY_CURRENT_VALUES = {};
 function validateFields(state, names) {
     const newErrors = new Map(state.errors);
     const newIsValid = new Map(state.isValid);
     const newIsRequired = new Map(state.isRequired);
     let formIsValid = true;
     if (state.inputs.size > 0) {
-        const currentValues = Object.fromEntries(state.values);
+        let currentValues = EMPTY_CURRENT_VALUES;
+        let currentValuesBuilt = false;
         for (const name of names){
             const input = state.inputs.get(name);
             if (!input) continue;
+            const dynamic = isDynamicInput(input);
+            if (dynamic && !currentValuesBuilt) {
+                currentValues = Object.fromEntries(state.values);
+                currentValuesBuilt = true;
+            }
             const value = state.values.get(name);
             const externalError = state.externalValidationErrors.get(name);
             const result = runSingleValidation(value, currentValues, input, externalError);
@@ -642,12 +428,22 @@ function FormsyInner(props, ref) {
     const onChangeRef = useRef(onChange);
     const onValidRef = useRef(onValid);
     const onInvalidRef = useRef(onInvalid);
+    const onSubmitRef = useRef(onSubmit);
+    const onValidSubmitRef = useRef(onValidSubmit);
+    const onInvalidSubmitRef = useRef(onInvalidSubmit);
+    const preventDefaultSubmitRef = useRef(preventDefaultSubmit);
+    const preventExternalInvalidationRef = useRef(preventExternalInvalidation);
     const mappingRef = useRef(mapping);
     const disabledRef = useRef(disabled);
     const formStateRef = useRef(formState);
     onChangeRef.current = onChange;
     onValidRef.current = onValid;
     onInvalidRef.current = onInvalid;
+    onSubmitRef.current = onSubmit;
+    onValidSubmitRef.current = onValidSubmit;
+    onInvalidSubmitRef.current = onInvalidSubmit;
+    preventDefaultSubmitRef.current = preventDefaultSubmit;
+    preventExternalInvalidationRef.current = preventExternalInvalidation;
     mappingRef.current = mapping;
     disabledRef.current = disabled;
     formStateRef.current = formState;
@@ -660,9 +456,7 @@ function FormsyInner(props, ref) {
         });
         return returnModel;
     }, []);
-    const getPristineValues = useCallback(()=>Object.fromEntries(formState.initialValues), [
-        formState.initialValues
-    ]);
+    const getPristineValues = useCallback(()=>Object.fromEntries(formStateRef.current.initialValues), []);
     const handleReset = useCallback((model)=>{
         if (model) {
             const modelMap = new Map();
@@ -686,14 +480,12 @@ function FormsyInner(props, ref) {
         dispatch({
             type: 'SET_EXTERNAL_ERRORS',
             errors: errorsMap,
-            preventInvalidation: preventExternalInvalidation
+            preventInvalidation: preventExternalInvalidationRef.current
         });
-    }, [
-        preventExternalInvalidation
-    ]);
+    }, []);
     const handleUpdateInputsWithValue = useCallback((data, validate = true)=>{
         const valuesToSet = new Map();
-        formState.inputs.forEach((_input, name)=>{
+        formStateRef.current.inputs.forEach((_input, name)=>{
             if (data && has(data, name)) valuesToSet.set(name, get(data, name));
         });
         if (valuesToSet.size > 0) dispatch({
@@ -701,27 +493,21 @@ function FormsyInner(props, ref) {
             values: valuesToSet,
             validate
         });
-    }, [
-        formState.inputs
-    ]);
+    }, []);
     const handleSubmit = useCallback((event)=>{
         const currentState = formStateRef.current;
         const { formIsValid } = currentState;
-        if (preventDefaultSubmit && event?.preventDefault) event.preventDefault();
+        if (preventDefaultSubmitRef.current && event?.preventDefault) event.preventDefault();
         dispatch({
             type: 'SET_SUBMITTED',
             submitted: true
         });
         const model = mapModel(Object.fromEntries(currentState.values));
         const submitEvent = event;
-        onSubmit?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
-        if (formIsValid) onValidSubmit?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
-        else onInvalidSubmit?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
+        onSubmitRef.current?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
+        if (formIsValid) onValidSubmitRef.current?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
+        else onInvalidSubmitRef.current?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
     }, [
-        preventDefaultSubmit,
-        onSubmit,
-        onValidSubmit,
-        onInvalidSubmit,
         handleReset,
         handleUpdateInputsWithError,
         mapModel
@@ -735,7 +521,14 @@ function FormsyInner(props, ref) {
             getModel: ()=>mapModel(Object.fromEntries(formStateRef.current.values)),
             getPristineValues: ()=>getPristineValues(),
             getCurrentValues: ()=>Object.fromEntries(formStateRef.current.values)
-        }));
+        }), [
+        handleReset,
+        handleUpdateInputsWithValue,
+        handleUpdateInputsWithError,
+        getPristineValues,
+        handleSubmit,
+        mapModel
+    ]);
     const canChangeRef = useRef(false);
     const initialEventsFired = useRef(false);
     useEffect(()=>{
@@ -767,13 +560,15 @@ function FormsyInner(props, ref) {
             value,
             validate
         });
-        if (canChangeRef.current) {
+        if (canChangeRef.current && onChangeRef.current) {
             const state = formStateRef.current;
-            const newValues = new Map(state.values);
-            newValues.set(name, value);
-            const model = mapModel(Object.fromEntries(newValues));
-            const changed = !isSame(Object.fromEntries(state.initialValues), Object.fromEntries(newValues));
-            onChangeRef.current?.(model, changed);
+            const newValues = {
+                ...Object.fromEntries(state.values),
+                [name]: value
+            };
+            const model = mapModel(newValues);
+            const changed = !isSame(Object.fromEntries(state.initialValues), newValues);
+            onChangeRef.current(model, changed);
         }
     }, [
         mapModel
@@ -785,15 +580,17 @@ function FormsyInner(props, ref) {
             config,
             initialValue
         });
-        if (canChangeRef.current) {
+        if (canChangeRef.current && onChangeRef.current) {
             const state = formStateRef.current;
-            const newValues = new Map(state.values);
-            newValues.set(name, initialValue);
-            const newInitialValues = new Map(state.initialValues);
-            if (!newInitialValues.has(name)) newInitialValues.set(name, initialValue);
-            const model = mapModel(Object.fromEntries(newValues));
-            const changed = !isSame(Object.fromEntries(newInitialValues), Object.fromEntries(newValues));
-            onChangeRef.current?.(model, changed);
+            const newValues = {
+                ...Object.fromEntries(state.values),
+                [name]: initialValue
+            };
+            const newInitialValues = Object.fromEntries(state.initialValues);
+            if (!state.initialValues.has(name)) newInitialValues[name] = initialValue;
+            const model = mapModel(newValues);
+            const changed = !isSame(newInitialValues, newValues);
+            onChangeRef.current(model, changed);
         }
     }, [
         mapModel
@@ -803,12 +600,11 @@ function FormsyInner(props, ref) {
             type: 'UNREGISTER',
             name
         });
-        if (canChangeRef.current) {
-            const state = formStateRef.current;
-            const newValues = new Map(state.values);
-            newValues.delete(name);
-            const model = mapModel(Object.fromEntries(newValues));
-            onChangeRef.current?.(model, true);
+        if (canChangeRef.current && onChangeRef.current) {
+            const newValues = Object.fromEntries(formStateRef.current.values);
+            delete newValues[name];
+            const model = mapModel(newValues);
+            onChangeRef.current(model, true);
         }
     }, [
         mapModel
@@ -899,6 +695,227 @@ FormsyInner.displayName = 'Formsy';
 const Formsy = /*#__PURE__*/ forwardRef(FormsyInner);
 Formsy.displayName = 'Formsy';
 const src_Formsy = Formsy;
+const EMPTY_ERRORS = [];
+function areSnapshotsEqual(a, b) {
+    return Object.is(a.value, b.value) && a.isPristine === b.isPristine && a.isRequired === b.isRequired && a.isValid === b.isValid && a.isFormDisabled === b.isFormDisabled && a.isFormSubmitted === b.isFormSubmitted && a.errors.length === b.errors.length && a.errors.every((error, index)=>error === b.errors[index]);
+}
+const convertValidationsToObject = (validations)=>{
+    if (isString(validations)) return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation)=>{
+        let args = validation.split(':');
+        const validateMethod = args.shift() || '';
+        args = args.map((arg)=>{
+            try {
+                return JSON.parse(arg);
+            } catch  {
+                return arg;
+            }
+        });
+        if (args.length > 1) throw new Error('Formsy does not support multiple args on string validations. Use object format of validations instead.');
+        const validationsAccumulatorCopy = {
+            ...validationsAccumulator
+        };
+        validationsAccumulatorCopy[validateMethod] = args.length ? args[0] : true;
+        return validationsAccumulatorCopy;
+    }, {});
+    return validations || {};
+};
+const convertRequired = (required)=>{
+    if (true === required) return {
+        isDefaultRequiredValue: true
+    };
+    return convertValidationsToObject(required);
+};
+function computeLocalValidation(value, validations, requiredValidations, validationError, validationErrors) {
+    const currentValues = {};
+    const validationResults = runRules(value, currentValues, validations || {}, validationRules_validationRules);
+    const requiredResults = runRules(value, currentValues, requiredValidations || {}, validationRules_validationRules);
+    const isRequired = Object.keys(requiredValidations || {}).length ? !!requiredResults.success.length : false;
+    const isCustomValid = !validationResults.failed.length;
+    const isValid = isRequired ? false : isCustomValid;
+    const errors = (()=>{
+        if (isValid && !isRequired) return [];
+        if (validationResults.errors.length) return validationResults.errors;
+        if (isRequired) {
+            const error = (validationErrors || {})[requiredResults.success[0]] || validationError;
+            return error ? [
+                error
+            ] : [];
+        }
+        if (validationResults.failed.length) return validationResults.failed.map((failed)=>(validationErrors || {})[failed] || validationError).filter((x, pos, arr)=>arr.indexOf(x) === pos).filter(Boolean);
+        return [];
+    })();
+    return {
+        isRequired,
+        isValid,
+        errors
+    };
+}
+function useFormsy(props) {
+    const actions = useContext(FormsyActionsContext);
+    const stateStore = useContext(FormsyStateStoreContext);
+    const { isValidValue: validateValue, registerInput, resetValue: resetFieldValue, setValue: setFieldValue, unregisterInput, updateValidations } = actions;
+    const { name, value: externalValue, validations, required, validationError, validationErrors } = props;
+    const prevExternalValue = useRef(externalValue);
+    const previousSnapshot = useRef(null);
+    const registrationRef = useRef();
+    const localValCacheRef = useRef({
+        isRequired: false,
+        isValid: true,
+        errors: EMPTY_ERRORS
+    });
+    const parsedValidations = useMemo(()=>convertValidationsToObject(validations), [
+        validations
+    ]);
+    const parsedRequired = useMemo(()=>convertRequired(required), [
+        required
+    ]);
+    if (!name) throw new Error('Form Input requires a name property when used');
+    if (!registrationRef.current) registrationRef.current = {
+        validations: parsedValidations,
+        requiredValidations: parsedRequired,
+        validationError,
+        validationErrors
+    };
+    const getSnapshot = useCallback(()=>{
+        const state = stateStore.getState();
+        if (!state.inputs.has(name)) {
+            previousSnapshot.current = null;
+            return null;
+        }
+        const snapshot = {
+            value: state.values.get(name),
+            errors: state.errors.get(name) || EMPTY_ERRORS,
+            isPristine: state.isPristine.get(name) ?? true,
+            isRequired: state.isRequired.get(name) ?? false,
+            isValid: state.isValid.get(name) ?? true,
+            isFormDisabled: stateStore.getDisabled(),
+            isFormSubmitted: state.formSubmitted
+        };
+        if (previousSnapshot.current && areSnapshotsEqual(previousSnapshot.current, snapshot)) return previousSnapshot.current;
+        previousSnapshot.current = snapshot;
+        return snapshot;
+    }, [
+        name,
+        stateStore
+    ]);
+    const fieldState = useSyncExternalStore(stateStore.subscribe, getSnapshot, getSnapshot);
+    useLayoutEffect(()=>{
+        registerInput(name, registrationRef.current, prevExternalValue.current);
+        prevExternalValue.current = externalValue;
+        return ()=>{
+            unregisterInput(name);
+        };
+    }, [
+        name
+    ]);
+    useEffect(()=>{
+        if (!isSame(externalValue, prevExternalValue.current)) {
+            prevExternalValue.current = externalValue;
+            if (void 0 !== externalValue) setFieldValue(name, externalValue);
+        }
+    }, [
+        externalValue,
+        name,
+        setFieldValue
+    ]);
+    useLayoutEffect(()=>{
+        updateValidations(name, {
+            validations: parsedValidations,
+            requiredValidations: parsedRequired,
+            validationError,
+            validationErrors
+        });
+    }, [
+        updateValidations,
+        name,
+        parsedValidations,
+        parsedRequired,
+        validationError,
+        validationErrors
+    ]);
+    const localVal = useMemo(()=>{
+        if (fieldState) return localValCacheRef.current;
+        localValCacheRef.current = computeLocalValidation(externalValue, parsedValidations, parsedRequired, validationError, validationErrors);
+        return localValCacheRef.current;
+    }, [
+        fieldState,
+        externalValue,
+        parsedValidations,
+        parsedRequired,
+        validationError,
+        validationErrors
+    ]);
+    const inputValue = fieldState ? fieldState.value : externalValue;
+    const errors = fieldState ? fieldState.errors : localVal.errors;
+    const isPristine = fieldState ? fieldState.isPristine : true;
+    const isValid = fieldState ? fieldState.isValid : localVal.isValid;
+    const isRequired = fieldState ? fieldState.isRequired : localVal.isRequired;
+    const setValue = useCallback((value, validate = true)=>{
+        setFieldValue(name, value, validate);
+    }, [
+        name,
+        setFieldValue
+    ]);
+    const resetValue = useCallback(()=>{
+        resetFieldValue(name);
+    }, [
+        name,
+        resetFieldValue
+    ]);
+    const isValidValue = useCallback((value)=>validateValue(name, value), [
+        name,
+        validateValue
+    ]);
+    const setValidations = useCallback((validations, required)=>{
+        updateValidations(name, {
+            validations: convertValidationsToObject(validations),
+            requiredValidations: convertRequired(required),
+            validationError,
+            validationErrors
+        });
+    }, [
+        name,
+        updateValidations,
+        validationError,
+        validationErrors
+    ]);
+    return {
+        value: inputValue,
+        setValue,
+        errorMessage: errors.length ? errors[0] : null,
+        errorMessages: errors.length ? errors : EMPTY_ERRORS,
+        hasValue: !isDefaultRequiredValue(inputValue),
+        isFormDisabled: fieldState?.isFormDisabled ?? stateStore.getDisabled(),
+        isFormSubmitted: fieldState?.isFormSubmitted ?? false,
+        isPristine,
+        isRequired,
+        isValid,
+        isValidValue,
+        resetValue,
+        setValidations,
+        showError: !isRequired && !isValid,
+        showRequired: isRequired
+    };
+}
+function getDisplayName(component) {
+    return component.displayName || component.name || (isString(component) ? component : 'Component');
+}
+function withFormsy(WrappedComponent) {
+    const MemoizedWrappedComponent = /*#__PURE__*/ react.memo(WrappedComponent);
+    const WithFormsy = (props)=>{
+        const formsyProps = useFormsy(props);
+        const allProps = {
+            ...props,
+            ...formsyProps
+        };
+        if (props.innerRef) allProps.ref = props.innerRef;
+        return /*#__PURE__*/ jsx(MemoizedWrappedComponent, {
+            ...allProps
+        });
+    };
+    WithFormsy.displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
+    return WithFormsy;
+}
 const src = src_Formsy;
 export default src;
 export { addValidationRule, useFormsy, validationRules_validationRules as validationRules, withFormsy };

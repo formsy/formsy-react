@@ -75,6 +75,9 @@ function runSingleValidation(
   };
 }
 
+// Only cross-field rules (see `isDynamicInput`) read the values object.
+const EMPTY_CURRENT_VALUES: Record<string, any> = {};
+
 function validateFields(state: FormState, names: Iterable<string>): FormState {
   const newErrors = new Map(state.errors);
   const newIsValid = new Map(state.isValid);
@@ -82,11 +85,17 @@ function validateFields(state: FormState, names: Iterable<string>): FormState {
   let formIsValid = true;
 
   if (state.inputs.size > 0) {
-    const currentValues = Object.fromEntries(state.values);
+    let currentValues = EMPTY_CURRENT_VALUES;
+    let currentValuesBuilt = false;
     for (const name of names) {
       const input = state.inputs.get(name);
       if (!input) {
         continue;
+      }
+      const dynamic = isDynamicInput(input);
+      if (dynamic && !currentValuesBuilt) {
+        currentValues = Object.fromEntries(state.values);
+        currentValuesBuilt = true;
       }
       const value = state.values.get(name);
       const externalError = state.externalValidationErrors.get(name);

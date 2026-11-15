@@ -116,6 +116,11 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
   const onChangeRef = useRef(onChange);
   const onValidRef = useRef(onValid);
   const onInvalidRef = useRef(onInvalid);
+  const onSubmitRef = useRef(onSubmit);
+  const onValidSubmitRef = useRef(onValidSubmit);
+  const onInvalidSubmitRef = useRef(onInvalidSubmit);
+  const preventDefaultSubmitRef = useRef(preventDefaultSubmit);
+  const preventExternalInvalidationRef = useRef(preventExternalInvalidation);
   const mappingRef = useRef(mapping);
   const disabledRef = useRef(disabled);
   const formStateRef = useRef(formState);
@@ -123,6 +128,11 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
   onChangeRef.current = onChange;
   onValidRef.current = onValid;
   onInvalidRef.current = onInvalid;
+  onSubmitRef.current = onSubmit;
+  onValidSubmitRef.current = onValidSubmit;
+  onInvalidSubmitRef.current = onInvalidSubmit;
+  preventDefaultSubmitRef.current = preventDefaultSubmit;
+  preventExternalInvalidationRef.current = preventExternalInvalidation;
   mappingRef.current = mapping;
   disabledRef.current = disabled;
   formStateRef.current = formState;
@@ -140,8 +150,8 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
   }, []);
 
   const getPristineValues = useCallback((): Record<string, any> => {
-    return Object.fromEntries(formState.initialValues);
-  }, [formState.initialValues]);
+    return Object.fromEntries(formStateRef.current.initialValues);
+  }, []);
 
   const handleReset = useCallback((model?: IModel) => {
     if (model) {
@@ -157,47 +167,41 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
     }
   }, []);
 
-  const handleUpdateInputsWithError: IUpdateInputsWithError = useCallback(
-    (errors, invalidate) => {
-      const errorsMap = new Map<string, any>();
-      Object.entries(errors).forEach(([name, error]) => {
-        if (!formStateRef.current.inputs.has(name) && invalidate === true) {
-          throw new Error(
-            `You are trying to update an input that does not exist. Verify errors object with input names. ${JSON.stringify(errors)}`
-          );
-        }
-        errorsMap.set(name, error);
-      });
-      dispatch({
-        type: 'SET_EXTERNAL_ERRORS',
-        errors: errorsMap,
-        preventInvalidation: preventExternalInvalidation,
-      });
-    },
-    [preventExternalInvalidation]
-  );
-
-  const handleUpdateInputsWithValue = useCallback(
-    (data: Record<string, any>, validate = true) => {
-      const valuesToSet = new Map<string, any>();
-      formState.inputs.forEach((_input, name) => {
-        if (data && has(data, name)) {
-          valuesToSet.set(name, get(data, name));
-        }
-      });
-      if (valuesToSet.size > 0) {
-        dispatch({ type: 'SET_VALUES', values: valuesToSet, validate });
+  const handleUpdateInputsWithError: IUpdateInputsWithError = useCallback((errors, invalidate) => {
+    const errorsMap = new Map<string, any>();
+    Object.entries(errors).forEach(([name, error]) => {
+      if (!formStateRef.current.inputs.has(name) && invalidate === true) {
+        throw new Error(
+          `You are trying to update an input that does not exist. Verify errors object with input names. ${JSON.stringify(errors)}`
+        );
       }
-    },
-    [formState.inputs]
-  );
+      errorsMap.set(name, error);
+    });
+    dispatch({
+      type: 'SET_EXTERNAL_ERRORS',
+      errors: errorsMap,
+      preventInvalidation: preventExternalInvalidationRef.current,
+    });
+  }, []);
+
+  const handleUpdateInputsWithValue = useCallback((data: Record<string, any>, validate = true) => {
+    const valuesToSet = new Map<string, any>();
+    formStateRef.current.inputs.forEach((_input, name) => {
+      if (data && has(data, name)) {
+        valuesToSet.set(name, get(data, name));
+      }
+    });
+    if (valuesToSet.size > 0) {
+      dispatch({ type: 'SET_VALUES', values: valuesToSet, validate });
+    }
+  }, []);
 
   const handleSubmit = useCallback(
     (event?: React.SyntheticEvent<HTMLFormElement>) => {
       const currentState = formStateRef.current;
       const { formIsValid } = currentState;
 
-      if (preventDefaultSubmit && event?.preventDefault) {
+      if (preventDefaultSubmitRef.current && event?.preventDefault) {
         event.preventDefault();
       }
 
@@ -205,27 +209,33 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
 
       const model = mapModel(Object.fromEntries(currentState.values));
       const submitEvent = event as React.SyntheticEvent<HTMLFormElement>;
-      onSubmit?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
+      onSubmitRef.current?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
 
       if (formIsValid) {
-        onValidSubmit?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
+        onValidSubmitRef.current?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
       } else {
-        onInvalidSubmit?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
+        onInvalidSubmitRef.current?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
       }
     },
-    [preventDefaultSubmit, onSubmit, onValidSubmit, onInvalidSubmit, handleReset, handleUpdateInputsWithError, mapModel]
+    [handleReset, handleUpdateInputsWithError, mapModel]
   );
 
-  useImperativeHandle(ref, () => ({
-    submit: handleSubmit,
-    reset: handleReset,
-    updateInputsWithValue: handleUpdateInputsWithValue,
-    updateInputsWithError: handleUpdateInputsWithError,
-    isChanged: () => !utils.isSame(getPristineValues(), Object.fromEntries(formStateRef.current.values)),
-    getModel: () => mapModel(Object.fromEntries(formStateRef.current.values)),
-    getPristineValues: () => getPristineValues(),
-    getCurrentValues: () => Object.fromEntries(formStateRef.current.values),
-  }));
+  // All imperative callbacks are stable ([]-deps) and read props and state
+  // through refs, so the API object stays referentially stable across renders.
+  useImperativeHandle(
+    ref,
+    () => ({
+      submit: handleSubmit,
+      reset: handleReset,
+      updateInputsWithValue: handleUpdateInputsWithValue,
+      updateInputsWithError: handleUpdateInputsWithError,
+      isChanged: () => !utils.isSame(getPristineValues(), Object.fromEntries(formStateRef.current.values)),
+      getModel: () => mapModel(Object.fromEntries(formStateRef.current.values)),
+      getPristineValues: () => getPristineValues(),
+      getCurrentValues: () => Object.fromEntries(formStateRef.current.values),
+    }),
+    [handleReset, handleUpdateInputsWithValue, handleUpdateInputsWithError, getPristineValues, handleSubmit, mapModel]
+  );
 
   const canChangeRef = useRef(false);
   const initialEventsFired = useRef(false);
@@ -261,13 +271,12 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
   const handleSetValue = useCallback(
     (name: string, value: any, validate: boolean = true) => {
       dispatch({ type: 'SET_VALUE', name, value, validate });
-      if (canChangeRef.current) {
+      if (canChangeRef.current && onChangeRef.current) {
         const state = formStateRef.current;
-        const newValues = new Map(state.values);
-        newValues.set(name, value);
-        const model = mapModel(Object.fromEntries(newValues));
-        const changed = !utils.isSame(Object.fromEntries(state.initialValues), Object.fromEntries(newValues));
-        onChangeRef.current?.(model, changed);
+        const newValues: Record<string, any> = { ...Object.fromEntries(state.values), [name]: value };
+        const model = mapModel(newValues);
+        const changed = !utils.isSame(Object.fromEntries(state.initialValues), newValues);
+        onChangeRef.current(model, changed);
       }
     },
     [mapModel]
@@ -276,17 +285,16 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
   const handleRegisterInput = useCallback(
     (name: string, config: InputRegistration, initialValue: any) => {
       dispatch({ type: 'REGISTER', name, config, initialValue });
-      if (canChangeRef.current) {
+      if (canChangeRef.current && onChangeRef.current) {
         const state = formStateRef.current;
-        const newValues = new Map(state.values);
-        newValues.set(name, initialValue);
-        const newInitialValues = new Map(state.initialValues);
-        if (!newInitialValues.has(name)) {
-          newInitialValues.set(name, initialValue);
+        const newValues: Record<string, any> = { ...Object.fromEntries(state.values), [name]: initialValue };
+        const newInitialValues: Record<string, any> = Object.fromEntries(state.initialValues);
+        if (!state.initialValues.has(name)) {
+          newInitialValues[name] = initialValue;
         }
-        const model = mapModel(Object.fromEntries(newValues));
-        const changed = !utils.isSame(Object.fromEntries(newInitialValues), Object.fromEntries(newValues));
-        onChangeRef.current?.(model, changed);
+        const model = mapModel(newValues);
+        const changed = !utils.isSame(newInitialValues, newValues);
+        onChangeRef.current(model, changed);
       }
     },
     [mapModel]
@@ -295,12 +303,11 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
   const handleUnregisterInput = useCallback(
     (name: string) => {
       dispatch({ type: 'UNREGISTER', name });
-      if (canChangeRef.current) {
-        const state = formStateRef.current;
-        const newValues = new Map(state.values);
-        newValues.delete(name);
-        const model = mapModel(Object.fromEntries(newValues));
-        onChangeRef.current?.(model, true);
+      if (canChangeRef.current && onChangeRef.current) {
+        const newValues: Record<string, any> = Object.fromEntries(formStateRef.current.values);
+        delete newValues[name];
+        const model = mapModel(newValues);
+        onChangeRef.current(model, true);
       }
     },
     [mapModel]
