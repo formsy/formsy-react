@@ -580,6 +580,54 @@ describe('onChange', () => {
     expect(hasChanged).toHaveBeenCalledWith({ foo: 'foo' }, false);
   });
 
+  it('should preserve the caret when a controlled parent re-renders in the same commit', () => {
+    function ChatLikeInput(props: { name: string; value: string; onStoreChange: (value: string) => void }) {
+      const field = useFormsy<string>(props);
+      return (
+        <textarea
+          data-testid="test-input"
+          value={field.value}
+          onChange={(event) => {
+            field.setValue(event.currentTarget.value);
+            props.onStoreChange(event.currentTarget.value);
+          }}
+        />
+      );
+    }
+
+    function TestForm() {
+      const [storeValue, setStore] = React.useState('');
+      return (
+        <Formsy>
+          <ChatLikeInput name="message" value={storeValue} onStoreChange={setStore} />
+        </Formsy>
+      );
+    }
+
+    const screen = render(<TestForm />);
+    const input = screen.getByTestId('test-input') as HTMLTextAreaElement;
+
+    // type "test123" (caret at end)
+    fireEvent.change(input, { target: { value: 'test123' } });
+    expect(input.value).toBe('test123');
+
+    // place the caret before "123", then type an "x"
+    input.setSelectionRange(4, 4);
+    fireEvent.change(input, { target: { value: 'testx123', selectionStart: 5, selectionEnd: 5 } });
+
+    // The parent re-render in the same commit must not make React rewrite
+    // the DOM value from a stale pre-commit snapshot — that resets the
+    // caret to the end and subsequent characters get appended.
+    expect(input.value).toBe('testx123');
+    expect(input.selectionStart).toBe(5);
+
+    input.setSelectionRange(5, 5);
+    fireEvent.change(input, { target: { value: 'testxx123', selectionStart: 6, selectionEnd: 6 } });
+
+    expect(input.value).toBe('testxx123');
+    expect(input.selectionStart).toBe(6);
+  });
+
   it('should trigger onChange once when form element is changed', () => {
     const hasChanged = jest.fn();
     const screen = render(

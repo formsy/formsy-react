@@ -654,10 +654,6 @@ function FormsyInner(props, ref) {
         formState.formIsValid
     ]);
     (0, external_react_namespaceObject.useLayoutEffect)(()=>{
-        stateStore.state = formState;
-        stateStore.disabled = disabled;
-        pendingValuesRef.current = null;
-        pendingInitialValuesRef.current = null;
         stateStore.listeners.forEach((listener)=>listener());
     }, [
         stateStore,
@@ -787,6 +783,10 @@ function FormsyInner(props, ref) {
         handleUnregisterInput,
         handleUpdateValidations
     ]);
+    stateStore.state = formState;
+    stateStore.disabled = disabled;
+    pendingValuesRef.current = null;
+    pendingInitialValuesRef.current = null;
     const FormElement = formElement;
     return /*#__PURE__*/ (0, jsx_runtime_namespaceObject.jsx)(FormsyActionsContext.Provider, {
         value: actions,

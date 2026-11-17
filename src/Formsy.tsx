@@ -338,13 +338,8 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
   }, [formState.inputs, formState.formIsValid]);
 
   useLayoutEffect(() => {
-    // Publish only committed state. Mutating an external store during render
-    // can expose an abandoned concurrent render to subscribers.
-    stateStore.state = formState;
-    stateStore.disabled = disabled;
-    // The reducer state is up to date again; later reads can snapshot from it.
-    pendingValuesRef.current = null;
-    pendingInitialValuesRef.current = null;
+    // Notify subscribers only after the commit; renders already read the
+    // fresh state through the render-body publish above.
     stateStore.listeners.forEach((listener) => listener());
   }, [stateStore, formState, disabled]);
 
@@ -473,6 +468,20 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
       handleUpdateValidations,
     ]
   );
+
+  // Publish the store during the render body so that every reader in this
+  // commit — including parents re-rendering for their own reasons
+  // (controlled state) — sees the committed reducer state. If the
+  // publish happened in a layout effect instead, a co-rendered component
+  // would read the stale pre-commit state and reset a controlled input's
+  // DOM value, moving the caret to the end. Subscribers are only notified
+  // after the commit (layout effect below), so an abandoned concurrent
+  // render never reaches a subscriber.
+  stateStore.state = formState;
+  stateStore.disabled = disabled;
+  // The reducer state is up to date again; later reads can snapshot from it.
+  pendingValuesRef.current = null;
+  pendingInitialValuesRef.current = null;
 
   const FormElement = formElement;
   return (
