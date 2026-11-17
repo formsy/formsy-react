@@ -39,6 +39,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
     addValidationRule: ()=>addValidationRule,
     default: ()=>src,
+    useFormsy: ()=>useFormsy,
     validationRules: ()=>validationRules_validationRules,
     withFormsy: ()=>withFormsy
 });
@@ -77,15 +78,6 @@ function isValueNullOrUndefined(value) {
 function isValueUndefined(value) {
     return void 0 === value;
 }
-function protectAgainstParamReassignment(value) {
-    if (isObject(value)) return {
-        ...value
-    };
-    if (isArray(value)) return [
-        ...value
-    ];
-    return value;
-}
 function isSame(a, b) {
     if (typeof a !== typeof b) return false;
     if (isArray(a) && isArray(b)) {
@@ -123,15 +115,6 @@ function runRules(value, currentValues, validations, validationRules) {
         return addToResults(validationRulesVal(currentValues, value, validationsVal));
     });
     return results;
-}
-function debounce(callback, timeout) {
-    let timer;
-    return (...args)=>{
-        clearTimeout(timer);
-        timer = setTimeout(()=>{
-            callback.apply(this, args);
-        }, timeout);
-    };
 }
 function isExisty(value) {
     return !isValueNullOrUndefined(value);
@@ -184,21 +167,653 @@ const validationRules_validationRules = {
 const addValidationRule = (name, func)=>{
     validationRules_validationRules[name] = func;
 };
+const jsx_runtime_namespaceObject = require("react/jsx-runtime");
+const set_js_namespaceObject = require("lodash/set.js");
+var set_js_default = /*#__PURE__*/ __webpack_require__.n(set_js_namespaceObject);
+const has_js_namespaceObject = require("lodash/has.js");
+var has_js_default = /*#__PURE__*/ __webpack_require__.n(has_js_namespaceObject);
+const get_js_namespaceObject = require("lodash/get.js");
+var get_js_default = /*#__PURE__*/ __webpack_require__.n(get_js_namespaceObject);
 const external_react_namespaceObject = require("react");
 var external_react_default = /*#__PURE__*/ __webpack_require__.n(external_react_namespaceObject);
-const noFormsyErrorMessage = 'Could not find Formsy Context Provider. Did you use withFormsy outside <Formsy />?';
+const noFormsyErrorMessage = 'Could not find Formsy Context Provider. Did you use useFormsy or withFormsy outside <Formsy />?';
 const throwNoFormsyProvider = ()=>{
     throw new Error(noFormsyErrorMessage);
 };
-const defaultValue = {
-    attachToForm: throwNoFormsyProvider,
-    detachFromForm: throwNoFormsyProvider,
-    isFormDisabled: true,
-    isValidValue: throwNoFormsyProvider,
-    validate: throwNoFormsyProvider,
-    runValidation: throwNoFormsyProvider
+const defaultStore = {
+    subscribe: ()=>{
+        throwNoFormsyProvider();
+        return ()=>void 0;
+    },
+    getState: ()=>{
+        throwNoFormsyProvider();
+    },
+    getDisabled: ()=>{
+        throwNoFormsyProvider();
+        return false;
+    }
 };
-const FormsyContext = external_react_default().createContext(defaultValue);
+const FormsyActionsContext = /*#__PURE__*/ external_react_default().createContext({
+    setValue: throwNoFormsyProvider,
+    registerInput: throwNoFormsyProvider,
+    unregisterInput: throwNoFormsyProvider,
+    resetValue: throwNoFormsyProvider,
+    updateValidations: throwNoFormsyProvider,
+    isValidValue: ()=>{
+        throwNoFormsyProvider();
+        return false;
+    }
+});
+const FormsyStateStoreContext = /*#__PURE__*/ external_react_default().createContext(defaultStore);
+function runSingleValidation(value, currentValues, input, externalError) {
+    const validationResults = runRules(value, currentValues, input.validations || {}, validationRules_validationRules);
+    const requiredResults = runRules(value, currentValues, input.requiredValidations || {}, validationRules_validationRules);
+    const isRequired = Object.keys(input.requiredValidations || {}).length ? !!requiredResults.success.length : false;
+    const isCustomValid = !validationResults.failed.length;
+    const isValid = isRequired ? false : isCustomValid && !externalError;
+    const validationErrors = input.validationErrors || {};
+    const componentValidationError = input.validationError;
+    const validationError = (()=>{
+        if (isValid && !isRequired) return [];
+        if (validationResults.errors.length) return validationResults.errors;
+        if (externalError) return [
+            externalError
+        ];
+        if (isRequired) {
+            const error = validationErrors[requiredResults.success[0]] || componentValidationError;
+            return error ? [
+                error
+            ] : [];
+        }
+        if (validationResults.failed.length) return validationResults.failed.map((failed)=>validationErrors[failed] ? validationErrors[failed] : componentValidationError).filter((x, pos, arr)=>arr.indexOf(x) === pos);
+        return [];
+    })();
+    return {
+        isRequired,
+        isValid,
+        validationError: validationError || []
+    };
+}
+const EMPTY_CURRENT_VALUES = {};
+function validateFields(state, names) {
+    const newErrors = new Map(state.errors);
+    const newIsValid = new Map(state.isValid);
+    const newIsRequired = new Map(state.isRequired);
+    let formIsValid = true;
+    if (state.inputs.size > 0) {
+        let currentValues = EMPTY_CURRENT_VALUES;
+        let currentValuesBuilt = false;
+        for (const name of names){
+            const input = state.inputs.get(name);
+            if (!input) continue;
+            const dynamic = isDynamicInput(input);
+            if (dynamic && !currentValuesBuilt) {
+                currentValues = Object.fromEntries(state.values);
+                currentValuesBuilt = true;
+            }
+            const value = state.values.get(name);
+            const externalError = state.externalValidationErrors.get(name);
+            const result = runSingleValidation(value, currentValues, input, externalError);
+            const prevented = state.preventExternalInvalidation && state.externalValidationErrors.has(name);
+            newErrors.set(name, result.validationError);
+            newIsValid.set(name, prevented ? true : result.isValid);
+            newIsRequired.set(name, result.isRequired);
+        }
+    }
+    state.inputs.forEach((_input, inputName)=>{
+        if (false === newIsValid.get(inputName)) formIsValid = false;
+    });
+    return {
+        ...state,
+        errors: newErrors,
+        isValid: newIsValid,
+        isRequired: newIsRequired,
+        formIsValid
+    };
+}
+function validateAll(state) {
+    return validateFields(state, state.inputs.keys());
+}
+const BUILT_IN_RULES = new Set(Object.keys(validationRules_validationRules));
+const dynamicInputCache = new WeakMap();
+function hasCrossFieldRules(validations) {
+    if (!validations || 'object' != typeof validations) return false;
+    return Object.keys(validations).some((ruleName)=>'equalsField' === ruleName || !BUILT_IN_RULES.has(ruleName) || isFunction(validations[ruleName]));
+}
+function isDynamicInput(input) {
+    let dynamic = dynamicInputCache.get(input);
+    if (void 0 === dynamic) {
+        dynamic = hasCrossFieldRules(input.validations) || hasCrossFieldRules(input.requiredValidations);
+        dynamicInputCache.set(input, dynamic);
+    }
+    return dynamic;
+}
+function namesToValidate(state, changedNames) {
+    const names = Array.from(changedNames);
+    const changed = new Set(names);
+    state.inputs.forEach((input, name)=>{
+        if (!changed.has(name) && isDynamicInput(input)) names.push(name);
+    });
+    return names;
+}
+function isSameErrorsMap(a, b) {
+    if (a === b) return true;
+    if (a.size !== b.size) return false;
+    for (const [key, value] of b)if (!a.has(key) || !isSame(a.get(key), value)) return false;
+    return true;
+}
+function formsyReducer(state, action) {
+    switch(action.type){
+        case 'REGISTER':
+            {
+                if (!action.name) return state;
+                if (state.inputs.has(action.name)) return state;
+                const hasPreRegisteredValue = state.values.has(action.name);
+                const newInputs = new Map(state.inputs).set(action.name, action.config);
+                const newValues = new Map(state.values);
+                const newPristine = new Map(state.isPristine);
+                if (!hasPreRegisteredValue) {
+                    newValues.set(action.name, action.initialValue);
+                    newPristine.set(action.name, true);
+                }
+                const newInitialValues = new Map(state.initialValues).set(action.name, action.initialValue);
+                let newState = {
+                    ...state,
+                    inputs: newInputs,
+                    values: newValues,
+                    initialValues: newInitialValues,
+                    isPristine: newPristine
+                };
+                newState = validateAll(newState);
+                return newState;
+            }
+        case 'UNREGISTER':
+            {
+                if (!state.inputs.has(action.name)) return state;
+                const newInputs = new Map(state.inputs);
+                newInputs.delete(action.name);
+                const newValues = new Map(state.values);
+                newValues.delete(action.name);
+                const newInitialValues = new Map(state.initialValues);
+                newInitialValues.delete(action.name);
+                const newErrors = new Map(state.errors);
+                newErrors.delete(action.name);
+                const newPristine = new Map(state.isPristine);
+                newPristine.delete(action.name);
+                const newIsValid = new Map(state.isValid);
+                newIsValid.delete(action.name);
+                const newIsRequired = new Map(state.isRequired);
+                newIsRequired.delete(action.name);
+                let newState = {
+                    ...state,
+                    inputs: newInputs,
+                    values: newValues,
+                    initialValues: newInitialValues,
+                    errors: newErrors,
+                    isPristine: newPristine,
+                    isValid: newIsValid,
+                    isRequired: newIsRequired
+                };
+                newState = validateAll(newState);
+                return newState;
+            }
+        case 'SET_VALUE':
+            {
+                const newValues = new Map(state.values).set(action.name, action.value);
+                const newPristine = action.validate ? new Map(state.isPristine).set(action.name, false) : state.isPristine;
+                let externalValidationErrors = state.externalValidationErrors;
+                if (externalValidationErrors.has(action.name)) {
+                    externalValidationErrors = new Map(externalValidationErrors);
+                    externalValidationErrors.delete(action.name);
+                }
+                const newState = {
+                    ...state,
+                    values: newValues,
+                    isPristine: newPristine,
+                    externalValidationErrors
+                };
+                if (!action.validate) return newState;
+                return validateFields(newState, namesToValidate(newState, [
+                    action.name
+                ]));
+            }
+        case 'SET_VALUES':
+            {
+                const newValues = new Map(state.values);
+                action.values.forEach((value, name)=>{
+                    newValues.set(name, value);
+                });
+                const newState = {
+                    ...state,
+                    values: newValues
+                };
+                if (!action.validate) return newState;
+                return validateFields(newState, namesToValidate(newState, action.values.keys()));
+            }
+        case 'SET_SUBMITTED':
+            return {
+                ...state,
+                formSubmitted: action.submitted
+            };
+        case 'SET_EXTERNAL_ERRORS':
+            {
+                const { errors, preventInvalidation } = action;
+                if (preventInvalidation === state.preventExternalInvalidation && isSameErrorsMap(state.externalValidationErrors, errors)) return state;
+                return validateAll({
+                    ...state,
+                    externalValidationErrors: errors,
+                    preventExternalInvalidation: preventInvalidation
+                });
+            }
+        case 'VALIDATE':
+            return validateAll(state);
+        case 'RESET':
+            {
+                const newValues = new Map(state.values);
+                const newPristine = new Map(state.isPristine);
+                let changedNames;
+                if (action.values) {
+                    changedNames = action.values.keys();
+                    action.values.forEach((value, name)=>{
+                        newValues.set(name, value);
+                        newPristine.set(name, true);
+                    });
+                } else state.inputs.forEach((_input, name)=>{
+                    newValues.set(name, state.initialValues.get(name));
+                    newPristine.set(name, true);
+                });
+                const newState = {
+                    ...state,
+                    values: newValues,
+                    isPristine: newPristine,
+                    formSubmitted: action.values ? state.formSubmitted : false
+                };
+                return changedNames ? validateFields(newState, namesToValidate(newState, changedNames)) : validateAll(newState);
+            }
+        case 'UPDATE_VALIDATIONS':
+            {
+                const existing = state.inputs.get(action.name);
+                if (!existing) return state;
+                if (isSame(existing, action.config)) return state;
+                const newInputs = new Map(state.inputs).set(action.name, action.config);
+                return validateAll({
+                    ...state,
+                    inputs: newInputs
+                });
+            }
+        default:
+            return state;
+    }
+}
+function getInitialState() {
+    return {
+        values: new Map(),
+        initialValues: new Map(),
+        errors: new Map(),
+        isPristine: new Map(),
+        isValid: new Map(),
+        isRequired: new Map(),
+        inputs: new Map(),
+        formSubmitted: false,
+        formIsValid: true,
+        externalValidationErrors: new Map(),
+        preventExternalInvalidation: false
+    };
+}
+function FormsyInner(props, ref) {
+    const { children, mapping, onChange, onInvalid, onInvalidSubmit, onReset, onSubmit, onValid, onValidSubmit, preventDefaultSubmit = true, preventExternalInvalidation = false, validationErrors, disabled = false, formElement = 'form', ...nonFormsyProps } = props;
+    const [formState, dispatch] = (0, external_react_namespaceObject.useReducer)(formsyReducer, void 0, getInitialState);
+    const stateStoreRef = (0, external_react_namespaceObject.useRef)();
+    if (!stateStoreRef.current) {
+        const listeners = new Set();
+        stateStoreRef.current = {
+            state: formState,
+            disabled,
+            listeners,
+            subscribe: (listener)=>{
+                listeners.add(listener);
+                return ()=>listeners.delete(listener);
+            },
+            getState: ()=>stateStoreRef.current.state,
+            getDisabled: ()=>stateStoreRef.current.disabled
+        };
+    }
+    const stateStore = stateStoreRef.current;
+    const prevValidationErrorsRef = (0, external_react_namespaceObject.useRef)(null);
+    const onChangeRef = (0, external_react_namespaceObject.useRef)(onChange);
+    const onValidRef = (0, external_react_namespaceObject.useRef)(onValid);
+    const onInvalidRef = (0, external_react_namespaceObject.useRef)(onInvalid);
+    const onSubmitRef = (0, external_react_namespaceObject.useRef)(onSubmit);
+    const onValidSubmitRef = (0, external_react_namespaceObject.useRef)(onValidSubmit);
+    const onInvalidSubmitRef = (0, external_react_namespaceObject.useRef)(onInvalidSubmit);
+    const preventDefaultSubmitRef = (0, external_react_namespaceObject.useRef)(preventDefaultSubmit);
+    const preventExternalInvalidationRef = (0, external_react_namespaceObject.useRef)(preventExternalInvalidation);
+    const mappingRef = (0, external_react_namespaceObject.useRef)(mapping);
+    const disabledRef = (0, external_react_namespaceObject.useRef)(disabled);
+    const formStateRef = (0, external_react_namespaceObject.useRef)(formState);
+    onChangeRef.current = onChange;
+    onValidRef.current = onValid;
+    onInvalidRef.current = onInvalid;
+    onSubmitRef.current = onSubmit;
+    onValidSubmitRef.current = onValidSubmit;
+    onInvalidSubmitRef.current = onInvalidSubmit;
+    preventDefaultSubmitRef.current = preventDefaultSubmit;
+    preventExternalInvalidationRef.current = preventExternalInvalidation;
+    mappingRef.current = mapping;
+    disabledRef.current = disabled;
+    formStateRef.current = formState;
+    const mapModel = (0, external_react_namespaceObject.useCallback)((model)=>{
+        const mappingFn = mappingRef.current;
+        if ('function' == typeof mappingFn) return mappingFn(model);
+        const returnModel = {};
+        Object.keys(model).forEach((key)=>{
+            set_js_default()(returnModel, key, model[key]);
+        });
+        return returnModel;
+    }, []);
+    const pendingValuesRef = (0, external_react_namespaceObject.useRef)(null);
+    const pendingInitialValuesRef = (0, external_react_namespaceObject.useRef)(null);
+    const getPendingValues = (0, external_react_namespaceObject.useCallback)(()=>{
+        if (!pendingValuesRef.current) pendingValuesRef.current = new Map(formStateRef.current.values);
+        return pendingValuesRef.current;
+    }, []);
+    const getPendingInitialValues = (0, external_react_namespaceObject.useCallback)(()=>{
+        if (!pendingInitialValuesRef.current) pendingInitialValuesRef.current = new Map(formStateRef.current.initialValues);
+        return pendingInitialValuesRef.current;
+    }, []);
+    const getPristineValues = (0, external_react_namespaceObject.useCallback)(()=>Object.fromEntries(formStateRef.current.initialValues), []);
+    const handleReset = (0, external_react_namespaceObject.useCallback)((model)=>{
+        if (model) {
+            const modelMap = new Map();
+            formStateRef.current.inputs.forEach((_input, name)=>{
+                if (has_js_default()(model, name)) modelMap.set(name, get_js_default()(model, name));
+            });
+            dispatch({
+                type: 'RESET',
+                values: modelMap
+            });
+            const pendingValues = getPendingValues();
+            modelMap.forEach((value, name)=>{
+                pendingValues.set(name, value);
+            });
+            if (canChangeRef.current && onChangeRef.current) {
+                const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
+                onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+            }
+        } else {
+            dispatch({
+                type: 'RESET'
+            });
+            const pendingValues = getPendingValues();
+            const pendingInitialValues = getPendingInitialValues();
+            formStateRef.current.inputs.forEach((_input, name)=>{
+                pendingValues.set(name, formStateRef.current.initialValues.get(name));
+            });
+            pendingInitialValues.forEach((value, name)=>{
+                pendingValues.set(name, value);
+            });
+            if (canChangeRef.current && onChangeRef.current) {
+                const changed = !isSame(Object.fromEntries(pendingInitialValues), Object.fromEntries(pendingValues));
+                onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+            }
+        }
+    }, [
+        getPendingValues,
+        getPendingInitialValues,
+        mapModel
+    ]);
+    const handleUpdateInputsWithError = (0, external_react_namespaceObject.useCallback)((errors, invalidate)=>{
+        const errorsMap = new Map();
+        Object.entries(errors).forEach(([name, error])=>{
+            if (!formStateRef.current.inputs.has(name) && true === invalidate) throw new Error(`You are trying to update an input that does not exist. Verify errors object with input names. ${JSON.stringify(errors)}`);
+            errorsMap.set(name, error);
+        });
+        dispatch({
+            type: 'SET_EXTERNAL_ERRORS',
+            errors: errorsMap,
+            preventInvalidation: preventExternalInvalidationRef.current
+        });
+    }, []);
+    const handleUpdateInputsWithValue = (0, external_react_namespaceObject.useCallback)((data, validate = true)=>{
+        const valuesToSet = new Map();
+        formStateRef.current.inputs.forEach((_input, name)=>{
+            if (data && has_js_default()(data, name)) valuesToSet.set(name, get_js_default()(data, name));
+        });
+        if (valuesToSet.size > 0) {
+            dispatch({
+                type: 'SET_VALUES',
+                values: valuesToSet,
+                validate
+            });
+            const pendingValues = getPendingValues();
+            valuesToSet.forEach((value, name)=>{
+                pendingValues.set(name, value);
+            });
+            if (canChangeRef.current && onChangeRef.current && validate) {
+                const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
+                onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+            }
+        }
+    }, [
+        getPendingValues,
+        getPendingInitialValues,
+        mapModel
+    ]);
+    const handleSubmit = (0, external_react_namespaceObject.useCallback)((event)=>{
+        const currentState = formStateRef.current;
+        const { formIsValid } = currentState;
+        if (preventDefaultSubmitRef.current && event?.preventDefault) event.preventDefault();
+        dispatch({
+            type: 'SET_SUBMITTED',
+            submitted: true
+        });
+        const model = mapModel(Object.fromEntries(currentState.values));
+        const submitEvent = event;
+        onSubmitRef.current?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
+        if (formIsValid) onValidSubmitRef.current?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
+        else onInvalidSubmitRef.current?.(model, handleReset, handleUpdateInputsWithError, submitEvent);
+    }, [
+        handleReset,
+        handleUpdateInputsWithError,
+        mapModel
+    ]);
+    (0, external_react_namespaceObject.useImperativeHandle)(ref, ()=>({
+            submit: handleSubmit,
+            reset: handleReset,
+            updateInputsWithValue: handleUpdateInputsWithValue,
+            updateInputsWithError: handleUpdateInputsWithError,
+            isChanged: ()=>!isSame(getPristineValues(), Object.fromEntries(formStateRef.current.values)),
+            getModel: ()=>mapModel(Object.fromEntries(formStateRef.current.values)),
+            getPristineValues: ()=>getPristineValues(),
+            getCurrentValues: ()=>Object.fromEntries(formStateRef.current.values)
+        }), [
+        handleReset,
+        handleUpdateInputsWithValue,
+        handleUpdateInputsWithError,
+        getPristineValues,
+        handleSubmit,
+        mapModel
+    ]);
+    const canChangeRef = (0, external_react_namespaceObject.useRef)(false);
+    const initialEventsFired = (0, external_react_namespaceObject.useRef)(false);
+    const registeredInputsCountRef = (0, external_react_namespaceObject.useRef)(0);
+    (0, external_react_namespaceObject.useEffect)(()=>{
+        canChangeRef.current = true;
+    }, []);
+    (0, external_react_namespaceObject.useEffect)(()=>{
+        if (formState.inputs.size > 0) {
+            initialEventsFired.current = true;
+            if (formState.formIsValid) onValidRef.current?.();
+            else onInvalidRef.current?.();
+        } else if (initialEventsFired.current || 0 === registeredInputsCountRef.current) {
+            initialEventsFired.current = true;
+            onValidRef.current?.();
+        }
+    }, [
+        formState.inputs,
+        formState.formIsValid
+    ]);
+    (0, external_react_namespaceObject.useLayoutEffect)(()=>{
+        stateStore.listeners.forEach((listener)=>listener());
+    }, [
+        stateStore,
+        formState,
+        disabled
+    ]);
+    const handleSetValue = (0, external_react_namespaceObject.useCallback)((name, value, validate = true)=>{
+        dispatch({
+            type: 'SET_VALUE',
+            name,
+            value,
+            validate
+        });
+        if (canChangeRef.current && onChangeRef.current) {
+            const pendingValues = getPendingValues();
+            pendingValues.set(name, value);
+            const model = mapModel(Object.fromEntries(pendingValues));
+            const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
+            onChangeRef.current(model, changed);
+        }
+    }, [
+        getPendingValues,
+        getPendingInitialValues,
+        mapModel
+    ]);
+    const handleRegisterInput = (0, external_react_namespaceObject.useCallback)((name, config, initialValue)=>{
+        if (name && !formStateRef.current.inputs.has(name)) registeredInputsCountRef.current += 1;
+        dispatch({
+            type: 'REGISTER',
+            name,
+            config,
+            initialValue
+        });
+        if (canChangeRef.current && onChangeRef.current) {
+            const pendingValues = getPendingValues();
+            if (!pendingValues.has(name)) pendingValues.set(name, initialValue);
+            getPendingInitialValues().set(name, initialValue);
+            const model = mapModel(Object.fromEntries(pendingValues));
+            const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
+            onChangeRef.current(model, changed);
+        }
+    }, [
+        getPendingValues,
+        getPendingInitialValues,
+        mapModel
+    ]);
+    const handleUnregisterInput = (0, external_react_namespaceObject.useCallback)((name)=>{
+        if (formStateRef.current.inputs.has(name)) registeredInputsCountRef.current -= 1;
+        dispatch({
+            type: 'UNREGISTER',
+            name
+        });
+        pendingValuesRef.current?.delete(name);
+        pendingInitialValuesRef.current?.delete(name);
+    }, []);
+    const handleResetValue = (0, external_react_namespaceObject.useCallback)((name)=>{
+        const currentState = formStateRef.current;
+        const initialValue = currentState.initialValues.get(name);
+        const modelMap = new Map();
+        modelMap.set(name, initialValue);
+        dispatch({
+            type: 'RESET',
+            values: modelMap
+        });
+        const pendingValues = getPendingValues();
+        pendingValues.set(name, initialValue);
+        if (canChangeRef.current && onChangeRef.current) {
+            const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
+            onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+        }
+    }, [
+        getPendingValues,
+        getPendingInitialValues,
+        mapModel
+    ]);
+    const handleUpdateValidations = (0, external_react_namespaceObject.useCallback)((name, config)=>{
+        dispatch({
+            type: 'UPDATE_VALIDATIONS',
+            name,
+            config
+        });
+    }, []);
+    const handleIsValidValue = (0, external_react_namespaceObject.useCallback)((name, value)=>{
+        const state = formStateRef.current;
+        const input = state.inputs.get(name);
+        if (!input) return true;
+        const allValues = Object.fromEntries(new Map(state.values).set(name, value));
+        const results = runRules(value, allValues, input.validations || {}, validationRules_validationRules);
+        return !results.failed.length;
+    }, []);
+    (0, external_react_namespaceObject.useEffect)(()=>{
+        if (validationErrors && isObject(validationErrors) && Object.keys(validationErrors).length > 0) {
+            prevValidationErrorsRef.current = validationErrors;
+            const errorsMap = new Map();
+            Object.keys(validationErrors).forEach((key)=>{
+                errorsMap.set(key, validationErrors[key]);
+            });
+            dispatch({
+                type: 'SET_EXTERNAL_ERRORS',
+                errors: errorsMap,
+                preventInvalidation: preventExternalInvalidation
+            });
+        } else if (prevValidationErrorsRef.current) {
+            prevValidationErrorsRef.current = null;
+            dispatch({
+                type: 'SET_EXTERNAL_ERRORS',
+                errors: new Map(),
+                preventInvalidation: preventExternalInvalidation
+            });
+        }
+    }, [
+        validationErrors,
+        preventExternalInvalidation
+    ]);
+    const actions = (0, external_react_namespaceObject.useMemo)(()=>({
+            setValue: handleSetValue,
+            registerInput: handleRegisterInput,
+            unregisterInput: handleUnregisterInput,
+            resetValue: handleResetValue,
+            updateValidations: handleUpdateValidations,
+            isValidValue: handleIsValidValue
+        }), [
+        handleIsValidValue,
+        handleRegisterInput,
+        handleResetValue,
+        handleSetValue,
+        handleUnregisterInput,
+        handleUpdateValidations
+    ]);
+    stateStore.state = formState;
+    stateStore.disabled = disabled;
+    pendingValuesRef.current = null;
+    pendingInitialValuesRef.current = null;
+    const FormElement = formElement;
+    return /*#__PURE__*/ (0, jsx_runtime_namespaceObject.jsx)(FormsyActionsContext.Provider, {
+        value: actions,
+        children: /*#__PURE__*/ (0, jsx_runtime_namespaceObject.jsx)(FormsyStateStoreContext.Provider, {
+            value: stateStore,
+            children: /*#__PURE__*/ (0, jsx_runtime_namespaceObject.jsx)(FormElement, {
+                onReset: (e)=>{
+                    e.preventDefault();
+                    handleReset();
+                    onReset?.();
+                },
+                onSubmit: handleSubmit,
+                ...nonFormsyProps,
+                disabled: disabled,
+                children: children
+            })
+        })
+    });
+}
+FormsyInner.displayName = 'Formsy';
+const Formsy = /*#__PURE__*/ (0, external_react_namespaceObject.forwardRef)(FormsyInner);
+Formsy.displayName = 'Formsy';
+const src_Formsy = Formsy;
+const EMPTY_ERRORS = [];
+function areSnapshotsEqual(a, b) {
+    return Object.is(a.value, b.value) && a.isPristine === b.isPristine && a.isRequired === b.isRequired && a.isValid === b.isValid && a.isFormDisabled === b.isFormDisabled && a.isFormSubmitted === b.isFormSubmitted && a.errors.length === b.errors.length && a.errors.every((error, index)=>error === b.errors[index]);
+}
 const convertValidationsToObject = (validations)=>{
     if (isString(validations)) return validations.split(/,(?![^{[]*[}\]])/g).reduce((validationsAccumulator, validation)=>{
         let args = validation.split(':');
@@ -206,7 +821,7 @@ const convertValidationsToObject = (validations)=>{
         args = args.map((arg)=>{
             try {
                 return JSON.parse(arg);
-            } catch (_e) {
+            } catch  {
                 return arg;
             }
         });
@@ -219,381 +834,218 @@ const convertValidationsToObject = (validations)=>{
     }, {});
     return validations || {};
 };
+const convertRequired = (required)=>{
+    if (true === required) return {
+        isDefaultRequiredValue: true
+    };
+    return convertValidationsToObject(required);
+};
+function computeLocalValidation(value, validations, requiredValidations, validationError, validationErrors) {
+    const currentValues = {};
+    const validationResults = runRules(value, currentValues, validations || {}, validationRules_validationRules);
+    const requiredResults = runRules(value, currentValues, requiredValidations || {}, validationRules_validationRules);
+    const isRequired = Object.keys(requiredValidations || {}).length ? !!requiredResults.success.length : false;
+    const isCustomValid = !validationResults.failed.length;
+    const isValid = isRequired ? false : isCustomValid;
+    const errors = (()=>{
+        if (isValid && !isRequired) return [];
+        if (validationResults.errors.length) return validationResults.errors;
+        if (isRequired) {
+            const error = (validationErrors || {})[requiredResults.success[0]] || validationError;
+            return error ? [
+                error
+            ] : [];
+        }
+        if (validationResults.failed.length) return validationResults.failed.map((failed)=>(validationErrors || {})[failed] || validationError).filter((x, pos, arr)=>arr.indexOf(x) === pos).filter(Boolean);
+        return [];
+    })();
+    return {
+        isRequired,
+        isValid,
+        errors
+    };
+}
+function useFormsy(props) {
+    const actions = (0, external_react_namespaceObject.useContext)(FormsyActionsContext);
+    const stateStore = (0, external_react_namespaceObject.useContext)(FormsyStateStoreContext);
+    const { isValidValue: validateValue, registerInput, resetValue: resetFieldValue, setValue: setFieldValue, unregisterInput, updateValidations } = actions;
+    const { name, value: externalValue, validations, required, validationError, validationErrors } = props;
+    const prevExternalValue = (0, external_react_namespaceObject.useRef)(externalValue);
+    const previousSnapshot = (0, external_react_namespaceObject.useRef)(null);
+    const registrationRef = (0, external_react_namespaceObject.useRef)();
+    const localValCacheRef = (0, external_react_namespaceObject.useRef)({
+        isRequired: false,
+        isValid: true,
+        errors: EMPTY_ERRORS
+    });
+    const parsedValidations = (0, external_react_namespaceObject.useMemo)(()=>convertValidationsToObject(validations), [
+        validations
+    ]);
+    const parsedRequired = (0, external_react_namespaceObject.useMemo)(()=>convertRequired(required), [
+        required
+    ]);
+    if (!name) throw new Error('Form Input requires a name property when used');
+    if (!registrationRef.current) registrationRef.current = {
+        validations: parsedValidations,
+        requiredValidations: parsedRequired,
+        validationError,
+        validationErrors
+    };
+    const getSnapshot = (0, external_react_namespaceObject.useCallback)(()=>{
+        const state = stateStore.getState();
+        if (!state.inputs.has(name)) {
+            previousSnapshot.current = null;
+            return null;
+        }
+        const snapshot = {
+            value: state.values.get(name),
+            errors: state.errors.get(name) || EMPTY_ERRORS,
+            isPristine: state.isPristine.get(name) ?? true,
+            isRequired: state.isRequired.get(name) ?? false,
+            isValid: state.isValid.get(name) ?? true,
+            isFormDisabled: stateStore.getDisabled(),
+            isFormSubmitted: state.formSubmitted
+        };
+        if (previousSnapshot.current && areSnapshotsEqual(previousSnapshot.current, snapshot)) return previousSnapshot.current;
+        previousSnapshot.current = snapshot;
+        return snapshot;
+    }, [
+        name,
+        stateStore
+    ]);
+    const fieldState = (0, external_react_namespaceObject.useSyncExternalStore)(stateStore.subscribe, getSnapshot, getSnapshot);
+    (0, external_react_namespaceObject.useLayoutEffect)(()=>{
+        registerInput(name, registrationRef.current, prevExternalValue.current);
+        prevExternalValue.current = externalValue;
+        return ()=>{
+            unregisterInput(name);
+        };
+    }, [
+        name
+    ]);
+    (0, external_react_namespaceObject.useEffect)(()=>{
+        if (!isSame(externalValue, prevExternalValue.current)) {
+            prevExternalValue.current = externalValue;
+            if (void 0 !== externalValue) {
+                const formValue = stateStore.getState().values.get(name);
+                if (void 0 !== formValue && isSame(formValue, externalValue)) return;
+                setFieldValue(name, externalValue);
+            }
+        }
+    }, [
+        externalValue,
+        name,
+        setFieldValue,
+        stateStore
+    ]);
+    (0, external_react_namespaceObject.useLayoutEffect)(()=>{
+        updateValidations(name, {
+            validations: parsedValidations,
+            requiredValidations: parsedRequired,
+            validationError,
+            validationErrors
+        });
+    }, [
+        updateValidations,
+        name,
+        parsedValidations,
+        parsedRequired,
+        validationError,
+        validationErrors
+    ]);
+    const localVal = (0, external_react_namespaceObject.useMemo)(()=>{
+        if (fieldState) return localValCacheRef.current;
+        localValCacheRef.current = computeLocalValidation(externalValue, parsedValidations, parsedRequired, validationError, validationErrors);
+        return localValCacheRef.current;
+    }, [
+        fieldState,
+        externalValue,
+        parsedValidations,
+        parsedRequired,
+        validationError,
+        validationErrors
+    ]);
+    const inputValue = fieldState ? fieldState.value : externalValue;
+    const errors = fieldState ? fieldState.errors : localVal.errors;
+    const isPristine = fieldState ? fieldState.isPristine : true;
+    const isValid = fieldState ? fieldState.isValid : localVal.isValid;
+    const isRequired = fieldState ? fieldState.isRequired : localVal.isRequired;
+    const setValue = (0, external_react_namespaceObject.useCallback)((value, validate = true)=>{
+        setFieldValue(name, value, validate);
+    }, [
+        name,
+        setFieldValue
+    ]);
+    const resetValue = (0, external_react_namespaceObject.useCallback)(()=>{
+        resetFieldValue(name);
+    }, [
+        name,
+        resetFieldValue
+    ]);
+    const isValidValue = (0, external_react_namespaceObject.useCallback)((value)=>validateValue(name, value), [
+        name,
+        validateValue
+    ]);
+    const setValidations = (0, external_react_namespaceObject.useCallback)((validations, required)=>{
+        updateValidations(name, {
+            validations: convertValidationsToObject(validations),
+            requiredValidations: convertRequired(required),
+            validationError,
+            validationErrors
+        });
+    }, [
+        name,
+        updateValidations,
+        validationError,
+        validationErrors
+    ]);
+    return {
+        value: inputValue,
+        setValue,
+        errorMessage: errors.length ? errors[0] : null,
+        errorMessages: errors.length ? errors : EMPTY_ERRORS,
+        hasValue: !isDefaultRequiredValue(inputValue),
+        isFormDisabled: fieldState?.isFormDisabled ?? stateStore.getDisabled(),
+        isFormSubmitted: fieldState?.isFormSubmitted ?? false,
+        isPristine,
+        isRequired,
+        isValid,
+        isValidValue,
+        resetValue,
+        setValidations,
+        showError: !isRequired && !isValid,
+        showRequired: isRequired
+    };
+}
 function getDisplayName(component) {
     return component.displayName || component.name || (isString(component) ? component : 'Component');
 }
 function withFormsy(WrappedComponent) {
-    class WithFormsyWrapper extends external_react_default().Component {
-        validations;
-        requiredValidations;
-        static displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
-        constructor(props){
-            super(props);
-            const { runValidation, validations, required, value = WrappedComponent.defaultValue } = props;
-            this.state = {
-                value
-            };
-            this.setValidations(validations, required);
-            this.state = {
-                formSubmitted: false,
-                isPristine: true,
-                pristineValue: value,
-                value: value,
-                ...runValidation(this, value)
-            };
-        }
-        componentDidMount() {
-            const { name, attachToForm } = this.props;
-            if (!name) throw new Error('Form Input requires a name property when used');
-            attachToForm(this);
-        }
-        shouldComponentUpdate(nextProps, nextState) {
-            const { props, state } = this;
-            const isChanged = (a, b)=>Object.keys(a).some((k)=>a[k] !== b[k]);
-            const isPropsChanged = isChanged(props, nextProps);
-            const isStateChanged = isChanged(state, nextState);
-            return isPropsChanged || isStateChanged;
-        }
-        componentDidUpdate(prevProps) {
-            const { value, validations, required, validate } = this.props;
-            if (!isSame(value, prevProps.value)) this.setValue(value);
-            if (!isSame(validations, prevProps.validations) || !isSame(required, prevProps.required)) {
-                this.setValidations(validations, required);
-                validate(this);
-            }
-        }
-        componentWillUnmount() {
-            const { detachFromForm } = this.props;
-            detachFromForm(this);
-        }
-        getErrorMessage = ()=>{
-            const messages = this.getErrorMessages();
-            return messages.length ? messages[0] : null;
+    const MemoizedWrappedComponent = /*#__PURE__*/ external_react_default().memo(WrappedComponent);
+    const WithFormsy = (props)=>{
+        const formsyProps = useFormsy(props);
+        const allProps = {
+            ...props,
+            ...formsyProps
         };
-        getErrorMessages = ()=>{
-            const { validationError } = this.state;
-            if (!this.isValid() || this.showRequired()) return validationError || [];
-            return [];
-        };
-        getValue = ()=>this.state.value;
-        setValidations = (validations, required)=>{
-            this.validations = convertValidationsToObject(validations) || {};
-            this.requiredValidations = true === required ? {
-                isDefaultRequiredValue: required
-            } : convertValidationsToObject(required);
-        };
-        setValue = (value, validate = true)=>{
-            const { validate: validateForm } = this.props;
-            if (validate) this.setState({
-                value,
-                isPristine: false
-            }, ()=>{
-                validateForm(this);
-            });
-            else this.setState({
-                value
-            });
-        };
-        hasValue = ()=>{
-            const { value } = this.state;
-            return isDefaultRequiredValue(value);
-        };
-        isFormDisabled = ()=>this.props.isFormDisabled;
-        isFormSubmitted = ()=>this.state.formSubmitted;
-        isPristine = ()=>this.state.isPristine;
-        isRequired = ()=>!!this.props.required;
-        isValid = ()=>this.state.isValid;
-        isValidValue = (value)=>this.props.isValidValue(this, value);
-        resetValue = ()=>{
-            const { pristineValue } = this.state;
-            const { validate } = this.props;
-            this.setState({
-                value: pristineValue,
-                isPristine: true
-            }, ()=>{
-                validate(this);
-            });
-        };
-        showError = ()=>!this.showRequired() && !this.isValid();
-        showRequired = ()=>this.state.isRequired;
-        render() {
-            const { innerRef } = this.props;
-            const propsForElement = {
-                ...this.props,
-                errorMessage: this.getErrorMessage(),
-                errorMessages: this.getErrorMessages(),
-                hasValue: this.hasValue(),
-                isFormDisabled: this.isFormDisabled(),
-                isFormSubmitted: this.isFormSubmitted(),
-                isPristine: this.isPristine(),
-                isRequired: this.isRequired(),
-                isValid: this.isValid(),
-                isValidValue: this.isValidValue,
-                resetValue: this.resetValue,
-                setValidations: this.setValidations,
-                setValue: this.setValue,
-                showError: this.showError(),
-                showRequired: this.showRequired(),
-                value: this.getValue()
-            };
-            if (innerRef) propsForElement.ref = innerRef;
-            return external_react_default().createElement(WrappedComponent, propsForElement);
-        }
-    }
-    return (props)=>external_react_default().createElement(FormsyContext.Consumer, null, (contextValue)=>external_react_default().createElement(WithFormsyWrapper, {
-                ...props,
-                ...contextValue
-            }));
+        if (props.innerRef) allProps.ref = props.innerRef;
+        return /*#__PURE__*/ (0, jsx_runtime_namespaceObject.jsx)(MemoizedWrappedComponent, {
+            ...allProps
+        });
+    };
+    WithFormsy.displayName = `Formsy(${getDisplayName(WrappedComponent)})`;
+    return WithFormsy;
 }
-const set_js_namespaceObject = require("lodash/set.js");
-var set_js_default = /*#__PURE__*/ __webpack_require__.n(set_js_namespaceObject);
-const has_js_namespaceObject = require("lodash/has.js");
-var has_js_default = /*#__PURE__*/ __webpack_require__.n(has_js_namespaceObject);
-const get_js_namespaceObject = require("lodash/get.js");
-var get_js_default = /*#__PURE__*/ __webpack_require__.n(get_js_namespaceObject);
-const ONE_RENDER_FRAME = 66;
-class Formsy extends external_react_default().Component {
-    static displayName = 'Formsy';
-    inputs;
-    emptyArray;
-    prevInputNames = null;
-    debouncedValidateForm;
-    unmounted = false;
-    constructor(props){
-        super(props);
-        this.state = {
-            canChange: false,
-            isSubmitting: false,
-            isValid: true,
-            contextValue: {
-                attachToForm: this.attachToForm,
-                detachFromForm: this.detachFromForm,
-                isFormDisabled: props.disabled ?? false,
-                isValidValue: this.isValidValue,
-                validate: this.validate,
-                runValidation: this.runValidation
-            }
-        };
-        this.inputs = [];
-        this.emptyArray = [];
-        this.debouncedValidateForm = debounce(this.validateForm, ONE_RENDER_FRAME);
-    }
-    componentDidMount = ()=>{
-        this.prevInputNames = this.inputs.map((component)=>component.props.name);
-        this.validateForm();
-    };
-    componentWillUnmount = ()=>{
-        this.unmounted = true;
-    };
-    componentDidUpdate = (prevProps)=>{
-        const { validationErrors, disabled = false } = this.props;
-        if (validationErrors && isObject(validationErrors) && Object.keys(validationErrors).length > 0) this.setInputValidationErrors(validationErrors);
-        const newInputNames = this.inputs.map((component)=>component.props.name);
-        if (this.prevInputNames && !isSame(this.prevInputNames, newInputNames)) {
-            this.prevInputNames = newInputNames;
-            this.validateForm();
-        }
-        if ((disabled ?? false) !== (prevProps.disabled ?? false)) this.setState((state)=>({
-                ...state,
-                contextValue: {
-                    ...state.contextValue,
-                    isFormDisabled: disabled
-                }
-            }));
-    };
-    getCurrentValues = ()=>Object.fromEntries(this.inputs.map((component)=>{
-            const { props: { name }, state: { value } } = component;
-            return [
-                name,
-                protectAgainstParamReassignment(value)
-            ];
-        }));
-    getModel = ()=>{
-        const currentValues = this.getCurrentValues();
-        return this.mapModel(currentValues);
-    };
-    getPristineValues = ()=>Object.fromEntries(this.inputs.map((component)=>{
-            const { props: { name, value } } = component;
-            return [
-                name,
-                protectAgainstParamReassignment(value)
-            ];
-        }));
-    setFormPristine = (isPristine)=>{
-        this.setState({
-            formSubmitted: !isPristine
-        });
-        this.inputs.forEach((component)=>{
-            component.setState({
-                formSubmitted: !isPristine,
-                isPristine
-            });
-        });
-    };
-    setInputValidationErrors = (errors)=>{
-        const { preventExternalInvalidation = false } = this.props;
-        const { isValid } = this.state;
-        this.inputs.forEach((component)=>{
-            const { name } = component.props;
-            component.setState({
-                isValid: !(name in errors),
-                validationError: isString(errors[name]) ? [
-                    errors[name]
-                ] : errors[name]
-            });
-        });
-        if (!preventExternalInvalidation && isValid) this.setFormValidState(false);
-    };
-    setFormValidState = (allIsValid)=>{
-        this.setState({
-            isValid: allIsValid
-        });
-        if (allIsValid) this.props.onValid?.();
-        else this.props.onInvalid?.();
-    };
-    isValidValue = (component, value)=>this.runValidation(component, value).isValid;
-    isFormDisabled = ()=>this.props.disabled ?? false;
-    mapModel = (model)=>{
-        const { mapping } = this.props;
-        if ('function' == typeof mapping) return mapping(model);
-        const returnModel = {};
-        Object.keys(model).forEach((key)=>{
-            set_js_default()(returnModel, key, model[key]);
-        });
-        return returnModel;
-    };
-    reset = (model)=>{
-        this.setFormPristine(true);
-        this.resetModel(model);
-    };
-    runValidation = (component, value = component.state.value)=>{
-        const { validationErrors = {} } = this.props;
-        const { validationError, validationErrors: componentValidationErrors, name } = component.props;
-        const currentValues = this.getCurrentValues();
-        const validationResults = runRules(value, currentValues, component.validations || {}, validationRules_validationRules);
-        const requiredResults = runRules(value, currentValues, component.requiredValidations || {}, validationRules_validationRules);
-        const isRequired = Object.keys(component.requiredValidations || {}).length ? !!requiredResults.success.length : false;
-        const isValid = !validationResults.failed.length && !(validationErrors && validationErrors[component.props.name]);
-        return {
-            isRequired,
-            isValid: isRequired ? false : isValid,
-            validationError: (()=>{
-                if (isValid && !isRequired) return this.emptyArray;
-                if (validationResults.errors.length) return validationResults.errors;
-                if (validationErrors && validationErrors[name]) return isString(validationErrors[name]) ? [
-                    validationErrors[name]
-                ] : validationErrors[name];
-                if (isRequired) {
-                    const error = (componentValidationErrors || {})[requiredResults.success[0]] || validationError;
-                    return error ? [
-                        error
-                    ] : null;
-                }
-                if (validationResults.failed.length) return validationResults.failed.map((failed)=>(componentValidationErrors || {})[failed] ? componentValidationErrors[failed] : validationError).filter((x, pos, arr)=>arr.indexOf(x) === pos);
-            })()
-        };
-    };
-    attachToForm = (component)=>{
-        if (-1 === this.inputs.indexOf(component)) this.inputs.push(component);
-        const { canChange } = this.state;
-        if (canChange) this.props.onChange?.(this.getModel(), this.isChanged());
-        this.debouncedValidateForm();
-    };
-    detachFromForm = (component)=>{
-        this.inputs = this.inputs.filter((input)=>input !== component);
-        this.debouncedValidateForm();
-    };
-    isChanged = ()=>!isSame(this.getPristineValues(), this.getCurrentValues());
-    submit = (event)=>{
-        const { onSubmit, onValidSubmit, onInvalidSubmit, preventDefaultSubmit = true } = this.props;
-        const { isValid } = this.state;
-        if (preventDefaultSubmit && event?.preventDefault) event.preventDefault();
-        this.setFormPristine(false);
-        const model = this.getModel();
-        onSubmit?.(model, this.resetModel, this.updateInputsWithError, event);
-        if (isValid) onValidSubmit?.(model, this.resetModel, this.updateInputsWithError, event);
-        else onInvalidSubmit?.(model, this.resetModel, this.updateInputsWithError, event);
-    };
-    updateInputsWithError = (errors, invalidate)=>{
-        const { preventExternalInvalidation = false } = this.props;
-        const { isValid } = this.state;
-        Object.entries(errors).forEach(([name, error])=>{
-            const component = this.inputs.find((input)=>input.props.name === name);
-            if (!component) throw new Error(`You are trying to update an input that does not exist. Verify errors object with input names. ${JSON.stringify(errors)}`);
-            component.setState({
-                isValid: preventExternalInvalidation,
-                validationError: isString(error) ? [
-                    error
-                ] : error
-            });
-        });
-        if (invalidate && isValid) this.setFormValidState(false);
-    };
-    updateInputsWithValue = (data, validate)=>{
-        this.inputs.forEach((component)=>{
-            const { name } = component.props;
-            if (data && has_js_default()(data, name)) component.setValue(get_js_default()(data, name), validate);
-        });
-    };
-    validate = (component)=>{
-        const { onChange } = this.props;
-        const { canChange } = this.state;
-        if (canChange) onChange?.(this.getModel(), this.isChanged());
-        const validationState = this.runValidation(component);
-        component.setState(validationState, this.validateForm);
-    };
-    validateForm = ()=>{
-        if (this.unmounted) return;
-        const onValidationComplete = ()=>{
-            const allIsValid = this.inputs.every((component)=>component.state.isValid);
-            this.setFormValidState(allIsValid);
-            this.setState({
-                canChange: true
-            });
-        };
-        if (0 === this.inputs.length) onValidationComplete();
-        else this.inputs.forEach((component, index)=>{
-            const validationState = this.runValidation(component);
-            const isLastInput = index === this.inputs.length - 1;
-            const callback = isLastInput ? onValidationComplete : null;
-            component.setState(validationState, callback);
-        });
-    };
-    render() {
-        const { children, mapping, onChange, onInvalid, onInvalidSubmit, onReset, onSubmit, onValid, onValidSubmit, preventDefaultSubmit, preventExternalInvalidation, validationErrors, disabled = false, formElement = 'form', ...nonFormsyProps } = this.props;
-        const { contextValue } = this.state;
-        return external_react_default().createElement(FormsyContext.Provider, {
-            value: contextValue
-        }, external_react_default().createElement(formElement || 'form', {
-            onReset: this.resetInternal,
-            onSubmit: this.submit,
-            ...nonFormsyProps,
-            disabled
-        }, children));
-    }
-    resetInternal = (event)=>{
-        const { onReset } = this.props;
-        event.preventDefault();
-        this.reset();
-        onReset?.();
-    };
-    resetModel = (data)=>{
-        this.inputs.forEach((component)=>{
-            const { name } = component.props;
-            if (data && has_js_default()(data, name)) component.setValue(get_js_default()(data, name));
-            else component.resetValue();
-        });
-        this.validateForm();
-    };
-}
-const src = Formsy;
+const src = src_Formsy;
 exports.addValidationRule = __webpack_exports__.addValidationRule;
 exports["default"] = __webpack_exports__["default"];
+exports.useFormsy = __webpack_exports__.useFormsy;
 exports.validationRules = __webpack_exports__.validationRules;
 exports.withFormsy = __webpack_exports__.withFormsy;
 for(var __rspack_i in __webpack_exports__)if (-1 === [
     "addValidationRule",
     "default",
+    "useFormsy",
     "validationRules",
     "withFormsy"
 ].indexOf(__rspack_i)) exports[__rspack_i] = __webpack_exports__[__rspack_i];

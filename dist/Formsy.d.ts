@@ -1,6 +1,5 @@
 import React, { PropsWithChildren } from 'react';
-import { FormsyContextInterface, IModel, InputComponent, IResetModel, IUpdateInputsWithError, IUpdateInputsWithValue, ValidationError } from './interfaces';
-import { PassDownProps } from './withFormsy';
+import { FormsyImperativeAPI, IModel, IResetModel, IUpdateInputsWithError } from './interfaces';
 type FormHTMLAttributesCleaned = Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onChange' | 'onSubmit'>;
 type OnSubmitCallback = (model: IModel, resetModel: IResetModel, updateInputsWithError: IUpdateInputsWithError, event: React.SyntheticEvent<HTMLFormElement>) => void;
 type FormElementType = string | React.ComponentType<PropsWithChildren<{
@@ -23,50 +22,12 @@ export interface FormsyProps extends FormHTMLAttributesCleaned {
     validationErrors?: null | object;
     formElement?: FormElementType;
 }
-export interface FormsyState {
-    canChange: boolean;
-    contextValue: FormsyContextInterface;
-    formSubmitted?: boolean;
-    isPristine?: boolean;
-    isSubmitting: boolean;
-    isValid: boolean;
+declare function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<FormsyImperativeAPI>): React.JSX.Element;
+declare namespace FormsyInner {
+    var displayName: string;
 }
-export declare class Formsy extends React.Component<PropsWithChildren<FormsyProps>, FormsyState> {
-    static displayName: string;
-    inputs: InstanceType<any & PassDownProps<any>>[];
-    emptyArray: any[];
-    prevInputNames: any[] | null;
-    private readonly debouncedValidateForm;
-    private unmounted;
-    constructor(props: FormsyProps);
-    componentDidMount: () => void;
-    componentWillUnmount: () => void;
-    componentDidUpdate: (prevProps: FormsyProps) => void;
-    getCurrentValues: () => any;
-    getModel: () => any;
-    getPristineValues: () => any;
-    setFormPristine: (isPristine: boolean) => void;
-    setInputValidationErrors: (errors: any) => void;
-    setFormValidState: (allIsValid: boolean) => void;
-    isValidValue: (component: any, value: any) => boolean;
-    isFormDisabled: () => boolean;
-    mapModel: (model: IModel) => IModel;
-    reset: (model?: IModel) => void;
-    runValidation: <V>(component: InputComponent<V>, value?: V) => {
-        isRequired: boolean;
-        isValid: boolean;
-        validationError: ValidationError[];
-    };
-    attachToForm: (component: any) => void;
-    detachFromForm: <V>(component: InputComponent<V>) => void;
-    isChanged: () => boolean;
-    submit: (event?: React.SyntheticEvent<HTMLFormElement>) => void;
-    updateInputsWithError: IUpdateInputsWithError;
-    updateInputsWithValue: IUpdateInputsWithValue<any>;
-    validate: <V>(component: InputComponent<V>) => void;
-    validateForm: () => void;
-    render(): React.FunctionComponentElement<React.ProviderProps<FormsyContextInterface>>;
-    private resetInternal;
-    private resetModel;
-}
-export {};
+declare const Formsy: React.ForwardRefExoticComponent<FormsyProps & {
+    children?: React.ReactNode | undefined;
+} & React.RefAttributes<FormsyImperativeAPI>>;
+export default Formsy;
+export { FormsyInner as Formsy };
