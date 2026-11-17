@@ -149,23 +149,75 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
     return returnModel;
   }, []);
 
+  // Synchronous onChange calls need the model *including* every action that is
+  // still queued for the next commit (several setValue/registerInput calls can
+  // be dispatched in one event handler before React re-renders). These overlays
+  // mirror the value-affecting reducer operations since the last commit; they
+  // are cleared in the publish layout effect, once the reducer has caught up.
+  const pendingValuesRef = useRef<Map<string, any> | null>(null);
+  const pendingInitialValuesRef = useRef<Map<string, any> | null>(null);
+
+  const getPendingValues = useCallback((): Map<string, any> => {
+    if (!pendingValuesRef.current) {
+      pendingValuesRef.current = new Map(formStateRef.current.values);
+    }
+    return pendingValuesRef.current;
+  }, []);
+
+  const getPendingInitialValues = useCallback((): Map<string, any> => {
+    if (!pendingInitialValuesRef.current) {
+      pendingInitialValuesRef.current = new Map(formStateRef.current.initialValues);
+    }
+    return pendingInitialValuesRef.current;
+  }, []);
+
   const getPristineValues = useCallback((): Record<string, any> => {
     return Object.fromEntries(formStateRef.current.initialValues);
   }, []);
 
-  const handleReset = useCallback((model?: IModel) => {
-    if (model) {
-      const modelMap = new Map<string, any>();
-      formStateRef.current.inputs.forEach((_input, name) => {
-        if (has(model, name)) {
-          modelMap.set(name, get(model, name));
+  const handleReset = useCallback(
+    (model?: IModel) => {
+      if (model) {
+        const modelMap = new Map<string, any>();
+        formStateRef.current.inputs.forEach((_input, name) => {
+          if (has(model, name)) {
+            modelMap.set(name, get(model, name));
+          }
+        });
+        dispatch({ type: 'RESET', values: modelMap });
+        const pendingValues = getPendingValues();
+        modelMap.forEach((value, name) => {
+          pendingValues.set(name, value);
+        });
+        if (canChangeRef.current && onChangeRef.current) {
+          // Upstream parity: resetModel sets each input's value, which fires
+          // onChange so the consumer's stored model does not go stale.
+          const changed = !utils.isSame(
+            Object.fromEntries(getPendingInitialValues()),
+            Object.fromEntries(pendingValues)
+          );
+          onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
         }
-      });
-      dispatch({ type: 'RESET', values: modelMap });
-    } else {
-      dispatch({ type: 'RESET' });
-    }
-  }, []);
+      } else {
+        dispatch({ type: 'RESET' });
+        // RESET without a model restores initialValues for every registered
+        // input — including inputs that are still queued for registration.
+        const pendingValues = getPendingValues();
+        const pendingInitialValues = getPendingInitialValues();
+        formStateRef.current.inputs.forEach((_input, name) => {
+          pendingValues.set(name, formStateRef.current.initialValues.get(name));
+        });
+        pendingInitialValues.forEach((value, name) => {
+          pendingValues.set(name, value);
+        });
+        if (canChangeRef.current && onChangeRef.current) {
+          const changed = !utils.isSame(Object.fromEntries(pendingInitialValues), Object.fromEntries(pendingValues));
+          onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+        }
+      }
+    },
+    [getPendingValues, getPendingInitialValues, mapModel]
+  );
 
   const handleUpdateInputsWithError: IUpdateInputsWithError = useCallback((errors, invalidate) => {
     const errorsMap = new Map<string, any>();
@@ -184,17 +236,34 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
     });
   }, []);
 
-  const handleUpdateInputsWithValue = useCallback((data: Record<string, any>, validate = true) => {
-    const valuesToSet = new Map<string, any>();
-    formStateRef.current.inputs.forEach((_input, name) => {
-      if (data && has(data, name)) {
-        valuesToSet.set(name, get(data, name));
+  const handleUpdateInputsWithValue = useCallback(
+    (data: Record<string, any>, validate = true) => {
+      const valuesToSet = new Map<string, any>();
+      formStateRef.current.inputs.forEach((_input, name) => {
+        if (data && has(data, name)) {
+          valuesToSet.set(name, get(data, name));
+        }
+      });
+      if (valuesToSet.size > 0) {
+        dispatch({ type: 'SET_VALUES', values: valuesToSet, validate });
+        const pendingValues = getPendingValues();
+        valuesToSet.forEach((value, name) => {
+          pendingValues.set(name, value);
+        });
+        if (canChangeRef.current && onChangeRef.current && validate) {
+          // Upstream parity: updateInputsWithValue sets each matching input's
+          // value with validation, which fires onChange. Coalesced into a
+          // single call with the complete model.
+          const changed = !utils.isSame(
+            Object.fromEntries(getPendingInitialValues()),
+            Object.fromEntries(pendingValues)
+          );
+          onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+        }
       }
-    });
-    if (valuesToSet.size > 0) {
-      dispatch({ type: 'SET_VALUES', values: valuesToSet, validate });
-    }
-  }, []);
+    },
+    [getPendingValues, getPendingInitialValues, mapModel]
+  );
 
   const handleSubmit = useCallback(
     (event?: React.SyntheticEvent<HTMLFormElement>) => {
@@ -273,6 +342,9 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
     // can expose an abandoned concurrent render to subscribers.
     stateStore.state = formState;
     stateStore.disabled = disabled;
+    // The reducer state is up to date again; later reads can snapshot from it.
+    pendingValuesRef.current = null;
+    pendingInitialValuesRef.current = null;
     stateStore.listeners.forEach((listener) => listener());
   }, [stateStore, formState, disabled]);
 
@@ -280,14 +352,14 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
     (name: string, value: any, validate: boolean = true) => {
       dispatch({ type: 'SET_VALUE', name, value, validate });
       if (canChangeRef.current && onChangeRef.current) {
-        const state = formStateRef.current;
-        const newValues: Record<string, any> = { ...Object.fromEntries(state.values), [name]: value };
-        const model = mapModel(newValues);
-        const changed = !utils.isSame(Object.fromEntries(state.initialValues), newValues);
+        const pendingValues = getPendingValues();
+        pendingValues.set(name, value);
+        const model = mapModel(Object.fromEntries(pendingValues));
+        const changed = !utils.isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
         onChangeRef.current(model, changed);
       }
     },
-    [mapModel]
+    [getPendingValues, getPendingInitialValues, mapModel]
   );
 
   const handleRegisterInput = useCallback(
@@ -299,43 +371,54 @@ function FormsyInner(props: PropsWithChildren<FormsyProps>, ref: React.Ref<Forms
       }
       dispatch({ type: 'REGISTER', name, config, initialValue });
       if (canChangeRef.current && onChangeRef.current) {
-        const state = formStateRef.current;
-        const newValues: Record<string, any> = { ...Object.fromEntries(state.values), [name]: initialValue };
-        const newInitialValues: Record<string, any> = Object.fromEntries(state.initialValues);
-        if (!state.initialValues.has(name)) {
-          newInitialValues[name] = initialValue;
+        const pendingValues = getPendingValues();
+        // Mirror the reducer: a value set before registration wins over the
+        // initialValue.
+        if (!pendingValues.has(name)) {
+          pendingValues.set(name, initialValue);
         }
-        const model = mapModel(newValues);
-        const changed = !utils.isSame(newInitialValues, newValues);
+        // The reducer records initialValue unconditionally on registration.
+        getPendingInitialValues().set(name, initialValue);
+        const model = mapModel(Object.fromEntries(pendingValues));
+        const changed = !utils.isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
         onChangeRef.current(model, changed);
       }
     },
-    [mapModel]
+    [getPendingValues, getPendingInitialValues, mapModel]
   );
 
-  const handleUnregisterInput = useCallback(
+  const handleUnregisterInput = useCallback((name: string) => {
+    // Mirror the reducer's no-op condition; decrement only real removals.
+    if (formStateRef.current.inputs.has(name)) {
+      registeredInputsCountRef.current -= 1;
+    }
+    dispatch({ type: 'UNREGISTER', name });
+    // Upstream parity: detaching an input does not fire onChange. Only the
+    // pending model overlays are updated, so a later onChange call queued in
+    // the same batch does not report the removed input.
+    pendingValuesRef.current?.delete(name);
+    pendingInitialValuesRef.current?.delete(name);
+  }, []);
+
+  const handleResetValue = useCallback(
     (name: string) => {
-      // Mirror the reducer's no-op condition; decrement only real removals.
-      if (formStateRef.current.inputs.has(name)) {
-        registeredInputsCountRef.current -= 1;
-      }
-      dispatch({ type: 'UNREGISTER', name });
+      const currentState = formStateRef.current;
+      const initialValue = currentState.initialValues.get(name);
+      const modelMap = new Map<string, any>();
+      modelMap.set(name, initialValue);
+      dispatch({ type: 'RESET', values: modelMap });
+      const pendingValues = getPendingValues();
+      pendingValues.set(name, initialValue);
       if (canChangeRef.current && onChangeRef.current) {
-        const newValues: Record<string, any> = Object.fromEntries(formStateRef.current.values);
-        delete newValues[name];
-        const model = mapModel(newValues);
-        onChangeRef.current(model, true);
+        // Upstream parity: input.resetValue() re-sets the pristine value
+        // through validate(), which fires onChange so the consumer's stored
+        // model does not go stale.
+        const changed = !utils.isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
+        onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
       }
     },
-    [mapModel]
+    [getPendingValues, getPendingInitialValues, mapModel]
   );
-
-  const handleResetValue = useCallback((name: string) => {
-    const currentState = formStateRef.current;
-    const modelMap = new Map<string, any>();
-    modelMap.set(name, currentState.initialValues.get(name));
-    dispatch({ type: 'RESET', values: modelMap });
-  }, []);
 
   const handleUpdateValidations = useCallback((name: string, config: InputRegistration) => {
     dispatch({ type: 'UPDATE_VALIDATIONS', name, config });

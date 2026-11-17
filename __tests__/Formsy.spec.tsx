@@ -5,7 +5,7 @@ import { PropsWithChildren, useRef, useState } from 'react';
 import DynamicInputForm from '../__test_utils__/DynamicInputForm';
 import TestInput from '../__test_utils__/TestInput';
 import TestInputHoc from '../__test_utils__/TestInputHoc';
-import Formsy, { addValidationRule } from '../src';
+import Formsy, { addValidationRule, useFormsy } from '../src';
 import { ValidationError } from '../src/interfaces';
 
 describe('Setting up a form', () => {
@@ -346,6 +346,238 @@ describe('onChange', () => {
 
     render(<TestForm />);
     expect(hasChanged).not.toHaveBeenCalled();
+  });
+
+  it('should not trigger onChange with an empty model on mount in StrictMode', () => {
+    const hasChanged = jest.fn();
+
+    function TestForm() {
+      return (
+        <React.StrictMode>
+          <Formsy onChange={hasChanged}>
+            <TestInput name="foo" value="foo" />
+          </Formsy>
+        </React.StrictMode>
+      );
+    }
+
+    render(<TestForm />);
+
+    // React 18 StrictMode simulates an unmount/remount of the mounted tree.
+    // That must be unobservable to user code: onChange must not fire with an
+    // empty model (or at all) while the form is mounting.
+    const emptyModelCalls = hasChanged.mock.calls.filter(([model]) => !model || Object.keys(model).length === 0);
+    expect(emptyModelCalls).toEqual([]);
+  });
+
+  it('should not trigger onChange when inputs are unmounted after submit', () => {
+    const hasChanged = jest.fn();
+
+    function TestForm() {
+      const [submitted, setSubmitted] = React.useState(false);
+      return (
+        <Formsy onChange={hasChanged} onSubmit={() => setSubmitted(true)}>
+          {submitted ? (
+            <p data-testid="success-view">done</p>
+          ) : (
+            <TestInput name="foo" value="foo" testId="test-input" />
+          )}
+          <button type="submit" data-testid="submit-btn" />
+        </Formsy>
+      );
+    }
+
+    const screen = render(<TestForm />);
+
+    fireEvent.click(screen.getByTestId('submit-btn'));
+
+    // Submitting replaces the inputs (success view) while the form element
+    // stays mounted. Unregistering inputs must not fire onChange — otherwise
+    // the user's model state is clobbered with {} right after submit.
+    expect(hasChanged).not.toHaveBeenCalled();
+  });
+
+  it('should trigger onChange once for a controlled input fed back through onChange', () => {
+    const hasChanged = jest.fn();
+
+    function TestForm() {
+      const [value, setValue] = React.useState('');
+      return (
+        <Formsy
+          onChange={(model) => {
+            hasChanged(model);
+            setValue(model.foo);
+          }}
+        >
+          <TestInput name="foo" value={value} testId="test-input" />
+        </Formsy>
+      );
+    }
+
+    const screen = render(<TestForm />);
+
+    fireEvent.change(screen.getByTestId('test-input'), { target: { value: 'bar' } });
+
+    // The value echoed back through the `value` prop must not re-fire onChange.
+    expect(hasChanged).toHaveBeenCalledTimes(1);
+  });
+
+  it('should pass the complete model to onChange when several values change in one event', () => {
+    const hasChanged = jest.fn();
+
+    function DualInput() {
+      const inputA = useFormsy<string>({ name: 'a' });
+      const inputB = useFormsy<string>({ name: 'b' });
+      return (
+        <input
+          data-testid="test-input"
+          value={inputA.value}
+          onChange={(event) => {
+            inputA.setValue(event.currentTarget.value);
+            inputB.setValue('fixed-b');
+          }}
+        />
+      );
+    }
+
+    const screen = render(
+      <Formsy onChange={hasChanged}>
+        <DualInput />
+      </Formsy>
+    );
+
+    fireEvent.change(screen.getByTestId('test-input'), { target: { value: 'foo' } });
+
+    // Both setValue calls are queued in the same commit; the last onChange
+    // must report the complete final model, not one built from a stale
+    // pre-commit snapshot.
+    expect(hasChanged).toHaveBeenLastCalledWith({ a: 'foo', b: 'fixed-b' }, true);
+  });
+
+  it('should trigger onChange when the form is reset', () => {
+    const hasChanged = jest.fn();
+    const formRef = React.createRef<Formsy>();
+
+    function TestForm() {
+      return (
+        <Formsy ref={formRef} onChange={hasChanged}>
+          <TestInput name="foo" value="foo" testId="test-input" />
+        </Formsy>
+      );
+    }
+
+    const screen = render(<TestForm />);
+
+    fireEvent.change(screen.getByTestId('test-input'), { target: { value: 'bar' } });
+    hasChanged.mockClear();
+
+    act(() => {
+      formRef.current.reset();
+    });
+
+    // Upstream fires onChange on reset (each input's value is set back), so
+    // the consumer's stored model does not go stale. Restoring the initial
+    // values means the form is no longer changed.
+    expect(hasChanged).toHaveBeenCalledWith({ foo: 'foo' }, false);
+  });
+
+  it('should trigger onChange when the form is reset with a custom model', () => {
+    const hasChanged = jest.fn();
+    const formRef = React.createRef<Formsy>();
+
+    function TestForm() {
+      return (
+        <Formsy ref={formRef} onChange={hasChanged}>
+          <TestInput name="foo" value="foo" testId="test-input" />
+        </Formsy>
+      );
+    }
+
+    render(<TestForm />);
+
+    act(() => {
+      formRef.current.reset({ foo: 'server-default' });
+    });
+
+    expect(hasChanged).toHaveBeenCalledWith({ foo: 'server-default' }, true);
+  });
+
+  it('should trigger onChange when updateInputsWithValue is called', () => {
+    const hasChanged = jest.fn();
+    const formRef = React.createRef<Formsy>();
+
+    function TestForm() {
+      return (
+        <Formsy ref={formRef} onChange={hasChanged}>
+          <TestInput name="foo" value="foo" testId="test-input" />
+        </Formsy>
+      );
+    }
+
+    render(<TestForm />);
+
+    act(() => {
+      formRef.current.updateInputsWithValue({ foo: 'server-value' });
+    });
+
+    expect(hasChanged).toHaveBeenCalledWith({ foo: 'server-value' }, true);
+  });
+
+  it('should not trigger onChange from updateInputsWithValue with validate=false', () => {
+    const hasChanged = jest.fn();
+    const formRef = React.createRef<Formsy>();
+
+    function TestForm() {
+      return (
+        <Formsy ref={formRef} onChange={hasChanged}>
+          <TestInput name="foo" value="foo" testId="test-input" />
+        </Formsy>
+      );
+    }
+
+    render(<TestForm />);
+
+    act(() => {
+      // Upstream's setValue(value, false) does not run the form validation
+      // pass and therefore does not fire onChange.
+      formRef.current.updateInputsWithValue({ foo: 'server-value' }, false);
+    });
+
+    expect(hasChanged).not.toHaveBeenCalled();
+  });
+
+  it('should trigger onChange when an input resets its own value', () => {
+    const hasChanged = jest.fn();
+
+    function ResetInput() {
+      const input = useFormsy<string>({ name: 'foo', value: 'foo' });
+      return (
+        <>
+          <input
+            data-testid="test-input"
+            value={input.value}
+            onChange={(event) => input.setValue(event.currentTarget.value)}
+          />
+          <button type="button" data-testid="reset-btn" onClick={() => input.resetValue()} />
+        </>
+      );
+    }
+
+    const screen = render(
+      <Formsy onChange={hasChanged}>
+        <ResetInput />
+      </Formsy>
+    );
+
+    fireEvent.change(screen.getByTestId('test-input'), { target: { value: 'bar' } });
+    hasChanged.mockClear();
+
+    fireEvent.click(screen.getByTestId('reset-btn'));
+
+    // Upstream: input.resetValue() re-sets the pristine value through
+    // validate(), which fires onChange so the consumer's stored model does
+    // not go stale.
+    expect(hasChanged).toHaveBeenCalledWith({ foo: 'foo' }, false);
   });
 
   it('should trigger onChange once when form element is changed', () => {

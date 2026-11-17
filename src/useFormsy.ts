@@ -202,10 +202,18 @@ export function useFormsy<V = any>(props: UseFormsyProps<V>): UseFormsyOutput<V>
     if (!utils.isSame(externalValue, prevExternalValue.current)) {
       prevExternalValue.current = externalValue;
       if (externalValue !== undefined) {
+        // Skip echoes of our own setValue: when a form is controlled through
+        // onChange, the value we just set is passed back via the `value` prop
+        // in the same commit. Pushing it again would fire a duplicate
+        // onChange for an unchanged value.
+        const formValue = stateStore.getState().values.get(name);
+        if (formValue !== undefined && utils.isSame(formValue, externalValue)) {
+          return;
+        }
         setFieldValue(name, externalValue);
       }
     }
-  }, [externalValue, name, setFieldValue]);
+  }, [externalValue, name, setFieldValue, stateStore]);
 
   useLayoutEffect(() => {
     updateValidations(name, {

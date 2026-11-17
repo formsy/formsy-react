@@ -308,10 +308,15 @@ function formsyReducer(state, action) {
             {
                 if (!action.name) return state;
                 if (state.inputs.has(action.name)) return state;
+                const hasPreRegisteredValue = state.values.has(action.name);
                 const newInputs = new Map(state.inputs).set(action.name, action.config);
-                const newValues = new Map(state.values).set(action.name, action.initialValue);
+                const newValues = new Map(state.values);
+                const newPristine = new Map(state.isPristine);
+                if (!hasPreRegisteredValue) {
+                    newValues.set(action.name, action.initialValue);
+                    newPristine.set(action.name, true);
+                }
                 const newInitialValues = new Map(state.initialValues).set(action.name, action.initialValue);
-                const newPristine = new Map(state.isPristine).set(action.name, true);
                 let newState = {
                     ...state,
                     inputs: newInputs,
@@ -506,6 +511,16 @@ function FormsyInner(props, ref) {
         });
         return returnModel;
     }, []);
+    const pendingValuesRef = (0, external_react_namespaceObject.useRef)(null);
+    const pendingInitialValuesRef = (0, external_react_namespaceObject.useRef)(null);
+    const getPendingValues = (0, external_react_namespaceObject.useCallback)(()=>{
+        if (!pendingValuesRef.current) pendingValuesRef.current = new Map(formStateRef.current.values);
+        return pendingValuesRef.current;
+    }, []);
+    const getPendingInitialValues = (0, external_react_namespaceObject.useCallback)(()=>{
+        if (!pendingInitialValuesRef.current) pendingInitialValuesRef.current = new Map(formStateRef.current.initialValues);
+        return pendingInitialValuesRef.current;
+    }, []);
     const getPristineValues = (0, external_react_namespaceObject.useCallback)(()=>Object.fromEntries(formStateRef.current.initialValues), []);
     const handleReset = (0, external_react_namespaceObject.useCallback)((model)=>{
         if (model) {
@@ -517,10 +532,36 @@ function FormsyInner(props, ref) {
                 type: 'RESET',
                 values: modelMap
             });
-        } else dispatch({
-            type: 'RESET'
-        });
-    }, []);
+            const pendingValues = getPendingValues();
+            modelMap.forEach((value, name)=>{
+                pendingValues.set(name, value);
+            });
+            if (canChangeRef.current && onChangeRef.current) {
+                const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
+                onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+            }
+        } else {
+            dispatch({
+                type: 'RESET'
+            });
+            const pendingValues = getPendingValues();
+            const pendingInitialValues = getPendingInitialValues();
+            formStateRef.current.inputs.forEach((_input, name)=>{
+                pendingValues.set(name, formStateRef.current.initialValues.get(name));
+            });
+            pendingInitialValues.forEach((value, name)=>{
+                pendingValues.set(name, value);
+            });
+            if (canChangeRef.current && onChangeRef.current) {
+                const changed = !isSame(Object.fromEntries(pendingInitialValues), Object.fromEntries(pendingValues));
+                onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+            }
+        }
+    }, [
+        getPendingValues,
+        getPendingInitialValues,
+        mapModel
+    ]);
     const handleUpdateInputsWithError = (0, external_react_namespaceObject.useCallback)((errors, invalidate)=>{
         const errorsMap = new Map();
         Object.entries(errors).forEach(([name, error])=>{
@@ -538,12 +579,26 @@ function FormsyInner(props, ref) {
         formStateRef.current.inputs.forEach((_input, name)=>{
             if (data && has_js_default()(data, name)) valuesToSet.set(name, get_js_default()(data, name));
         });
-        if (valuesToSet.size > 0) dispatch({
-            type: 'SET_VALUES',
-            values: valuesToSet,
-            validate
-        });
-    }, []);
+        if (valuesToSet.size > 0) {
+            dispatch({
+                type: 'SET_VALUES',
+                values: valuesToSet,
+                validate
+            });
+            const pendingValues = getPendingValues();
+            valuesToSet.forEach((value, name)=>{
+                pendingValues.set(name, value);
+            });
+            if (canChangeRef.current && onChangeRef.current && validate) {
+                const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
+                onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+            }
+        }
+    }, [
+        getPendingValues,
+        getPendingInitialValues,
+        mapModel
+    ]);
     const handleSubmit = (0, external_react_namespaceObject.useCallback)((event)=>{
         const currentState = formStateRef.current;
         const { formIsValid } = currentState;
@@ -601,6 +656,8 @@ function FormsyInner(props, ref) {
     (0, external_react_namespaceObject.useLayoutEffect)(()=>{
         stateStore.state = formState;
         stateStore.disabled = disabled;
+        pendingValuesRef.current = null;
+        pendingInitialValuesRef.current = null;
         stateStore.listeners.forEach((listener)=>listener());
     }, [
         stateStore,
@@ -615,16 +672,15 @@ function FormsyInner(props, ref) {
             validate
         });
         if (canChangeRef.current && onChangeRef.current) {
-            const state = formStateRef.current;
-            const newValues = {
-                ...Object.fromEntries(state.values),
-                [name]: value
-            };
-            const model = mapModel(newValues);
-            const changed = !isSame(Object.fromEntries(state.initialValues), newValues);
+            const pendingValues = getPendingValues();
+            pendingValues.set(name, value);
+            const model = mapModel(Object.fromEntries(pendingValues));
+            const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
             onChangeRef.current(model, changed);
         }
     }, [
+        getPendingValues,
+        getPendingInitialValues,
         mapModel
     ]);
     const handleRegisterInput = (0, external_react_namespaceObject.useCallback)((name, config, initialValue)=>{
@@ -636,18 +692,16 @@ function FormsyInner(props, ref) {
             initialValue
         });
         if (canChangeRef.current && onChangeRef.current) {
-            const state = formStateRef.current;
-            const newValues = {
-                ...Object.fromEntries(state.values),
-                [name]: initialValue
-            };
-            const newInitialValues = Object.fromEntries(state.initialValues);
-            if (!state.initialValues.has(name)) newInitialValues[name] = initialValue;
-            const model = mapModel(newValues);
-            const changed = !isSame(newInitialValues, newValues);
+            const pendingValues = getPendingValues();
+            if (!pendingValues.has(name)) pendingValues.set(name, initialValue);
+            getPendingInitialValues().set(name, initialValue);
+            const model = mapModel(Object.fromEntries(pendingValues));
+            const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
             onChangeRef.current(model, changed);
         }
     }, [
+        getPendingValues,
+        getPendingInitialValues,
         mapModel
     ]);
     const handleUnregisterInput = (0, external_react_namespaceObject.useCallback)((name)=>{
@@ -656,24 +710,29 @@ function FormsyInner(props, ref) {
             type: 'UNREGISTER',
             name
         });
-        if (canChangeRef.current && onChangeRef.current) {
-            const newValues = Object.fromEntries(formStateRef.current.values);
-            delete newValues[name];
-            const model = mapModel(newValues);
-            onChangeRef.current(model, true);
-        }
-    }, [
-        mapModel
-    ]);
+        pendingValuesRef.current?.delete(name);
+        pendingInitialValuesRef.current?.delete(name);
+    }, []);
     const handleResetValue = (0, external_react_namespaceObject.useCallback)((name)=>{
         const currentState = formStateRef.current;
+        const initialValue = currentState.initialValues.get(name);
         const modelMap = new Map();
-        modelMap.set(name, currentState.initialValues.get(name));
+        modelMap.set(name, initialValue);
         dispatch({
             type: 'RESET',
             values: modelMap
         });
-    }, []);
+        const pendingValues = getPendingValues();
+        pendingValues.set(name, initialValue);
+        if (canChangeRef.current && onChangeRef.current) {
+            const changed = !isSame(Object.fromEntries(getPendingInitialValues()), Object.fromEntries(pendingValues));
+            onChangeRef.current(mapModel(Object.fromEntries(pendingValues)), changed);
+        }
+    }, [
+        getPendingValues,
+        getPendingInitialValues,
+        mapModel
+    ]);
     const handleUpdateValidations = (0, external_react_namespaceObject.useCallback)((name, config)=>{
         dispatch({
             type: 'UPDATE_VALIDATIONS',
@@ -867,12 +926,17 @@ function useFormsy(props) {
     (0, external_react_namespaceObject.useEffect)(()=>{
         if (!isSame(externalValue, prevExternalValue.current)) {
             prevExternalValue.current = externalValue;
-            if (void 0 !== externalValue) setFieldValue(name, externalValue);
+            if (void 0 !== externalValue) {
+                const formValue = stateStore.getState().values.get(name);
+                if (void 0 !== formValue && isSame(formValue, externalValue)) return;
+                setFieldValue(name, externalValue);
+            }
         }
     }, [
         externalValue,
         name,
-        setFieldValue
+        setFieldValue,
+        stateStore
     ]);
     (0, external_react_namespaceObject.useLayoutEffect)(()=>{
         updateValidations(name, {
