@@ -193,10 +193,20 @@ export function formsyReducer(state: FormState, action: FormAction): FormState {
       if (state.inputs.has(action.name)) {
         return state;
       }
+      // An input may call setValue before it is registered (e.g. from
+      // componentDidMount, which commits before the wrapper's registration
+      // layout effect). Keep such a pre-registration value instead of
+      // clobbering it with the initialValue; its pristine state is kept as
+      // set by that setValue.
+      const hasPreRegisteredValue = state.values.has(action.name);
       const newInputs = new Map(state.inputs).set(action.name, action.config);
-      const newValues = new Map(state.values).set(action.name, action.initialValue);
+      const newValues = new Map(state.values);
+      const newPristine = new Map(state.isPristine);
+      if (!hasPreRegisteredValue) {
+        newValues.set(action.name, action.initialValue);
+        newPristine.set(action.name, true);
+      }
       const newInitialValues = new Map(state.initialValues).set(action.name, action.initialValue);
-      const newPristine = new Map(state.isPristine).set(action.name, true);
       let newState: FormState = {
         ...state,
         inputs: newInputs,

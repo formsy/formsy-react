@@ -710,6 +710,38 @@ describe('Element', () => {
     expect(renderSpy).toHaveBeenCalledTimes(2);
   });
 
+  it('applies the value when an input calls setValue on mount (e.g. custom checkbox)', () => {
+    class TestCheckbox extends React.Component<FormsyInputProps> {
+      componentDidMount() {
+        this.props.setValue(true);
+      }
+
+      render() {
+        return (
+          <input
+            type="checkbox"
+            checked={!!this.props.value}
+            onChange={(event) => this.props.setValue(event.currentTarget.checked)}
+            data-testid="test-input"
+          />
+        );
+      }
+    }
+
+    const Checkbox = withFormsy<FormsyInputProps, boolean>(TestCheckbox);
+
+    const formRef = React.createRef<React.ComponentRef<typeof Formsy>>();
+    const screen = render(
+      <Formsy ref={formRef}>
+        <Checkbox name="foo" />
+      </Formsy>
+    );
+
+    const input = screen.getByTestId('test-input') as HTMLInputElement;
+    expect(input.checked).toBe(true);
+    expect(formRef.current!.getModel()).toEqual({ foo: true });
+  });
+
   it('unregisters on unmount', () => {
     const submitSpy = jest.fn();
 
